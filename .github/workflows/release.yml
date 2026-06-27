@@ -64,7 +64,7 @@ jobs:
 
       - name: Restore SPM cache
         id: cache-spm
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           # Cache only .build/checkouts (dependency sources, not compiled artifacts).
           # Saved immediately after resolve so that build outputs never end up in cache.
@@ -78,7 +78,7 @@ jobs:
 
       - name: Save SPM cache
         if: steps.cache-spm.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: .build/checkouts
           key: ${{ steps.cache-spm.outputs.cache-primary-key }}

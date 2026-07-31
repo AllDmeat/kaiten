@@ -49,6 +49,59 @@ over all other project practices.
   updates. Specifically: the "API Reference" tables and "CLI Commands"
   section in README.md. No exceptions.
 
+## Agent Plugin Releases
+
+This repository is also a plugin marketplace: `.claude-plugin/marketplace.json`
+lists the `kaiten` plugin, whose source is [`agent/`](agent).
+
+### Mandatory Rule
+
+**Editing anything under `agent/` is not enough to ship it.** The `version`
+field pins the plugin: while the string stays the same, Claude Code keeps
+serving the copy users already have, and an improved skill reaches nobody.
+There is no error and no warning — the update simply never arrives.
+
+So every change to `agent/` must, in the same PR:
+
+1. **Bump `version`** in **both** manifests, to the same value:
+   - `.claude-plugin/marketplace.json` → the plugin entry
+   - `agent/.claude-plugin/plugin.json`
+
+   Use semver against the previous plugin version. This line is independent of
+   the CLI's own version — do not assume the two match.
+2. **Merge to `main`.** The marketplace is served from the default branch, so
+   the merge is what publishes the new version.
+3. **Cut a release.** Push a `*.*.*` tag to trigger
+   [`release.yml`](.github/workflows/release.yml), so the CLI binary and the
+   plugin that documents it ship together and the release notes record what
+   changed for agents.
+
+Users then pick the change up with `/plugin update kaiten@kaiten`.
+
+### Validate Before Merging
+
+Run both, and treat warnings as errors:
+
+```bash
+claude plugin validate .
+claude plugin validate ./agent --strict
+```
+
+This is not optional politeness. A skill whose YAML frontmatter fails to parse
+still loads — with **empty metadata**, which silently disables its triggering
+entirely. A single unquoted `: ` inside the `description` is enough to cause
+it, and nothing at runtime reports the problem.
+
+### Keep the Skill Free of Facts That Drift
+
+The skill ships separately from the CLI and lags behind it, so it must not
+restate anything the CLI can change under it: subcommand or flag counts, CLI
+versions, pagination limits, or enumerations of subcommands. Prefer teaching
+how to find the answer — for example, the page-envelope shape is identified by
+the `(paginated)` marker in `kaiten --help` rather than by listing the
+subcommands that return it. The skill states that `--help` outranks it; keep
+that true.
+
 ## Kaiten API Documentation
 
 Detailed guide for parsing Kaiten API documentation: [docs/kaiten-docs-parsing.md](docs/kaiten-docs-parsing.md)

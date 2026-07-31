@@ -108,6 +108,36 @@ Expansion is one level deep: an expanded value is itself stripped of its own
 nested fields, so `--expand children` returns the children of a card without
 *their* children. Ask for a deeper level with a second command.
 
+A collection that is not expanded collapses to its ids, keeping its own key, so
+the response never goes silent about a relation it holds:
+
+```bash
+kaiten get-card --id 123
+# {"members":[821,904],"external_links":[5512,5513],"tags":[],"owner_id":821,...}
+
+kaiten get-card --id 123 --expand members
+# {"members":[{"id":821,"full_name":"…",…}],…}
+```
+
+The field therefore holds ids by default and entities when expanded. Keeping
+the key is what makes a card with members and a card without report the same
+field — `members: [821]` and `members: []` are both answers.
+
+Only entities are trimmed, and an `id` is what marks one. A nested value
+without an `id` is data, not a reference — a card's `properties` holds the
+custom field values, `{"id_714":[1088]}` — so it is passed through whole. There
+is no `properties_id` to stand in for it, and dropping it would lose the values
+rather than a pointer to them.
+
+Id arrays Kaiten sends itself (`tag_ids`, `parents_ids`) are passed through
+untouched, and nothing is ever invented.
+
+> **`children_ids` and `children_count` undercount.** They come straight from
+> Kaiten and can report fewer children than a card has — both have been seen
+> reporting eight for a card that has eleven, and expanding `children` returns
+> the same short list. Use `list-card-children` when the children of a card
+> have to be accurate.
+
 To discover what a command offers, pass a name it does not have:
 
 ```bash

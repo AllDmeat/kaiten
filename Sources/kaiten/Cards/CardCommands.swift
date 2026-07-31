@@ -41,7 +41,11 @@ func parseCardCondition(_ rawValue: Int?) throws -> CardCondition? {
 struct ListCards: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "list-cards",
-    abstract: "List cards on a board (paginated)"
+    abstract: "List cards on a board (paginated)",
+    discussion: """
+      `children_ids` and `children_count` on each row come straight from Kaiten and undercount: a \
+      card can have more children than either field admits.
+      """
   )
 
   @OptionGroup var global: GlobalOptions
@@ -345,7 +349,11 @@ struct CreateCard: AsyncParsableCommand {
 struct GetCard: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "get-card",
-    abstract: "Get a card by ID"
+    abstract: "Get a card by ID",
+    discussion: """
+      `children_ids` and `children_count` come straight from Kaiten and undercount: a card can \
+      have more children than either field admits.
+      """
   )
 
   @OptionGroup var global: GlobalOptions

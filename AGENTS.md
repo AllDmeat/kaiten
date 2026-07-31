@@ -163,6 +163,29 @@ Rules:
 
 This prevents future contributors from re-introducing the same bugs.
 
+## Help Text and Comments
+
+This repository is public. Two rules follow from that and from what help text is for.
+
+**Never write real entity IDs.** Not cards, boards, spaces, users, tags — nothing. An ID from a
+company's live Kaiten leaks its internal structure into an open repository, and once it is in a
+commit message or a PR description it cannot be taken back. State the observation without it —
+"a card can have more children than either field admits" carries the finding, while naming the
+card adds nothing a reader can use. Examples in the README use obviously invented short IDs.
+
+**Help documents API behaviour, and only that.** A subcommand's help says how its own endpoint
+behaves, including where it misreports. It does not point the reader at other subcommands —
+`kaiten --help` already lists them, and cross-references rot first: `list-cards` went on claiming
+`get-card` "verifies those two fields" long after that verification was deleted. It does not
+explain the shell, or `jq`, or how to write a loop — that is not this CLI's behaviour to document.
+Keep it short: the observation, not the investigation behind it, and no worked examples.
+
+A fact about the CLI belongs in `--help`, not in `agent/skills/kaiten/SKILL.md`. The skill ships
+separately from the binary and lags behind it; the help is what every consumer reads. It follows
+that anything already stated in the help is deleted from the skill rather than restated there —
+what the skill is for is the judgement the help cannot enforce, such as not reading a fact out of
+a field that was omitted.
+
 ## Code Formatting
 
 This project uses [swift-format](https://github.com/swiftlang/swift-format) (bundled with the Swift toolchain) with default configuration.

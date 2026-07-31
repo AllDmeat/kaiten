@@ -38,9 +38,9 @@ struct JSONOutputTests {
       (trimmed["files"] as? [Any])?.isEmpty == true,
       "an empty array is indistinguishable from scalars, so it is kept"
     )
-    #expect(trimmed["owner"] == nil)
-    #expect(trimmed["tags"] == nil)
-    #expect(trimmed["children"] == nil)
+    #expect(trimmed["owner"] == nil, "a single relation goes; owner_id already carries the fact")
+    #expect(trimmed["tags"] as? [Int] == [4], "a collection is replaced by its ids")
+    #expect(trimmed["children"] as? [Int] == [43])
   }
 
   @Test("Named fields are expanded, others still dropped")
@@ -48,7 +48,7 @@ struct JSONOutputTests {
     let trimmed = try object(JSONOutput.trim(card, expand: ["owner"]))
 
     #expect(try object(#require(trimmed["owner"]))["full_name"] as? String == "Aleksey Berezka")
-    #expect(trimmed["tags"] == nil)
+    #expect(trimmed["tags"] as? [Int] == [4], "unexpanded collections stay as ids")
     #expect(trimmed["owner_id"] as? Int == 7, "expanding adds, it does not replace the reference")
   }
 
@@ -79,8 +79,87 @@ struct JSONOutputTests {
     for element in trimmed {
       let card = try object(element)
       #expect(card["owner"] != nil)
-      #expect(card["tags"] == nil)
+      #expect(card["tags"] as? [Int] == [4])
     }
+  }
+
+  // MARK: - Identifiers left behind by dropped collections
+
+  @Test("A dropped collection becomes its ids, under the same key")
+  func droppedCollectionBecomesIdentifiers() throws {
+    let card: [String: Any] = [
+      "id": 42,
+      "members": [["id": 7, "full_name": "A"], ["id": 12, "full_name": "B"]],
+    ]
+
+    let trimmed = try object(JSONOutput.trim(card, expand: []))
+
+    #expect(trimmed["members"] as? [Int] == [7, 12], "the payload goes, the fact stays")
+  }
+
+  @Test("A card with members and one without report the same field")
+  func fullAndEmptyCollectionsAgreeOnTheKey() throws {
+    let staffed = try object(JSONOutput.trim(["members": [["id": 7]]], expand: []))
+    let empty = try object(JSONOutput.trim(["members": []], expand: []))
+
+    #expect(staffed["members"] as? [Int] == [7])
+    #expect((empty["members"] as? [Any])?.isEmpty == true)
+  }
+
+  @Test("Expanding puts the entities back in the same key")
+  func expandingRestoresEntitiesInPlace() throws {
+    let card: [String: Any] = ["id": 42, "members": [["id": 7, "full_name": "A"]]]
+
+    let trimmed = try object(JSONOutput.trim(card, expand: ["members"]))
+    let members = try #require(trimmed["members"] as? [Any])
+
+    #expect(try object(#require(members.first))["full_name"] as? String == "A")
+  }
+
+  @Test("Id arrays Kaiten already sends are left alone")
+  func leavesKaitensOwnIdentifierArraysAlone() throws {
+    let card: [String: Any] = ["tags": [["id": 4]], "tag_ids": [4], "parents_ids": [9]]
+
+    let trimmed = try object(JSONOutput.trim(card, expand: []))
+
+    #expect(trimmed["tags"] as? [Int] == [4])
+    #expect(trimmed["tag_ids"] as? [Int] == [4], "untouched")
+    #expect(trimmed["parents_ids"] as? [Int] == [9], "untouched")
+  }
+
+  // MARK: - Data is not a reference
+
+  @Test("An object with no id is data, and survives whole")
+  func keepsDataObjects() throws {
+    // A card's custom field values. There is no `properties_id` standing in for them, so dropping
+    // them would lose the values outright.
+    let card: [String: Any] = [
+      "id": 42,
+      "owner": ["id": 7, "full_name": "A"],
+      "properties": ["id_714": [1088], "id_369988": 100],
+    ]
+
+    let trimmed = try object(JSONOutput.trim(card, expand: []))
+
+    #expect(trimmed["owner"] == nil, "an entity goes; owner_id already carries the fact")
+    #expect(try object(#require(trimmed["properties"]))["id_369988"] as? Int == 100)
+  }
+
+  @Test("A collection whose elements have no id is data too, and survives whole")
+  func keepsCollectionsOfData() throws {
+    let card: [String: Any] = ["id": 42, "notes": [["text": "no id here"]]]
+
+    let trimmed = try object(JSONOutput.trim(card, expand: []))
+    let notes = try #require(trimmed["notes"] as? [Any])
+
+    #expect(try object(#require(notes.first))["text"] as? String == "no id here")
+  }
+
+  @Test("Data is not offered to --expand, having never been collapsed")
+  func dataIsNotExpandable() {
+    let card: [String: Any] = ["id": 42, "properties": ["id_714": [1088]]]
+
+    #expect(!JSONOutput.expandableFields(in: card).contains("properties"))
   }
 
   // MARK: - Pagination
@@ -96,7 +175,7 @@ struct JSONOutputTests {
     #expect(trimmed["hasMore"] as? Bool == true, "page metadata survives")
     #expect(row["id"] as? Int == 42, "rows survive rather than being dropped with the envelope")
     #expect(row["owner"] != nil)
-    #expect(row["tags"] == nil)
+    #expect(row["tags"] as? [Int] == [4], "unexpanded collections stay as ids")
   }
 
   @Test("Expandable fields of a page are its rows', not the envelope's")
@@ -112,7 +191,10 @@ struct JSONOutputTests {
 
     let trimmed = try object(JSONOutput.trim(checklist, expand: []))
 
-    #expect(trimmed["items"] == nil, "checklist items are a nested entity, not a page payload")
+    #expect(
+      trimmed["items"] as? [Int] == [9],
+      "checklist items are a nested entity, so they collapse to ids rather than being the payload"
+    )
     #expect(JSONOutput.expandableFields(in: checklist) == ["items"])
   }
 

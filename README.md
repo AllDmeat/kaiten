@@ -324,6 +324,66 @@ do {
 }
 ```
 
+## Agent skill
+
+Coding agents guess CLI invocations badly — `kaiten cards list --board 42` looks reasonable and does
+not exist. This repository ships a skill that fixes that: it makes the agent read `kaiten --help` and
+`kaiten <subcommand> --help` before composing anything, and adds what the help cannot tell it — where
+the config file lives, how to walk from spaces to boards to cards when you have no IDs, the two JSON
+output shapes, pagination, and the fact that `429` retry is already built in.
+
+One copy of that guidance lives in [`agent/skills/kaiten/`](agent/skills/kaiten). All three hosts
+below read it from there.
+
+### Claude Code
+
+```
+/plugin marketplace add AllDmeat/kaiten-sdk
+/plugin install kaiten@kaiten
+```
+
+Then restart or run `/reload-plugins`. To update later:
+
+```
+/plugin marketplace update kaiten
+/plugin update kaiten@kaiten
+```
+
+The same commands work outside the REPL as `claude plugin marketplace add …`, `claude plugin install
+…`, and `claude plugin update …`.
+
+### Cursor
+
+Cursor 2.5+ reads plugins from a marketplace repository as well, and this repository is one — see
+[`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json).
+
+Add it with the `/add-plugin` command in the editor, or register the repository for a whole team
+under Dashboard → Settings → Plugins → Team Marketplaces, where you paste the GitHub URL
+`https://github.com/AllDmeat/kaiten-sdk` and review the parsed plugins. Installed plugins are
+updated from the same marketplace UI.
+
+Cursor reads the skill from `agent/skills/`, so it gets the same guidance as the other two hosts.
+
+### Gemini CLI
+
+```bash
+gemini extensions install https://github.com/AllDmeat/kaiten-sdk
+```
+
+Gemini installs an extension from that extension's own root directory and cannot install a
+subdirectory straight from GitHub, so each release ships [`agent/`](agent) as a self-contained
+archive asset and Gemini takes that instead of cloning the repository. This works from release
+`1.8.0` onward; earlier releases carry no extension asset.
+
+To update:
+
+```bash
+gemini extensions update kaiten     # or: gemini extensions update --all
+```
+
+Restart the CLI afterwards — extension changes only take effect in a new session. Gemini activates
+the skill when a task looks relevant, rather than loading it into every session.
+
 ## Requirements
 
 - Swift 6.2+

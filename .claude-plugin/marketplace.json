@@ -1,0 +1,36 @@
+{
+  "name": "kaiten",
+  "owner": {
+    "name": "Aleksey Berezka",
+    "url": "https://github.com/AllDmeat"
+  },
+  "metadata": {
+    "description": "Agent skill for the kaiten CLI — the Kaiten project management API from the terminal",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "kaiten",
+      "source": "./agent",
+      "description": "Teaches the agent when and how to reach for the kaiten CLI. Its subcommands are a large flat list whose names cannot be guessed, so the skill makes the agent read `kaiten --help` and `kaiten <subcommand> --help` first, then adds what the help does not cover: config file location, the ID discovery chain (spaces → boards → cards), the two JSON output shapes, pagination, and built-in 429 handling.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Aleksey Berezka"
+      },
+      "homepage": "https://github.com/AllDmeat/kaiten-sdk",
+      "repository": "https://github.com/AllDmeat/kaiten-sdk",
+      "category": "productivity",
+      "keywords": [
+        "kaiten",
+        "kanban",
+        "project-management",
+        "issue-tracker",
+        "cards",
+        "boards",
+        "sprints",
+        "cli",
+        "swift"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "kaiten",
+  "owner": {
+    "name": "Aleksey Berezka"
+  },
+  "metadata": {
+    "description": "Agent skill for the kaiten CLI — the Kaiten project management API from the terminal"
+  },
+  "plugins": [
+    {
+      "name": "kaiten",
+      "source": "agent",
+      "description": "Teaches the agent to read `kaiten --help` and `kaiten <subcommand> --help` before composing a command, and covers what the help cannot: config file location, the ID discovery chain, the two JSON output shapes, pagination, and built-in 429 handling."
+    }
+  ]
+}

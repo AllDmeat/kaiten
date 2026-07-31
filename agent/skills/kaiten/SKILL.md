@@ -104,7 +104,6 @@ Same idea elsewhere: resolve a person with `kaiten list-users --query <name>` be
 
 ## Output: always JSON, in one of two shapes
 
-Every subcommand prints compact JSON to stdout — a single line, keys sorted — so pipe it to `jq`.
 There are two shapes and mixing them up is the most common way these pipelines break:
 
 - Subcommands whose abstract in `kaiten --help` ends in **`(paginated)`** return a page envelope:
@@ -116,52 +115,26 @@ because accepting `--offset` / `--limit` is not the same thing. Several subcomma
 and still return a bare array with no `hasMore` — to page one of those, keep going until a response
 comes back shorter than the `--limit` you asked for.
 
-## Related entities are omitted until you ask for them
+## Never read a fact out of an omitted field
 
-A response carries that entity's own scalars plus `*_id` references to its neighbours. The entities
-behind those references — the person behind `owner_id`, the board behind `board_id`, and collections
-such as members, tags, children or files — are left out unless you name them:
+`--help` explains what `--expand` omits and how to get it back. The part it cannot make you do is
+resist concluding anything from what is missing, and that is where these responses go wrong: they
+produce confident false answers rather than errors.
 
-```bash
-kaiten get-card --id 7                       # scalars and *_id references only
-kaiten get-card --id 7 --expand owner,tags   # those two come back as full objects
-kaiten get-card --id 7 --expand all          # every related entity in this response
-```
+A card whose output has no `owner` key still has an owner. "This card is unassigned" read off a
+default response is a fabrication, not a finding. Whenever the fact you need is about a neighbouring
+entity rather than the one you fetched, expand it or fetch it — never infer it from silence.
 
-**A missing key says nothing about the tracker.** This is the trap worth internalising, because it
-produces confident false answers rather than errors: a card whose output has no `owner` key still
-has an owner, and "this card is unassigned" read off a default response is a fabrication. Whenever
-the fact you need is about a neighbouring entity rather than the one you fetched, expand it or fetch
-it — never infer it from silence. The same goes for counting: `members` being absent is not zero
-members, though a `*_count` or `*_total` scalar, when the response has one, is a real answer.
+Read the same way when a subcommand's `--help` warns that a field misreports. It means the number in
+front of you is a floor, not an answer, and a claim built on it needs the endpoint that enumerates
+the things instead.
 
 **Ask for the fields you need rather than reaching for `all`.** These payloads are large — a single
 expanded owner is a whole user record — and `all` on a list of cards multiplies that by every row.
 Naming two or three fields keeps a board-sized response readable instead of burying the answer.
 
-**To find out what a subcommand offers, ask it for a field that does not exist:**
-
-```bash
-kaiten get-card --id 7 --expand '?'
-# Error: Unknown --expand field: '?'. Available: board, column, lane, members, owner, …
-```
-
-Quote the `?` — unquoted it is a shell glob and never reaches the CLI. Any other name that
-cannot be a field does the same job: `--expand nope`.
-
-That list is computed from the response in front of you, so it is accurate for that call in a way no
-document can be — including this one, which is why no list of expandable fields appears here.
-
-**Expansion goes exactly one level deep.** `--expand children` returns a card's children as objects,
-but each child is trimmed by the same rule, so the children's own children are not there. This is
-deliberate: cards nest into cards, and unbounded expansion would return the shape of the graph
-rather than the answer. To go deeper, run the next command against the ID you just got back.
-
-**A name absent from that `Available:` list means the response does not contain it** — which is not
-the same as the data not existing. Relations frequently have a subcommand of their own, so check
-`kaiten --help` for one before concluding anything; a few subcommands also take a flag that asks the
-server to include extra fields, and their `--help` says so. Guessing again with a different spelling
-is the one thing that will not help.
+**Quote the probe name.** `--expand '?'` makes the CLI list what it offers; unquoted, `?` is a shell
+glob and never reaches the CLI. Any impossible name does the same job: `--expand nope`.
 
 ## Paging a full board
 
@@ -173,8 +146,8 @@ limit=100   # confirm the max in `kaiten list-cards --help`
 offset=0
 while :; do
   page=$(kaiten list-cards --board-id 42 --limit "$limit" --offset "$offset")
-  echo "$page" | jq -c '.items[]'
-  [ "$(echo "$page" | jq -r '.hasMore')" = "true" ] || break
+  printf '%s' "$page" | jq -c '.items[]'
+  [ "$(printf '%s' "$page" | jq -r '.hasMore')" = "true" ] || break
   offset=$((offset + limit))
 done
 ```

@@ -9,6 +9,7 @@ struct Kaiten: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "kaiten",
     abstract: "CLI for Kaiten API",
+    discussion: "Every subcommand prints compact JSON to stdout.",
     subcommands: [
       ListSpaces.self,
       ListBoards.self,
@@ -89,10 +90,19 @@ struct GlobalOptions: ParsableArguments {
     help: ArgumentHelp(
       "Comma-separated nested fields to include in the output, or 'all'.",
       discussion: """
-        Responses omit nested entities by default: a card keeps owner_id but drops the embedded \
-        owner object. Naming a field brings it back one level deep — expanded values are \
-        themselves stripped of their nested fields. Pass an unknown name to list what a command \
-        offers.
+        Responses omit nested entities by default. A single one is dropped, its `*_id` staying \
+        behind: a card keeps owner_id and loses the embedded owner object. A collection collapses \
+        to an array of its members' ids under its own key, so `members` holds user ids, and an \
+        empty `members` means nobody rather than something withheld.
+
+        Naming a field brings the entities back, one level deep — an expanded value is itself \
+        stripped of its nested fields.
+
+        A nested value carrying no id is data, not a reference, and nothing else in the response \
+        stands in for it, so it is always present and cannot be expanded: a card's custom field \
+        values are never omitted.
+
+        Pass an unknown name to list what a command offers.
         """,
       valueName: "fields"
     )

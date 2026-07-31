@@ -7,7 +7,11 @@ import KaitenSDK
 struct ListCardChildren: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "list-card-children",
-    abstract: "List children of a card"
+    abstract: "List children of a card",
+    discussion: """
+      Enumerates every child of a card, including the ones the card's own `children_ids` and \
+      `children_count` omit.
+      """
   )
 
   @OptionGroup var global: GlobalOptions

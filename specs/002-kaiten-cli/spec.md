@@ -174,6 +174,43 @@ stdout confirms it works.
   remove that cost and is the intended long-term fix.
 - **FR-020**: JSON output MUST be compact rather than pretty-printed, with
   keys sorted so that output is stable across runs.
+- **FR-021**: Where a collection of entities is omitted, the CLI MUST replace
+  it with an array of their ids **under the same key**, so the response still
+  states that the relation exists. A single relation needs no such treatment —
+  dropping `owner` leaves `owner_id` behind — but a collection had no
+  fallback, and a card with members was indistinguishable from a card with
+  none. Keeping the key means an empty collection and a populated one report
+  the same field, which renaming to `member_ids` would not achieve.
+  A consequence is that the element type depends on `--expand`: ids by
+  default, entities when expanded. That is accepted; it is what `--expand`
+  means, and it beats two field names for one relation.
+  The CLI MUST NOT invent ids, and id arrays Kaiten sends itself (`tag_ids`,
+  `parents_ids`) MUST be passed through untouched.
+- **FR-021a**: Only entities may be trimmed, and the presence of an `id` is
+  what identifies one. A nested value carrying no `id` is data rather than a
+  reference — a card's `properties` holds custom field values shaped
+  `{"id_714": [1088]}` — and MUST be passed through whole, whether it is an
+  object or a collection. No `properties_id` exists to stand in for it, so
+  dropping it would lose the values themselves rather than a reference to
+  them, which is precisely the silent loss this trimming exists to prevent.
+  Such fields MUST NOT be offered to `--expand`: never having been collapsed,
+  there is nothing to restore.
+- **FR-022**: Where the CLI knowingly passes through a field that
+  misreports, the help of the affected subcommand MUST say so.
+  `children_ids` and `children_count` undercount — both have been observed
+  reporting eight children for a card that has eleven, and expanding
+  `children` returns the same short list — so `get-card`, `list-cards` and
+  `list-card-children` each state it. The CLI MUST NOT issue extra requests
+  to repair such a field: the cost is per row, and documenting the limit
+  keeps one command one request.
+- **FR-023**: A subcommand's help MUST describe the behaviour of its own
+  endpoint and nothing else. It MUST NOT direct the reader to other
+  subcommands: `kaiten --help` already lists them, cross-references are the
+  first thing to rot, and a subcommand's help is not a guide to the CLI.
+  Help MUST NOT explain the shell, `jq`, or how to consume the output, and
+  MUST NOT carry worked examples or the evidence behind a stated limit —
+  none of that is this CLI's behaviour to document. Properties shared by
+  every response belong once in the root command's discussion.
 
 ### Non-Functional Requirements
 

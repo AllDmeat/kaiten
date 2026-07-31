@@ -6,8 +6,13 @@ import Foundation
 /// Kaiten responses embed whole related entities alongside the references to them: a card carries
 /// `owner_id` *and* the entire owner, plus its board, type, lane, column, members, tags, checklists,
 /// children and files. Those thirteen-odd fields dwarf the seventy scalars callers usually read, so
-/// by default they are dropped and only scalars and `*_id` references survive. `--expand` names the
-/// ones to keep.
+/// by default they are cut back to the reference alone and `--expand` names the ones to restore.
+///
+/// Only entities are cut, and an `id` is what marks one. A single entity is dropped outright — its
+/// `*_id` is already alongside it — while a collection becomes the ids of its members, under its own
+/// key. Anything without an `id` is data rather than a reference, has no `*_id` standing in for it,
+/// and is passed through whole: dropping a card's `properties` would lose the custom field values
+/// themselves, which is the silent loss this trimming exists to avoid.
 ///
 /// Expansion is one level deep. An expanded value is itself stripped of its own nested fields, so
 /// `--expand children` on an epic returns its children without *their* children. The bound is not a
@@ -68,42 +73,72 @@ enum JSONOutput {
     }
     return Set(
       objects(in: json).flatMap { object in
-        object.filter { isNested($1) || ($1 as? [Any])?.isEmpty == true }.keys
+        object.filter { isEntityReference($1) || ($1 as? [Any])?.isEmpty == true }.keys
       }
     )
   }
 
   // MARK: - Trimming
 
-  /// Drops nested fields other than `keep`, and flattens the ones kept.
+  /// Drops nested fields other than `keep`, flattens the ones kept, and leaves an id array behind
+  /// where a dropped collection would otherwise vanish without trace.
   private static func keeping(_ keep: Set<String>, in object: [String: Any]) -> [String: Any] {
     var result: [String: Any] = [:]
     for (key, value) in object {
-      guard isNested(value) else {
+      guard isEntityReference(value) else {
         result[key] = value
         continue
       }
       if keep.contains(key) {
         result[key] = flattened(value)
+      } else if let ids = identifiers(of: value) {
+        result[key] = ids
       }
     }
     return result
   }
 
-  /// Strips an expanded value of its own nested fields — the one level of depth.
-  private static func flattened(_ value: Any) -> Any {
-    apply(value) { object in object.filter { _, nested in !isNested(nested) } }
+  /// The ids of a collection's entities, which take the collection's place when it is dropped.
+  ///
+  /// A dropped single relation leaves its reference behind — `owner` goes, `owner_id` stays — but a
+  /// collection had no such fallback, so a card with members was indistinguishable from a card with
+  /// none. Keeping the ids under the collection's own key closes that without renaming anything: an
+  /// empty collection and a full one report the same field, and `--expand` swaps the ids back for
+  /// the entities in place.
+  ///
+  /// The field's element type therefore depends on `--expand` — ids by default, objects when
+  /// expanded. That is what `--expand` is for, and it beats the alternative of two different field
+  /// names for the same relation.
+  ///
+  /// Returns nil for a single object, which needs no help — its `*_id` is already alongside it.
+  /// Every element is known to carry an `id` by the time this runs; ``isEntityReference(_:)`` is
+  /// what established that, and a collection failing it is kept whole rather than arriving here.
+  private static func identifiers(of value: Any) -> [Any]? {
+    guard let elements = value as? [Any] else { return nil }
+    return elements.compactMap { ($0 as? [String: Any])?["id"] }
   }
 
-  /// Whether a value carries a whole entity rather than a scalar.
+  /// Strips an expanded value of its own nested fields — the one level of depth.
+  private static func flattened(_ value: Any) -> Any {
+    apply(value) { object in object.filter { _, nested in !isEntityReference(nested) } }
+  }
+
+  /// Whether a value holds entities the response can point at by id, rather than data that exists
+  /// only here.
   ///
-  /// An empty array is treated as scalar: it is indistinguishable from an empty list of IDs and
-  /// costs nothing to keep, whereas dropping it would make a card with no tags differ in shape from
-  /// one whose tags were merely not expanded.
-  private static func isNested(_ value: Any) -> Bool {
-    if value is [String: Any] { return true }
-    if let array = value as? [Any] { return array.contains { $0 is [String: Any] } }
-    return false
+  /// The `id` is the whole signal, and it is what makes dropping safe. `owner` carries one, so
+  /// removing it costs nothing: `owner_id` says the same thing. A card's `properties` — the custom
+  /// field values, shaped `{"id_714": [1088]}` — carries none, and no `properties_id` exists
+  /// either, so dropping it would silently lose the values themselves. That is the failure this
+  /// trimming exists to prevent, not to cause, so data is kept whole.
+  ///
+  /// An empty array is data by this test, which is also the right answer: it is indistinguishable
+  /// from an empty list of ids and costs nothing to keep.
+  private static func isEntityReference(_ value: Any) -> Bool {
+    if let object = value as? [String: Any] { return object["id"] != nil }
+    guard let array = value as? [Any], !array.isEmpty else { return false }
+    let objects = array.compactMap { $0 as? [String: Any] }
+    return objects.count == array.count && objects.allSatisfy { $0["id"] != nil }
   }
 
   // MARK: - Pagination

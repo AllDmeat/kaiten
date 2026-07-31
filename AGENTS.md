@@ -83,7 +83,16 @@ So every change to `agent/` must, in the same PR:
 3. **Cut a release.** Push a `*.*.*` tag to trigger
    [`release.yml`](.github/workflows/release.yml), so the CLI binary and the
    plugin that documents it ship together and the release notes record what
-   changed for agents.
+   changed for agents. For Gemini CLI the release is not optional — it is the
+   only thing that carries the extension, since Gemini installs from a release
+   asset rather than from the branch.
+
+   Do not rename the `{platform}.kaiten.tar.gz` assets. Gemini resolves an asset
+   by trying the `{platform}.{arch}.` prefix, then `{platform}.`, and only falls
+   back to a generic asset when the release has exactly one. Because this
+   release also ships CLI binaries, a differently-named archive silently stops
+   matching, Gemini falls back to the repository source tarball — which has no
+   `gemini-extension.json` at its root — and the install breaks.
 
 Users then pick the change up with `/plugin update kaiten@kaiten`.
 

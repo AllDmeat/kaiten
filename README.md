@@ -366,23 +366,29 @@ Cursor reads the skill from `agent/skills/`, so it gets the same guidance as the
 
 ### Gemini CLI
 
-Gemini installs an extension from that extension's own root directory, and it cannot install a
-subdirectory straight from GitHub, so clone the repository first and point the installer at
-[`agent/`](agent):
-
 ```bash
-git clone https://github.com/AllDmeat/kaiten-sdk.git
-gemini extensions install --path ./kaiten-sdk/agent
+gemini extensions install https://github.com/AllDmeat/kaiten-sdk
 ```
 
-Restart the CLI afterwards — extension changes only take effect in a new session. To update, pull the
-repository and re-run the installer, or use:
+Gemini installs an extension from that extension's own root directory and cannot install a
+subdirectory straight from GitHub, so each release ships [`agent/`](agent) as a self-contained
+archive asset and Gemini takes that instead of cloning the repository. This works from release
+`1.8.0` onward; earlier releases carry no extension asset.
+
+To update:
 
 ```bash
 gemini extensions update kaiten     # or: gemini extensions update --all
 ```
 
-Gemini activates the skill when a task looks relevant, rather than loading it into every session.
+Restart the CLI afterwards — extension changes only take effect in a new session. Gemini activates
+the skill when a task looks relevant, rather than loading it into every session.
+
+To run an unreleased version straight from a checkout:
+
+```bash
+gemini extensions install --path ./agent
+```
 
 ## Requirements
 

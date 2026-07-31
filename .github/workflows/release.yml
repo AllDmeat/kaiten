@@ -116,8 +116,31 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v7
+
       - name: Download artifacts
         uses: actions/download-artifact@v8
+
+      - name: Package the agent extension for Gemini CLI
+        # Attaching the extension as a release asset is what lets Gemini install
+        # it with a single command; otherwise users must clone the repository,
+        # because Gemini cannot install a subdirectory straight from GitHub.
+        #
+        # The archive must have gemini-extension.json at its root, so it is
+        # built from the contents of agent/ rather than from the repository root.
+        #
+        # The names are not cosmetic. Gemini picks a release asset by trying
+        # `{platform}.{arch}.` first, then `{platform}.`, and only falls back to
+        # a generic asset when the release has exactly one. This release also
+        # ships CLI binaries, so a lone generic archive would never be chosen and
+        # Gemini would fall back to the repository source tarball — where the
+        # manifest sits under agent/, not at the root, and the install breaks.
+        # The extension is platform-independent, so publish one identical archive
+        # per platform prefix and let the second rule match.
+        run: |
+          for platform in darwin linux win32; do
+            tar -czf "${platform}.${PRODUCT_NAME}.tar.gz" -C agent .
+          done
 
       - name: Release
         uses: softprops/action-gh-release@v3
@@ -125,3 +148,4 @@ jobs:
           generate_release_notes: true
           files: |
             **/*.tar.gz
+            *.tar.gz

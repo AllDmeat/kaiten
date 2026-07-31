@@ -1,4 +1,5 @@
 import ArgumentParser
+import KaitenSDK
 import Testing
 
 @testable import kaiten
@@ -66,5 +67,38 @@ struct CLIValidationTests {
 
     let `default` = try GlobalOptions.parse([])
     #expect(`default`.selectedConfigPath == GlobalOptions.defaultConfigPath)
+  }
+
+  @Test("Card properties parser returns nil when the option is absent")
+  func cardPropertiesReturnsNilWhenAbsent() throws {
+    let parsed: Components.Schemas.UpdateCardRequest.propertiesPayload? =
+      try parseCardProperties(nil, fieldName: "properties")
+    #expect(parsed == nil)
+  }
+
+  @Test("Card properties parser accepts select and numeric values")
+  func cardPropertiesAcceptsValues() throws {
+    let parsed: Components.Schemas.UpdateCardRequest.propertiesPayload? =
+      try parseCardProperties(
+        #"{"id_299126": [106915], "id_160": 7, "id_42": null}"#,
+        fieldName: "properties"
+      )
+    #expect(parsed != nil)
+  }
+
+  @Test("Card properties parser rejects malformed JSON")
+  func cardPropertiesRejectsMalformedJSON() {
+    #expect(throws: ValidationError.self) {
+      let _: Components.Schemas.UpdateCardRequest.propertiesPayload? =
+        try parseCardProperties("{oops", fieldName: "properties")
+    }
+  }
+
+  @Test("Card properties parser rejects a non-object payload")
+  func cardPropertiesRejectsNonObject() {
+    #expect(throws: ValidationError.self) {
+      let _: Components.Schemas.UpdateCardRequest.propertiesPayload? =
+        try parseCardProperties("[1, 2]", fieldName: "properties")
+    }
   }
 }

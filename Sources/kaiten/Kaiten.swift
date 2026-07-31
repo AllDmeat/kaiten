@@ -133,6 +133,33 @@ func printJSON(_ value: some Encodable) throws {
   print(String(decoding: data, as: UTF8.self))
 }
 
+/// Decodes a custom-properties JSON object into the generated request payload.
+///
+/// Custom property values are a free-form object rather than a flat scalar, so they cannot be
+/// expressed as ordinary options. Keys are `id_<property-id>`; values are an array of value IDs for
+/// select properties, a number for numeric ones, or `null` to clear the property.
+///
+/// Parsing happens locally so a malformed object fails before any request is sent.
+func parseCardProperties<Payload: Decodable>(
+  _ rawValue: String?,
+  fieldName: String
+) throws -> Payload? {
+  guard let rawValue else { return nil }
+  let data = Data(rawValue.utf8)
+  guard let object = try? JSONSerialization.jsonObject(with: data), object is [String: Any] else {
+    throw ValidationError(
+      "Invalid \(fieldName) value: expected a JSON object such as '{\"id_42\": [7]}'"
+    )
+  }
+  do {
+    return try JSONDecoder().decode(Payload.self, from: data)
+  } catch {
+    throw ValidationError(
+      "Invalid \(fieldName) value: \(error.localizedDescription)"
+    )
+  }
+}
+
 func parseIntegerCSV(_ rawValue: String?, fieldName: String) throws -> [Int]? {
   guard let rawValue else { return nil }
   var result: [Int] = []

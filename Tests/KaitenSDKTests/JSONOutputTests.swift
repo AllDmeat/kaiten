@@ -34,7 +34,10 @@ struct JSONOutputTests {
     #expect(trimmed["id"] as? Int == 42)
     #expect(trimmed["owner_id"] as? Int == 7)
     #expect(trimmed["tag_ids"] as? [Int] == [4, 9], "an array of IDs is scalar")
-    #expect(trimmed["files"] as? [Int] != nil, "an empty array is indistinguishable from scalars")
+    #expect(
+      (trimmed["files"] as? [Any])?.isEmpty == true,
+      "an empty array is indistinguishable from scalars, so it is kept"
+    )
     #expect(trimmed["owner"] == nil)
     #expect(trimmed["tags"] == nil)
     #expect(trimmed["children"] == nil)
@@ -149,7 +152,7 @@ struct JSONOutputTests {
 
     #expect(JSONOutput.expandableFields(in: untagged).contains("tags"))
     let trimmed = try object(JSONOutput.trim(untagged, expand: ["tags"]))
-    #expect(trimmed["tags"] as? [Int] != nil)
+    #expect((trimmed["tags"] as? [Any])?.isEmpty == true)
   }
 
   @Test("Expandable fields of an array response union its elements")

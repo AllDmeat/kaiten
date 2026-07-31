@@ -384,12 +384,6 @@ gemini extensions update kaiten     # or: gemini extensions update --all
 Restart the CLI afterwards — extension changes only take effect in a new session. Gemini activates
 the skill when a task looks relevant, rather than loading it into every session.
 
-To run an unreleased version straight from a checkout:
-
-```bash
-gemini extensions install --path ./agent
-```
-
 ## Requirements
 
 - Swift 6.2+

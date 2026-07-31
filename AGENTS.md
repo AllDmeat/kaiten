@@ -52,7 +52,10 @@ over all other project practices.
 ## Agent Plugin Releases
 
 This repository is also a plugin marketplace: `.claude-plugin/marketplace.json`
-lists the `kaiten` plugin, whose source is [`agent/`](agent).
+lists the `kaiten` plugin, whose source is [`agent/`](agent). The same `agent/`
+directory is simultaneously a Gemini CLI extension and a Cursor plugin — all
+three read the one skill in `agent/skills/kaiten/`, so there is a single copy of
+the guidance and three manifests describing it.
 
 ### Mandatory Rule
 
@@ -63,12 +66,15 @@ There is no error and no warning — the update simply never arrives.
 
 So every change to `agent/` must, in the same PR:
 
-1. **Bump `version`** in **both** manifests, to the same value:
+1. **Bump `version`** in **all three** manifests, to the same value:
    - `.claude-plugin/marketplace.json` → the plugin entry
    - `agent/.claude-plugin/plugin.json`
+   - `agent/gemini-extension.json`
 
    Use semver against the previous plugin version. This line is independent of
-   the CLI's own version — do not assume the two match.
+   the CLI's own version — do not assume the two match. Missing one manifest
+   leaves that host serving the old skill while the others update, which is
+   harder to notice than nothing updating at all.
 2. **Merge to `main`.** The marketplace is served from the default branch, so
    the merge is what publishes the new version.
 3. **Cut a release.** Push a `*.*.*` tag to trigger
@@ -91,6 +97,15 @@ This is not optional politeness. A skill whose YAML frontmatter fails to parse
 still loads — with **empty metadata**, which silently disables its triggering
 entirely. A single unquoted `: ` inside the `description` is enough to cause
 it, and nothing at runtime reports the problem.
+
+### Do Not Add `contextFileName` to the Gemini Manifest
+
+`agent/gemini-extension.json` deliberately omits `contextFileName`, so Gemini
+discovers `agent/skills/kaiten/SKILL.md` as a skill and activates it only when a
+task is relevant. Pointing `contextFileName` at the same file would load it into
+**every** session instead, taxing unrelated work with guidance about a tracker
+that is not in play. The skill was built and measured around being triggered;
+turning it into always-on context throws that away.
 
 ### Keep the Skill Free of Facts That Drift
 

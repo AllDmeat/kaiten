@@ -332,14 +332,23 @@ can drive the CLI correctly. The `kaiten` plugin in [`agent/`](agent) teaches an
 cannot: config file location, the ID discovery chain, the two JSON output shapes, pagination, and the
 built-in `429` handling.
 
-Claude Code:
+**Claude Code** — install from the marketplace:
 
 ```
 /plugin marketplace add AllDmeat/kaiten-sdk
 /plugin install kaiten@kaiten
 ```
 
-Cursor loads the same guidance from [`agent/rules/`](agent/rules).
+**Gemini CLI** — `agent/` is also a Gemini extension, and Gemini discovers the same
+`agent/skills/kaiten/SKILL.md`. Gemini installs an extension from its root directory, and installing
+a subdirectory straight from GitHub is not supported, so clone first:
+
+```bash
+git clone https://github.com/AllDmeat/kaiten-sdk.git
+gemini extensions install --path ./kaiten-sdk/agent
+```
+
+**Cursor** loads the equivalent guidance from [`agent/rules/`](agent/rules).
 
 ## Requirements
 

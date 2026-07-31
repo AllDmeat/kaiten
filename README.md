@@ -324,6 +324,23 @@ do {
 }
 ```
 
+## Agent skill
+
+This repository doubles as a [plugin marketplace](.claude-plugin/marketplace.json) so coding agents
+can drive the CLI correctly. The `kaiten` plugin in [`agent/`](agent) teaches an agent to consult
+`kaiten --help` and `kaiten <subcommand> --help` before composing a command, and covers what the help
+cannot: config file location, the ID discovery chain, the two JSON output shapes, pagination, and the
+built-in `429` handling.
+
+Claude Code:
+
+```
+/plugin marketplace add AllDmeat/kaiten-sdk
+/plugin install kaiten@kaiten
+```
+
+Cursor loads the same guidance from [`agent/rules/`](agent/rules).
+
 ## Requirements
 
 - Swift 6.2+

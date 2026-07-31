@@ -1,0 +1,18 @@
+{
+  "name": "kaiten",
+  "version": "1.0.0",
+  "description": "Teaches the agent when and how to reach for the kaiten CLI (cards, boards, spaces, sprints, checklists, comments, members, custom properties) — read the help first, then work from it",
+  "author": {
+    "name": "Aleksey Berezka"
+  },
+  "homepage": "https://github.com/AllDmeat/kaiten-sdk",
+  "repository": "https://github.com/AllDmeat/kaiten-sdk",
+  "keywords": [
+    "kaiten",
+    "kanban",
+    "project-management",
+    "issue-tracker",
+    "cli"
+  ],
+  "skills": "./skills/"
+}

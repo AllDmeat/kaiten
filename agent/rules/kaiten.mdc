@@ -1,0 +1,72 @@
+---
+description: Read and change Kaiten (kaiten.ru kanban tracker) data — cards, boards, spaces, sprints, comments, checklists, members — through the `kaiten` CLI. Apply whenever Kaiten, a kaiten.ru URL, a card/board/sprint ID, or the team's Kaiten tracker comes up, and whenever the `kaiten` command is invoked. Does not apply to other trackers — Jira, Linear, YouTrack, Trello, Asana, Notion, GitHub Issues — which share the card/board/sprint vocabulary but are different products.
+alwaysApply: false
+---
+
+# kaiten
+
+`kaiten` is a CLI over the Kaiten project management API. Its subcommands are a single flat list.
+
+## Read the help before typing a command
+
+The subcommand names are flat and irregular — `list-cards`, `get-card-comments`,
+`list-card-children`, `get-board-columns` — so guesses like `kaiten cards list --board 42` fail. A
+single subcommand can take dozens of flags, and releases add more.
+
+```bash
+kaiten --help                # all subcommands with abstracts
+kaiten <subcommand> --help   # before first use of that subcommand
+```
+
+Both are instant, need no credentials, and make no network calls. The help outranks this file:
+wherever they disagree, the help is current and this file is stale.
+
+Flag names do not carry across subcommands — `get-board-columns` and `get-board-lanes` take
+`--board-id`, but `get-board` takes `--id`, and `get-checklist` takes `--card-id --checklist-id`.
+The naming is not predictable, so read the help of each subcommand before its first real call, even
+right after reading the help of what looks like its sibling.
+
+## Go through the CLI
+
+Do not `curl` the Kaiten REST API or hand-roll a client — the CLI already handles the token, `429`
+back-off, and the pagination envelope. Companions are `jq` and ordinary shell. If the CLI has no
+subcommand for the task, say so rather than improvising a raw API call.
+
+## Credentials
+
+`~/.config/kaiten/config.json` holding `{"url": "...", "token": "..."}`; override the path with
+`--config`. Tokens come from `https://<company>.kaiten.ru/profile/api-key`. Never echo the token.
+
+## Resolve IDs, do not guess them
+
+```bash
+kaiten list-spaces                          # → space IDs
+kaiten list-boards --space-id <space>       # → board IDs
+kaiten get-board-columns --board-id <board> # → column IDs
+kaiten list-cards --board-id <board>        # → card IDs
+```
+
+Resolve people with `list-users --query <name>` and sprints with `list-sprints --active` before
+passing their IDs to other commands.
+
+## Output
+
+Always pretty JSON on stdout. Two shapes:
+
+- subcommands marked `(paginated)` in `kaiten --help` return `{items, offset, limit, hasMore}` →
+  `jq '.items[]'`
+- everything else returns a bare array or object → `jq '.[]'`
+
+Accepting `--offset`/`--limit` is not the same as being paginated — several subcommands take those
+flags and still return a bare array with no `hasMore`, so page them until a response is shorter than
+the requested `--limit`. Each subcommand's `--help` states its maximum `--limit`.
+
+## Gotchas
+
+- No `--version` flag.
+- Multi-value flags are comma-separated strings (`--states 1,2`), not repeated flags — repeating
+  silently keeps the last value only.
+- Dates are ISO 8601. Magic integers (`--states`, `--condition`) are explained in each subcommand's
+  own `--help`.
+- `429` retry is built in; adding `sleep` or retry loops only slows things down.
+- `delete-*` and `remove-*` act immediately with no confirmation — confirm with the user first.

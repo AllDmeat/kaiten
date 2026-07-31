@@ -21,13 +21,17 @@ struct CreateBoard: AsyncParsableCommand {
   @Option(name: .long, help: "Sort order")
   var sortOrder: Double?
 
+  @Option(name: .long, help: "External ID")
+  var externalId: String?
+
   func run() async throws {
     let client = try await global.makeClient()
     let board = try await client.createBoard(
       spaceId: spaceId,
       title: title,
       description: boardDescription,
-      sortOrder: sortOrder
+      sortOrder: sortOrder,
+      externalId: externalId
     )
     try printJSON(board)
   }
@@ -56,6 +60,9 @@ struct UpdateBoard: AsyncParsableCommand {
   @Option(name: .long, help: "Sort order")
   var sortOrder: Double?
 
+  @Option(name: .long, help: "External ID")
+  var externalId: String?
+
   func run() async throws {
     let client = try await global.makeClient()
     let board = try await client.updateBoard(
@@ -63,7 +70,8 @@ struct UpdateBoard: AsyncParsableCommand {
       id: id,
       title: title,
       description: boardDescription,
-      sortOrder: sortOrder
+      sortOrder: sortOrder,
+      externalId: externalId
     )
     try printJSON(board)
   }

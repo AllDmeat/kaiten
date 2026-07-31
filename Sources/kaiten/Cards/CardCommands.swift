@@ -310,6 +310,13 @@ struct CreateCard: AsyncParsableCommand {
   @Option(name: .long, help: "Text format: 1 - markdown, 2 - html, 3 - jira wiki")
   var textFormatTypeId: Int?
 
+  @Option(
+    name: .long,
+    help:
+      "Custom properties as a JSON object. Keys are \"id_<property-id>\"; values are an array of value IDs for select properties, a number for numeric ones, or null to clear. Example: '{\"id_299126\": [106915]}'"
+  )
+  var properties: String?
+
   func run() async throws {
     let client = try await global.makeClient()
     var opts = CardCreateOptions(title: title, boardId: boardId)
@@ -329,6 +336,7 @@ struct CreateCard: AsyncParsableCommand {
     opts.typeId = typeId
     opts.externalId = externalId
     opts.textFormatTypeId = textFormatTypeId.map(TextFormatType.init(rawValue:))
+    opts.properties = try parseCardProperties(properties, fieldName: "properties")
     let card = try await client.createCard(opts)
     try printJSON(card)
   }
@@ -438,6 +446,16 @@ struct UpdateCard: AsyncParsableCommand {
   )
   var plannedEnd: String?
 
+  @Option(name: .long, help: "Service Desk unseen-comment flag")
+  var sdNewComment: Bool?
+
+  @Option(
+    name: .long,
+    help:
+      "Custom properties as a JSON object. Keys are \"id_<property-id>\"; values are an array of value IDs for select properties, a number for numeric ones, or null to clear. Example: '{\"id_299126\": [106915]}'"
+  )
+  var properties: String?
+
   func run() async throws {
     let client = try await global.makeClient()
     var opts = CardUpdateOptions()
@@ -468,6 +486,8 @@ struct UpdateCard: AsyncParsableCommand {
     //   "date"            → .some("date") (send string, server sets the value)
     opts.plannedStart = plannedStart.map { $0.isEmpty ? nil : $0 }
     opts.plannedEnd = plannedEnd.map { $0.isEmpty ? nil : $0 }
+    opts.sdNewComment = sdNewComment
+    opts.properties = try parseCardProperties(properties, fieldName: "properties")
     let card = try await client.updateCard(id: id, opts)
     try printJSON(card)
   }

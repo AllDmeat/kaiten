@@ -138,6 +138,12 @@ stdout confirms it works.
   across commands (including `list-users --ids`); malformed tokens MUST fail locally.
 - **FR-016**: The only supported connection argument is `--config`.
   URL and token input is allowed only via selected config file (`--config` path or default config path).
+- **FR-017**: SDK inputs that are free-form JSON objects rather than scalars
+  (card custom properties) MUST still be reachable from the CLI, as a single
+  option carrying a JSON object string. The CLI MUST parse and validate that
+  string locally before invoking the SDK method: input that is not a JSON
+  object, or that does not decode into the mapped payload, MUST produce a
+  validation error rather than being dropped or forwarded.
 
 ### Non-Functional Requirements
 

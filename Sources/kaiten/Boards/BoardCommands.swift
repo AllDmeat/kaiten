@@ -17,7 +17,7 @@ struct ListBoards: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let boards = try await client.listBoards(spaceId: spaceId)
-    try printJSON(boards)
+    try printJSON(boards, expand: global.expandedFields)
   }
 }
 
@@ -35,7 +35,7 @@ struct GetBoard: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let board = try await client.getBoard(id: id)
-    try printJSON(board)
+    try printJSON(board, expand: global.expandedFields)
   }
 }
 
@@ -53,7 +53,7 @@ struct GetBoardColumns: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let columns = try await client.getBoardColumns(boardId: boardId)
-    try printJSON(columns)
+    try printJSON(columns, expand: global.expandedFields)
   }
 }
 
@@ -77,6 +77,6 @@ struct GetBoardLanes: AsyncParsableCommand {
       boardId: boardId,
       condition: try parseLaneCondition(condition)
     )
-    try printJSON(lanes)
+    try printJSON(lanes, expand: global.expandedFields)
   }
 }

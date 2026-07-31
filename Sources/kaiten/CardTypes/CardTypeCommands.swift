@@ -18,6 +18,6 @@ struct ListCardTypes: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let types = try await client.listCardTypes(limit: limit, offset: offset)
-    try printJSON(types)
+    try printJSON(types, expand: global.expandedFields)
   }
 }

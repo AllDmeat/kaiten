@@ -22,6 +22,6 @@ struct ListSprints: AsyncParsableCommand {
     let client = try await global.makeClient()
     let sprints = try await client.listSprints(
       active: active ? true : nil, limit: limit, offset: offset)
-    try printJSON(sprints)
+    try printJSON(sprints, expand: global.expandedFields)
   }
 }

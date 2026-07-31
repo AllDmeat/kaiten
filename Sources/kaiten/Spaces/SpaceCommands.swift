@@ -14,6 +14,6 @@ struct ListSpaces: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let spaces = try await client.listSpaces()
-    try printJSON(spaces)
+    try printJSON(spaces, expand: global.expandedFields)
   }
 }

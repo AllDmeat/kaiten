@@ -56,7 +56,7 @@ struct ListCustomProperties: AsyncParsableCommand {
       orderBy: orderBy,
       orderDirection: orderDirection
     )
-    try printJSON(page)
+    try printJSON(page, expand: global.expandedFields)
   }
 }
 
@@ -74,7 +74,7 @@ struct GetCustomProperty: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let prop = try await client.getCustomProperty(id: id)
-    try printJSON(prop)
+    try printJSON(prop, expand: global.expandedFields)
   }
 }
 
@@ -126,7 +126,7 @@ struct ListCustomPropertySelectValues: AsyncParsableCommand {
       offset: offset ?? 0,
       limit: limit ?? 100
     )
-    try printJSON(values)
+    try printJSON(values, expand: global.expandedFields)
   }
 }
 
@@ -148,6 +148,6 @@ struct GetCustomPropertySelectValue: AsyncParsableCommand {
     let client = try await global.makeClient()
     let value = try await client.getCustomPropertySelectValue(
       propertyId: propertyId, id: id)
-    try printJSON(value)
+    try printJSON(value, expand: global.expandedFields)
   }
 }

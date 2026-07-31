@@ -85,6 +85,39 @@ kaiten list-spaces
 kaiten get-card --id 123
 ```
 
+#### 3. Output Size
+
+Responses embed whole related entities next to the references to them — a card
+carries `owner_id` *and* the entire owner, plus its board, type, lane, members,
+tags and children. Commands drop those by default and keep only scalars and
+`*_id` references:
+
+```bash
+kaiten get-card --id 123
+# {"board_id":5,"column_id":3,"id":123,"owner_id":7,"title":"Fix login",...}
+```
+
+`--expand` brings back the ones you name, or `all` for every one of them:
+
+```bash
+kaiten get-card --id 123 --expand owner,tags
+kaiten get-card --id 123 --expand all
+```
+
+Expansion is one level deep: an expanded value is itself stripped of its own
+nested fields, so `--expand children` returns the children of a card without
+*their* children. Ask for a deeper level with a second command.
+
+To discover what a command offers, pass a name it does not have:
+
+```bash
+kaiten get-card --id 123 --expand '?'
+# Error: Unknown --expand field: '?'. Available: board, children, column,
+# external_links, files, lane, members, owner, parents, properties, tags, type, all
+```
+
+Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
+
 ## API Reference
 
 ### Cards

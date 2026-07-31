@@ -15,6 +15,6 @@ struct GetCardBaselines: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let baselines = try await client.getCardBaselines(cardId: cardId)
-    try printJSON(baselines)
+    try printJSON(baselines, expand: global.expandedFields)
   }
 }

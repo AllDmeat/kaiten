@@ -63,7 +63,7 @@ struct CreateColumn: AsyncParsableCommand {
       wipLimitType: try parseWipLimitType(wipLimitType),
       colCount: colCount
     )
-    try printJSON(column)
+    try printJSON(column, expand: global.expandedFields)
   }
 }
 
@@ -111,7 +111,7 @@ struct UpdateColumn: AsyncParsableCommand {
       wipLimitType: try parseWipLimitType(wipLimitType),
       colCount: colCount
     )
-    try printJSON(column)
+    try printJSON(column, expand: global.expandedFields)
   }
 }
 
@@ -135,7 +135,7 @@ struct DeleteColumn: AsyncParsableCommand {
       boardId: boardId,
       id: id
     )
-    try printJSON(["id": deletedId])
+    try printJSON(["id": deletedId], expand: global.expandedFields)
   }
 }
 
@@ -157,7 +157,7 @@ struct ListSubcolumns: AsyncParsableCommand {
     let subcolumns = try await client.listSubcolumns(
       columnId: columnId
     )
-    try printJSON(subcolumns)
+    try printJSON(subcolumns, expand: global.expandedFields)
   }
 }
 
@@ -189,7 +189,7 @@ struct CreateSubcolumn: AsyncParsableCommand {
       sortOrder: sortOrder,
       type: try parseColumnType(columnType)
     )
-    try printJSON(subcolumn)
+    try printJSON(subcolumn, expand: global.expandedFields)
   }
 }
 
@@ -225,7 +225,7 @@ struct UpdateSubcolumn: AsyncParsableCommand {
       sortOrder: sortOrder,
       type: try parseColumnType(columnType)
     )
-    try printJSON(subcolumn)
+    try printJSON(subcolumn, expand: global.expandedFields)
   }
 }
 
@@ -249,6 +249,6 @@ struct DeleteSubcolumn: AsyncParsableCommand {
       columnId: columnId,
       id: id
     )
-    try printJSON(["id": deletedId])
+    try printJSON(["id": deletedId], expand: global.expandedFields)
   }
 }

@@ -47,7 +47,7 @@ struct CreateLane: AsyncParsableCommand {
       wipLimitType: try parseWipLimitType(wipLimitType),
       rowCount: rowCount
     )
-    try printJSON(lane)
+    try printJSON(lane, expand: global.expandedFields)
   }
 }
 
@@ -95,6 +95,6 @@ struct UpdateLane: AsyncParsableCommand {
       rowCount: rowCount,
       condition: try parseLaneCondition(condition)
     )
-    try printJSON(lane)
+    try printJSON(lane, expand: global.expandedFields)
   }
 }

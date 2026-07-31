@@ -22,7 +22,7 @@ struct CreateChecklist: AsyncParsableCommand {
     let client = try await global.makeClient()
     let checklist = try await client.createChecklist(
       cardId: cardId, name: name, sortOrder: sortOrder)
-    try printJSON(checklist)
+    try printJSON(checklist, expand: global.expandedFields)
   }
 }
 
@@ -45,7 +45,7 @@ struct GetChecklist: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let checklist = try await client.getChecklist(cardId: cardId, checklistId: checklistId)
-    try printJSON(checklist)
+    try printJSON(checklist, expand: global.expandedFields)
   }
 }
 
@@ -66,7 +66,7 @@ struct RemoveChecklist: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let deletedId = try await client.removeChecklist(cardId: cardId, checklistId: checklistId)
-    try printJSON(["id": deletedId])
+    try printJSON(["id": deletedId], expand: global.expandedFields)
   }
 }
 
@@ -102,7 +102,7 @@ struct UpdateChecklist: AsyncParsableCommand {
       sortOrder: sortOrder,
       moveToCardId: moveToCardId
     )
-    try printJSON(checklist)
+    try printJSON(checklist, expand: global.expandedFields)
   }
 }
 
@@ -156,7 +156,7 @@ struct UpdateChecklistItem: AsyncParsableCommand {
       dueDate: dueDate,
       responsibleId: responsibleId
     )
-    try printJSON(item)
+    try printJSON(item, expand: global.expandedFields)
   }
 }
 
@@ -200,7 +200,7 @@ struct CreateChecklistItem: AsyncParsableCommand {
       dueDate: dueDate,
       responsibleId: responsibleId
     )
-    try printJSON(item)
+    try printJSON(item, expand: global.expandedFields)
   }
 }
 
@@ -228,6 +228,6 @@ struct RemoveChecklistItem: AsyncParsableCommand {
       checklistId: checklistId,
       itemId: itemId
     )
-    try printJSON(["id": deletedId])
+    try printJSON(["id": deletedId], expand: global.expandedFields)
   }
 }

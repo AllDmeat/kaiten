@@ -33,7 +33,7 @@ struct CreateBoard: AsyncParsableCommand {
       sortOrder: sortOrder,
       externalId: externalId
     )
-    try printJSON(board)
+    try printJSON(board, expand: global.expandedFields)
   }
 }
 
@@ -73,6 +73,6 @@ struct UpdateBoard: AsyncParsableCommand {
       sortOrder: sortOrder,
       externalId: externalId
     )
-    try printJSON(board)
+    try printJSON(board, expand: global.expandedFields)
   }
 }

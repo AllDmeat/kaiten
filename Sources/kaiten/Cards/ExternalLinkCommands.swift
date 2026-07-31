@@ -18,7 +18,7 @@ struct ListExternalLinks: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let links = try await client.listExternalLinks(cardId: cardId)
-    try printJSON(links)
+    try printJSON(links, expand: global.expandedFields)
   }
 }
 
@@ -45,7 +45,7 @@ struct CreateExternalLink: AsyncParsableCommand {
     let client = try await global.makeClient()
     let link = try await client.createExternalLink(
       cardId: cardId, url: url, description: description)
-    try printJSON(link)
+    try printJSON(link, expand: global.expandedFields)
   }
 }
 
@@ -75,7 +75,7 @@ struct UpdateExternalLink: AsyncParsableCommand {
     let client = try await global.makeClient()
     let link = try await client.updateExternalLink(
       cardId: cardId, linkId: linkId, url: url, description: description)
-    try printJSON(link)
+    try printJSON(link, expand: global.expandedFields)
   }
 }
 
@@ -98,6 +98,6 @@ struct RemoveExternalLink: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let deletedId = try await client.removeExternalLink(cardId: cardId, linkId: linkId)
-    try printJSON(["id": deletedId])
+    try printJSON(["id": deletedId], expand: global.expandedFields)
   }
 }

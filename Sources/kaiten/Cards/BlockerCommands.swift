@@ -18,7 +18,7 @@ struct ListCardBlockers: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let blockers = try await client.listCardBlockers(cardId: cardId)
-    try printJSON(blockers)
+    try printJSON(blockers, expand: global.expandedFields)
   }
 }
 
@@ -45,7 +45,7 @@ struct CreateCardBlocker: AsyncParsableCommand {
     let client = try await global.makeClient()
     let blocker = try await client.createCardBlocker(
       cardId: cardId, reason: reason, blockerCardId: blockerCardId)
-    try printJSON(blocker)
+    try printJSON(blocker, expand: global.expandedFields)
   }
 }
 
@@ -75,7 +75,7 @@ struct UpdateCardBlocker: AsyncParsableCommand {
     let client = try await global.makeClient()
     let blocker = try await client.updateCardBlocker(
       cardId: cardId, blockerId: blockerId, reason: reason, blockerCardId: blockerCardId)
-    try printJSON(blocker)
+    try printJSON(blocker, expand: global.expandedFields)
   }
 }
 
@@ -98,6 +98,6 @@ struct DeleteCardBlocker: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let blocker = try await client.deleteCardBlocker(cardId: cardId, blockerId: blockerId)
-    try printJSON(blocker)
+    try printJSON(blocker, expand: global.expandedFields)
   }
 }

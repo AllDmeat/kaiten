@@ -111,10 +111,12 @@ nested fields, so `--expand children` returns the children of a card without
 To discover what a command offers, pass a name it does not have:
 
 ```bash
-kaiten get-card --id 123 --expand ?
+kaiten get-card --id 123 --expand '?'
 # Error: Unknown --expand field: '?'. Available: board, children, column,
 # external_links, files, lane, members, owner, parents, properties, tags, type, all
 ```
+
+Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
 
 ## API Reference
 

@@ -142,9 +142,12 @@ Naming two or three fields keeps a board-sized response readable instead of bury
 **To find out what a subcommand offers, ask it for a field that does not exist:**
 
 ```bash
-kaiten get-card --id 7 --expand ?
+kaiten get-card --id 7 --expand '?'
 # Error: Unknown --expand field: '?'. Available: board, column, lane, members, owner, …
 ```
+
+Quote the `?` — unquoted it is a shell glob and never reaches the CLI. Any other name that
+cannot be a field does the same job: `--expand nope`.
 
 That list is computed from the response in front of you, so it is accurate for that call in a way no
 document can be — including this one, which is why no list of expandable fields appears here.

@@ -12,6 +12,17 @@ func parseColumnType(_ rawValue: Int?) throws -> ColumnType? {
   return type
 }
 
+func parseWipLimitType(_ rawValue: Int?) throws -> WipLimitType? {
+  guard let rawValue else { return nil }
+  let type = WipLimitType(rawValue: rawValue)
+  guard WipLimitType.allCases.contains(type) else {
+    throw ValidationError(
+      "Invalid WIP limit type: \(rawValue). Allowed values: 1 (card count), 2 (card size)"
+    )
+  }
+  return type
+}
+
 struct CreateColumn: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "create-column",
@@ -32,13 +43,25 @@ struct CreateColumn: AsyncParsableCommand {
   @Option(name: .long, help: "Column type: 1=queue, 2=in progress, 3=done")
   var columnType: Int?
 
+  @Option(name: .long, help: "WIP limit value")
+  var wipLimit: Int?
+
+  @Option(name: .long, help: "WIP limit type: 1=card count, 2=card size")
+  var wipLimitType: Int?
+
+  @Option(name: .long, help: "Number of columns to display side by side")
+  var colCount: Int?
+
   func run() async throws {
     let client = try await global.makeClient()
     let column = try await client.createColumn(
       boardId: boardId,
       title: title,
       sortOrder: sortOrder,
-      type: try parseColumnType(columnType)
+      type: try parseColumnType(columnType),
+      wipLimit: wipLimit,
+      wipLimitType: try parseWipLimitType(wipLimitType),
+      colCount: colCount
     )
     try printJSON(column)
   }
@@ -67,6 +90,15 @@ struct UpdateColumn: AsyncParsableCommand {
   @Option(name: .long, help: "Column type: 1=queue, 2=in progress, 3=done")
   var columnType: Int?
 
+  @Option(name: .long, help: "WIP limit value")
+  var wipLimit: Int?
+
+  @Option(name: .long, help: "WIP limit type: 1=card count, 2=card size")
+  var wipLimitType: Int?
+
+  @Option(name: .long, help: "Number of columns to display side by side")
+  var colCount: Int?
+
   func run() async throws {
     let client = try await global.makeClient()
     let column = try await client.updateColumn(
@@ -74,7 +106,10 @@ struct UpdateColumn: AsyncParsableCommand {
       id: id,
       title: title,
       sortOrder: sortOrder,
-      type: try parseColumnType(columnType)
+      type: try parseColumnType(columnType),
+      wipLimit: wipLimit,
+      wipLimitType: try parseWipLimitType(wipLimitType),
+      colCount: colCount
     )
     try printJSON(column)
   }
@@ -143,12 +178,16 @@ struct CreateSubcolumn: AsyncParsableCommand {
   @Option(name: .long, help: "Sort order")
   var sortOrder: Double?
 
+  @Option(name: .long, help: "Subcolumn type: 1=queue, 2=in progress, 3=done")
+  var columnType: Int?
+
   func run() async throws {
     let client = try await global.makeClient()
     let subcolumn = try await client.createSubcolumn(
       columnId: columnId,
       title: title,
-      sortOrder: sortOrder
+      sortOrder: sortOrder,
+      type: try parseColumnType(columnType)
     )
     try printJSON(subcolumn)
   }
@@ -174,13 +213,17 @@ struct UpdateSubcolumn: AsyncParsableCommand {
   @Option(name: .long, help: "Sort order")
   var sortOrder: Double?
 
+  @Option(name: .long, help: "Subcolumn type: 1=queue, 2=in progress, 3=done")
+  var columnType: Int?
+
   func run() async throws {
     let client = try await global.makeClient()
     let subcolumn = try await client.updateSubcolumn(
       columnId: columnId,
       id: id,
       title: title,
-      sortOrder: sortOrder
+      sortOrder: sortOrder,
+      type: try parseColumnType(columnType)
     )
     try printJSON(subcolumn)
   }

@@ -69,6 +69,20 @@ struct CLIValidationTests {
     #expect(`default`.selectedConfigPath == GlobalOptions.defaultConfigPath)
   }
 
+  @Test("WIP limit type parser rejects unknown value")
+  func wipLimitTypeRejectsUnknown() {
+    #expect(throws: ValidationError.self) {
+      _ = try parseWipLimitType(999)
+    }
+  }
+
+  @Test("WIP limit type parser accepts documented values")
+  func wipLimitTypeAcceptsDocumented() throws {
+    #expect(try parseWipLimitType(1) == .cardCount)
+    #expect(try parseWipLimitType(2) == .cardSize)
+    #expect(try parseWipLimitType(nil) == nil)
+  }
+
   @Test("Card properties parser returns nil when the option is absent")
   func cardPropertiesReturnsNilWhenAbsent() throws {
     let parsed: Components.Schemas.UpdateCardRequest.propertiesPayload? =

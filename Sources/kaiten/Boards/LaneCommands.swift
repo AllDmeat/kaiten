@@ -28,6 +28,12 @@ struct CreateLane: AsyncParsableCommand {
   @Option(name: .long, help: "Sort order")
   var sortOrder: Double?
 
+  @Option(name: .long, help: "WIP limit value")
+  var wipLimit: Int?
+
+  @Option(name: .long, help: "WIP limit type: 1=card count, 2=card size")
+  var wipLimitType: Int?
+
   @Option(name: .long, help: "Row count (height)")
   var rowCount: Int?
 
@@ -37,6 +43,8 @@ struct CreateLane: AsyncParsableCommand {
       boardId: boardId,
       title: title,
       sortOrder: sortOrder,
+      wipLimit: wipLimit,
+      wipLimitType: try parseWipLimitType(wipLimitType),
       rowCount: rowCount
     )
     try printJSON(lane)
@@ -63,6 +71,12 @@ struct UpdateLane: AsyncParsableCommand {
   @Option(name: .long, help: "Sort order")
   var sortOrder: Double?
 
+  @Option(name: .long, help: "WIP limit value")
+  var wipLimit: Int?
+
+  @Option(name: .long, help: "WIP limit type: 1=card count, 2=card size")
+  var wipLimitType: Int?
+
   @Option(name: .long, help: "Row count (height)")
   var rowCount: Int?
 
@@ -76,6 +90,8 @@ struct UpdateLane: AsyncParsableCommand {
       id: id,
       title: title,
       sortOrder: sortOrder,
+      wipLimit: wipLimit,
+      wipLimitType: try parseWipLimitType(wipLimitType),
       rowCount: rowCount,
       condition: try parseLaneCondition(condition)
     )

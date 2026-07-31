@@ -18,11 +18,15 @@ struct CreateSpace: AsyncParsableCommand {
   @Option(name: .long, help: "Sort order")
   var sortOrder: Double?
 
+  @Option(name: .long, help: "Parent entity UID for nesting the space")
+  var parentEntityUid: String?
+
   func run() async throws {
     let client = try await global.makeClient()
     let space = try await client.createSpace(
       title: title,
       externalId: externalId,
+      parentEntityUid: parentEntityUid,
       sortOrder: sortOrder
     )
     try printJSON(space)
@@ -67,13 +71,21 @@ struct UpdateSpace: AsyncParsableCommand {
   @Option(name: .long, help: "Sort order")
   var sortOrder: Double?
 
+  @Option(name: .long, help: "Access mode")
+  var access: String?
+
+  @Option(name: .long, help: "Parent entity UID for nesting the space")
+  var parentEntityUid: String?
+
   func run() async throws {
     let client = try await global.makeClient()
     let space = try await client.updateSpace(
       id: id,
       title: title,
       externalId: externalId,
-      sortOrder: sortOrder
+      sortOrder: sortOrder,
+      access: access,
+      parentEntityUid: parentEntityUid
     )
     try printJSON(space)
   }

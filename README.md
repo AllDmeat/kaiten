@@ -304,6 +304,15 @@ kaiten update-card --id 123 --properties '{"id_299126": [106915]}'
 
 The object is parsed and validated locally, so a malformed payload fails before any request is sent.
 
+### WIP limits
+
+Columns and lanes carry a work-in-progress limit. `--wip-limit` sets the value and `--wip-limit-type`
+selects what it counts — `1` for card count, `2` for card size:
+
+```bash
+kaiten update-column --board-id 42 --id 7 --wip-limit 5 --wip-limit-type 1
+```
+
 ## Configuration
 
 The CLI and MCP server share the same config file at `~/.config/kaiten/config.json` (see [Configure Credentials](#2-configure-credentials) above).

@@ -446,6 +446,9 @@ struct UpdateCard: AsyncParsableCommand {
   )
   var plannedEnd: String?
 
+  @Option(name: .long, help: "Service Desk unseen-comment flag")
+  var sdNewComment: Bool?
+
   @Option(
     name: .long,
     help:
@@ -483,6 +486,7 @@ struct UpdateCard: AsyncParsableCommand {
     //   "date"            → .some("date") (send string, server sets the value)
     opts.plannedStart = plannedStart.map { $0.isEmpty ? nil : $0 }
     opts.plannedEnd = plannedEnd.map { $0.isEmpty ? nil : $0 }
+    opts.sdNewComment = sdNewComment
     opts.properties = try parseCardProperties(properties, fieldName: "properties")
     let card = try await client.updateCard(id: id, opts)
     try printJSON(card)

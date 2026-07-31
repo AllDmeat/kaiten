@@ -326,29 +326,63 @@ do {
 
 ## Agent skill
 
-This repository doubles as a [plugin marketplace](.claude-plugin/marketplace.json) so coding agents
-can drive the CLI correctly. The `kaiten` plugin in [`agent/`](agent) teaches an agent to consult
-`kaiten --help` and `kaiten <subcommand> --help` before composing a command, and covers what the help
-cannot: config file location, the ID discovery chain, the two JSON output shapes, pagination, and the
-built-in `429` handling.
+Coding agents guess CLI invocations badly — `kaiten cards list --board 42` looks reasonable and does
+not exist. This repository ships a skill that fixes that: it makes the agent read `kaiten --help` and
+`kaiten <subcommand> --help` before composing anything, and adds what the help cannot tell it — where
+the config file lives, how to walk from spaces to boards to cards when you have no IDs, the two JSON
+output shapes, pagination, and the fact that `429` retry is already built in.
 
-**Claude Code** — install from the marketplace:
+One copy of that guidance lives in [`agent/skills/kaiten/`](agent/skills/kaiten). All three hosts
+below read it from there.
+
+### Claude Code
 
 ```
 /plugin marketplace add AllDmeat/kaiten-sdk
 /plugin install kaiten@kaiten
 ```
 
-**Gemini CLI** — `agent/` is also a Gemini extension, and Gemini discovers the same
-`agent/skills/kaiten/SKILL.md`. Gemini installs an extension from its root directory, and installing
-a subdirectory straight from GitHub is not supported, so clone first:
+Then restart or run `/reload-plugins`. To update later:
+
+```
+/plugin marketplace update kaiten
+/plugin update kaiten@kaiten
+```
+
+The same commands work outside the REPL as `claude plugin marketplace add …`, `claude plugin install
+…`, and `claude plugin update …`.
+
+### Cursor
+
+Cursor 2.5+ reads plugins from a marketplace repository as well, and this repository is one — see
+[`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json).
+
+Add it with the `/add-plugin` command in the editor, or register the repository for a whole team
+under Dashboard → Settings → Plugins → Team Marketplaces, where you paste the GitHub URL
+`https://github.com/AllDmeat/kaiten-sdk` and review the parsed plugins. Installed plugins are
+updated from the same marketplace UI.
+
+Cursor reads the skill from `agent/skills/`, so it gets the same guidance as the other two hosts.
+
+### Gemini CLI
+
+Gemini installs an extension from that extension's own root directory, and it cannot install a
+subdirectory straight from GitHub, so clone the repository first and point the installer at
+[`agent/`](agent):
 
 ```bash
 git clone https://github.com/AllDmeat/kaiten-sdk.git
 gemini extensions install --path ./kaiten-sdk/agent
 ```
 
-**Cursor** loads the equivalent guidance from [`agent/rules/`](agent/rules).
+Restart the CLI afterwards — extension changes only take effect in a new session. To update, pull the
+repository and re-run the installer, or use:
+
+```bash
+gemini extensions update kaiten     # or: gemini extensions update --all
+```
+
+Gemini activates the skill when a task looks relevant, rather than loading it into every session.
 
 ## Requirements
 

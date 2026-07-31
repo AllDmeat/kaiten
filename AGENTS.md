@@ -51,11 +51,11 @@ over all other project practices.
 
 ## Agent Plugin Releases
 
-This repository is also a plugin marketplace: `.claude-plugin/marketplace.json`
-lists the `kaiten` plugin, whose source is [`agent/`](agent). The same `agent/`
-directory is simultaneously a Gemini CLI extension and a Cursor plugin — all
-three read the one skill in `agent/skills/kaiten/`, so there is a single copy of
-the guidance and three manifests describing it.
+This repository is a plugin marketplace twice over — `.claude-plugin/marketplace.json`
+for Claude Code and `.cursor-plugin/marketplace.json` for Cursor — and both point
+at [`agent/`](agent), which is simultaneously a Gemini CLI extension. All three
+hosts read the one skill in `agent/skills/kaiten/`: a single copy of the guidance
+with several manifests describing it.
 
 ### Mandatory Rule
 
@@ -66,10 +66,13 @@ There is no error and no warning — the update simply never arrives.
 
 So every change to `agent/` must, in the same PR:
 
-1. **Bump `version`** in **all three** manifests, to the same value:
-   - `.claude-plugin/marketplace.json` → the plugin entry
+1. **Bump `version`** in **every** manifest that carries one, to the same value:
+   - `.claude-plugin/marketplace.json` → both `metadata` and the plugin entry
    - `agent/.claude-plugin/plugin.json`
+   - `agent/.cursor-plugin/plugin.json`
    - `agent/gemini-extension.json`
+
+   (`.cursor-plugin/marketplace.json` has no version field — nothing to bump there.)
 
    Use semver against the previous plugin version. This line is independent of
    the CLI's own version — do not assume the two match. Missing one manifest

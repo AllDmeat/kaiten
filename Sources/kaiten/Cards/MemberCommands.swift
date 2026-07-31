@@ -26,7 +26,7 @@ struct AddCardMember: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let member = try await client.addCardMember(cardId: cardId, userId: userId)
-    try printJSON(member)
+    try printJSON(member, expand: global.expandedFields)
   }
 }
 
@@ -51,7 +51,7 @@ struct UpdateCardMemberRole: AsyncParsableCommand {
     let client = try await global.makeClient()
     let roleType = try parseCardMemberRoleType(type)
     let role = try await client.updateCardMemberRole(cardId: cardId, userId: userId, type: roleType)
-    try printJSON(role)
+    try printJSON(role, expand: global.expandedFields)
   }
 }
 
@@ -72,6 +72,6 @@ struct RemoveCardMember: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let deletedId = try await client.removeCardMember(cardId: cardId, userId: userId)
-    try printJSON(["id": deletedId])
+    try printJSON(["id": deletedId], expand: global.expandedFields)
   }
 }

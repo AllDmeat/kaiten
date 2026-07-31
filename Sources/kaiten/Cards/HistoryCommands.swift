@@ -15,6 +15,6 @@ struct GetCardHistory: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let history = try await client.getCardLocationHistory(cardId: cardId)
-    try printJSON(history)
+    try printJSON(history, expand: global.expandedFields)
   }
 }

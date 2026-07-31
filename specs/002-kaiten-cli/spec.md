@@ -145,6 +145,22 @@ stdout confirms it works.
   object, or that does not decode into the mapped payload, MUST produce a
   validation error rather than being dropped or forwarded.
 
+- **FR-018**: Command output MUST omit nested entities by default, keeping
+  only scalar fields and `*_id` references. A `--expand` option MUST accept a
+  comma-separated list of nested field names, or `all`, to include them.
+  Expansion MUST stop after one level: an expanded value MUST itself be
+  stripped of its own nested fields, so that response size follows the
+  request rather than the shape of the entity graph. `Card.children` and
+  `Card.parents` are arrays of cards, so unbounded expansion would not
+  terminate on a cyclic graph.
+- **FR-019**: The set of names `--expand` accepts MUST be derived from the
+  response rather than from a per-command list, so it cannot drift out of
+  sync with the API. An unknown name MUST produce a validation error listing
+  the names the response does offer; silently ignoring it is forbidden.
+  A response with no nested fields MUST reject any `--expand` value.
+- **FR-020**: JSON output MUST be compact rather than pretty-printed, with
+  keys sorted so that output is stable across runs.
+
 ### Non-Functional Requirements
 
 - **NFR-001**: The CLI MUST compile and run on macOS (ARM) and

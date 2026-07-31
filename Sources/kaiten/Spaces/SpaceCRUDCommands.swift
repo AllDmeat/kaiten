@@ -29,7 +29,7 @@ struct CreateSpace: AsyncParsableCommand {
       parentEntityUid: parentEntityUid,
       sortOrder: sortOrder
     )
-    try printJSON(space)
+    try printJSON(space, expand: global.expandedFields)
   }
 }
 
@@ -47,7 +47,7 @@ struct GetSpace: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let space = try await client.getSpace(id: id)
-    try printJSON(space)
+    try printJSON(space, expand: global.expandedFields)
   }
 }
 
@@ -87,6 +87,6 @@ struct UpdateSpace: AsyncParsableCommand {
       access: access,
       parentEntityUid: parentEntityUid
     )
-    try printJSON(space)
+    try printJSON(space, expand: global.expandedFields)
   }
 }

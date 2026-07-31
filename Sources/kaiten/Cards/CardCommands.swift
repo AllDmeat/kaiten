@@ -244,7 +244,7 @@ struct ListCards: AsyncParsableCommand {
     let page = try await client.listCards(
       boardId: boardId, columnId: columnId, laneId: laneId, offset: offset, limit: limit,
       filter: filter)
-    try printJSON(page)
+    try printJSON(page, expand: global.expandedFields)
   }
 }
 
@@ -338,7 +338,7 @@ struct CreateCard: AsyncParsableCommand {
     opts.textFormatTypeId = textFormatTypeId.map(TextFormatType.init(rawValue:))
     opts.properties = try parseCardProperties(properties, fieldName: "properties")
     let card = try await client.createCard(opts)
-    try printJSON(card)
+    try printJSON(card, expand: global.expandedFields)
   }
 }
 
@@ -356,7 +356,7 @@ struct GetCard: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let card = try await client.getCard(id: id)
-    try printJSON(card)
+    try printJSON(card, expand: global.expandedFields)
   }
 }
 
@@ -489,7 +489,7 @@ struct UpdateCard: AsyncParsableCommand {
     opts.sdNewComment = sdNewComment
     opts.properties = try parseCardProperties(properties, fieldName: "properties")
     let card = try await client.updateCard(id: id, opts)
-    try printJSON(card)
+    try printJSON(card, expand: global.expandedFields)
   }
 }
 
@@ -507,7 +507,7 @@ struct GetCardComments: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let comments = try await client.getCardComments(cardId: cardId)
-    try printJSON(comments)
+    try printJSON(comments, expand: global.expandedFields)
   }
 }
 
@@ -525,7 +525,7 @@ struct GetCardMembers: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let members = try await client.getCardMembers(cardId: cardId)
-    try printJSON(members)
+    try printJSON(members, expand: global.expandedFields)
   }
 }
 
@@ -550,7 +550,7 @@ struct UpdateComment: AsyncParsableCommand {
     let client = try await global.makeClient()
     let comment = try await client.updateComment(
       cardId: cardId, commentId: commentId, text: text)
-    try printJSON(comment)
+    try printJSON(comment, expand: global.expandedFields)
   }
 }
 
@@ -571,7 +571,7 @@ struct AddComment: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let comment = try await client.createComment(cardId: cardId, text: text)
-    try printJSON(comment)
+    try printJSON(comment, expand: global.expandedFields)
   }
 }
 
@@ -589,7 +589,7 @@ struct DeleteCard: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let card = try await client.deleteCard(id: cardId)
-    try printJSON(card)
+    try printJSON(card, expand: global.expandedFields)
   }
 }
 
@@ -610,6 +610,6 @@ struct DeleteComment: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let deletedId = try await client.deleteComment(cardId: cardId, commentId: commentId)
-    try printJSON(["id": deletedId])
+    try printJSON(["id": deletedId], expand: global.expandedFields)
   }
 }

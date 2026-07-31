@@ -19,6 +19,6 @@ struct GetSprintSummary: AsyncParsableCommand {
     let client = try await global.makeClient()
     let summary = try await client.getSprintSummary(
       id: id, excludeDeletedCards: excludeDeletedCards ? true : nil)
-    try printJSON(summary)
+    try printJSON(summary, expand: global.expandedFields)
   }
 }

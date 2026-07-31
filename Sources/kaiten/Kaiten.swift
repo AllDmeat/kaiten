@@ -84,6 +84,29 @@ struct GlobalOptions: ParsableArguments {
   @Option(name: .long, help: "Path to Kaiten config.json")
   var config: String?
 
+  @Option(
+    name: .long,
+    help: ArgumentHelp(
+      "Comma-separated nested fields to include in the output, or 'all'.",
+      discussion: """
+        Responses omit nested entities by default: a card keeps owner_id but drops the embedded \
+        owner object. Naming a field brings it back one level deep — expanded values are \
+        themselves stripped of their nested fields. Pass an unknown name to list what a command \
+        offers.
+        """,
+      valueName: "fields"
+    )
+  )
+  var expand: String?
+
+  /// `--expand` names, parsed with the same strict CSV rules as the other list-valued options: a
+  /// malformed token fails locally rather than being silently dropped.
+  var expandedFields: Set<String> {
+    get throws {
+      Set(try parseStringCSV(expand, fieldName: "--expand") ?? [])
+    }
+  }
+
   var selectedConfigPath: String {
     config ?? Self.defaultConfigPath
   }
@@ -125,13 +148,6 @@ struct GlobalOptions: ParsableArguments {
 }
 
 // MARK: - Helpers
-
-func printJSON(_ value: some Encodable) throws {
-  let encoder = JSONEncoder()
-  encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-  let data = try encoder.encode(value)
-  print(String(decoding: data, as: UTF8.self))
-}
 
 /// Decodes a custom-properties JSON object into the generated request payload.
 ///

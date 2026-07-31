@@ -37,7 +37,7 @@ struct ListUsers: AsyncParsableCommand {
       offset: offset,
       includeInactive: includeInactive ? true : nil
     )
-    try printJSON(users)
+    try printJSON(users, expand: global.expandedFields)
   }
 }
 
@@ -52,6 +52,6 @@ struct GetCurrentUser: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let user = try await client.getCurrentUser()
-    try printJSON(user)
+    try printJSON(user, expand: global.expandedFields)
   }
 }

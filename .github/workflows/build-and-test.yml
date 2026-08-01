@@ -59,7 +59,7 @@ jobs:
           swift-version: ${{ env.SWIFT_VERSION }}
 
       - name: Install mise
-        uses: jdx/mise-action@v4
+        uses: jdx/mise-action@v4.2.3
         # mise manages node + playwright (used by the kaiten-docs task), not Swift.
         # Swift is installed outside of mise — see the steps above and
         # https://github.com/jdx/mise/discussions/10572 for why.

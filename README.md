@@ -264,6 +264,43 @@ Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
 | `listSprints()` | List sprints |
 | `getSprintSummary(...)` | Get sprint summary |
 
+### Automations
+
+| Method | Description |
+|--------|-------------|
+| `listAutomations(spaceId:)` | List automations in a space |
+| `createAutomation(spaceId:type:actions:name:trigger:conditions:)` | Create an automation |
+| `updateAutomation(spaceId:automationUid:name:trigger:conditions:actions:)` | Update an automation |
+| `deleteAutomation(spaceId:automationUid:)` | Delete an automation |
+
+Automations come in three types: `.onAction` (event), `.onDate` (due date) and
+`.onDemand` (button).
+
+Trigger, action, status and condition discriminators are exposed as Swift enums
+(`AutomationTriggerType`, `AutomationActionType`, `AutomationStatus`,
+`AutomationConditionClause`). Each has an `unknown(String)` case: Kaiten returns
+values its documentation does not list, so undocumented values are preserved
+rather than failing the whole response. Nested `data` payloads stay free-form
+JSON — the documentation does not describe their fields.
+
+```swift
+let automations = try await client.listAutomations(spaceId: 38155)
+for automation in automations {
+  switch automation.actions?.first?.actionType {
+  case .moveToPath: print("moves cards")
+  case .unknown(let raw): print("new action type: \(raw)")
+  default: break
+  }
+}
+
+let created = try await client.createAutomation(
+  spaceId: 38155,
+  type: .onDemand,
+  actions: [.init(actionType: .completeChecklists)],
+  name: "Complete all checklists"
+)
+```
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

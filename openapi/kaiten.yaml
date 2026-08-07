@@ -2215,6 +2215,130 @@ paths:
           description: Invalid token
         '403':
           description: Forbidden
+  /spaces/{space_id}/automations:
+    get:
+      summary: Get list of automations
+      operationId: list_automations
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Space ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Automation'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    post:
+      summary: Create automation
+      operationId: create_automation
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Space ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAutomationRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Automation'
+        '400':
+          description: Bad request
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /spaces/{space_id}/automations/{automation_uid}:
+    patch:
+      summary: Update automation
+      operationId: update_automation
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Space ID
+      - name: automation_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Automation UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAutomationRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Automation'
+        '400':
+          description: Bad request
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Delete automation
+      operationId: delete_automation
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Space ID
+      - name: automation_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Automation UID
+      responses:
+        '200':
+          description: success
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 components:
   securitySchemes:
     bearerAuth:
@@ -4879,3 +5003,163 @@ components:
           - string
           - 'null'
           description: Baseline end time
+    Automation:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Automation uid
+        name:
+          type:
+          - string
+          - 'null'
+          description: Automation name
+        sort_order:
+          type: number
+          description: Automation sort order
+        space_uid:
+          type: string
+          description: Space uid
+        updater_id:
+          type: integer
+          description: User id, who created automation
+        # DOC_MISMATCH: docs=`enum` without `on_demand`, actual includes `on_demand` (button automations) — https://developers.kaiten.ru/automations/get-list-of-automations
+        # DOC_MISMATCH: docs=`enum` (active, disabled, removed, broken), actual=`string` — Kaiten returns undocumented values, so a closed enum breaks decoding — https://developers.kaiten.ru/automations/get-list-of-automations
+        status:
+          type: string
+          description: 'Automation status. Documented values: active, disabled, removed, broken. Map to the AutomationStatus Swift enum, which preserves unknown values.'
+        # DOC_MISMATCH: docs=`enum` without `on_demand`, actual=`string` including `on_demand` (button automations) — https://developers.kaiten.ru/automations/get-list-of-automations
+        type:
+          type: string
+          description: 'Automation type. Documented values: on_action (event), on_date (due date), on_demand (button). Map to the AutomationType Swift enum, which preserves unknown values.'
+        # DOC_MISMATCH: docs=non-nullable `object`, actual=`object | null` (button automations have no trigger) — https://developers.kaiten.ru/automations/get-list-of-automations
+        # NOTE: expressed as a plain $ref rather than `anyOf: [$ref, 'null']` — swift-openapi-generator
+        # silently drops properties using that pattern. The property is optional, and the synthesized
+        # decoder maps an explicit JSON `null` to `nil`.
+        trigger:
+          $ref: '#/components/schemas/AutomationTrigger'
+          description: Automation trigger data
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutomationAction'
+          description: Automation actions
+        # DOC_MISMATCH: docs=non-nullable `object`, actual=`object | null` — https://developers.kaiten.ru/automations/get-list-of-automations
+        # NOTE: see the comment on `trigger` above for why this is a plain $ref.
+        conditions:
+          $ref: '#/components/schemas/AutomationConditionGroup'
+          description: Automation conditions
+        # DOC_MISMATCH: docs=`integer`, absent from actual API responses — https://developers.kaiten.ru/automations/get-list-of-automations
+        company_id:
+          type: integer
+          description: Company id
+        # DOC_MISMATCH: docs=`string`, absent from actual API responses — https://developers.kaiten.ru/automations/get-list-of-automations
+        created:
+          type: string
+          description: Created timestamp
+        # DOC_MISMATCH: docs=`string`, absent from actual API responses — https://developers.kaiten.ru/automations/get-list-of-automations
+        updated:
+          type: string
+          description: Updated timestamp
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/automations/get-list-of-automations
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+          description: Tags referenced by the automation
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/automations/get-list-of-automations
+        brokenLogs:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: Diagnostic entries for automations in the `broken` status
+    AutomationTrigger:
+      type: object
+      properties:
+        # DOC_MISMATCH: docs=`enum` (21 values), actual=`string` — Kaiten returns undocumented trigger types, so a closed enum breaks decoding — https://developers.kaiten.ru/automations/get-list-of-automations
+        type:
+          type: string
+          description: 'Trigger type. Documented values: card_moved_in_path, card_created, comment_posted, card_user_added, responsible_added, card_type_changed, card_state_changed, custom_property_changed, due_date_changed, checklist_item_checked, checklists_completed, child_cards_state_changed, tag_added, tag_removed, blocked, unblocked, blocker_added, due_date_on_date, checklist_item_due_date_on_date, custom_property_date_on_date, all_conditions_met. Map to the AutomationTriggerType Swift enum, which preserves unknown values.'
+        hasToFireOnCardCreation:
+          type: boolean
+          description: Should it fire on card creation
+        data:
+          type: object
+          additionalProperties: true
+          description: Trigger data. Shape depends on the trigger type and is not described in the Kaiten documentation
+    AutomationAction:
+      type: object
+      properties:
+        # DOC_MISMATCH: docs=`enum` (25 values), actual=`string`; observed undocumented value: "change_type" — https://developers.kaiten.ru/automations/get-list-of-automations
+        type:
+          type: string
+          description: 'Action type. Documented values: add_assignee, remove_assignee, add_card_users, remove_card_users, add_user_groups, add_tag, remove_tags, add_property, property_add_to_child_card, add_size, add_timeline, change_asap, add_due_date, remove_due_date, move_to_path, move_on_board, archive, add_child_card, add_parent_card, connect_parent_card, complete_checklists, sort_cards, add_comment, card_add_sla, card_remove_sla. Map to the AutomationActionType Swift enum, which preserves unknown values.'
+        created:
+          type: string
+          description: Action create timestamp
+        data:
+          type: object
+          additionalProperties: true
+          description: Action data. Shape depends on the action type and is not described in the Kaiten documentation
+    AutomationConditionGroup:
+      type: object
+      properties:
+        clause:
+          type: string
+          description: 'Condition clause. Documented values: and, or. Map to the AutomationConditionClause Swift enum, which preserves unknown values.'
+        created:
+          type: string
+          description: Condition created timestamp. ISO 8601 format
+        conditions:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: Array of condition groups. Shape depends on the trigger type and is not described in the Kaiten documentation
+    CreateAutomationRequest:
+      type: object
+      required:
+      - type
+      - actions
+      properties:
+        name:
+          type: string
+          maxLength: 256
+          description: Automation name. Required for `on_demand` automations
+        type:
+          type: string
+          description: 'Automation type. Documented values: on_action, on_date, on_demand.'
+        trigger:
+          $ref: '#/components/schemas/AutomationTrigger'
+          description: Automation trigger. Required for `on_action` and `on_date` automations
+        conditions:
+          $ref: '#/components/schemas/AutomationConditionGroup'
+          description: Automation conditions
+        actions:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/AutomationAction'
+          description: Automation actions
+    UpdateAutomationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 256
+          description: Automation name
+        trigger:
+          $ref: '#/components/schemas/AutomationTrigger'
+          description: Automation trigger
+        conditions:
+          $ref: '#/components/schemas/AutomationConditionGroup'
+          description: Automation conditions
+        actions:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/AutomationAction'
+          description: Automation actions

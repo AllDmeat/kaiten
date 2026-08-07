@@ -130,6 +130,10 @@ A developer requests all spaces and boards — for navigation.
 - **FR-017**: SDK initialization MUST validate that `baseURL` is an absolute HTTPS URL with a non-empty host component.
 - **FR-018**: SDK response mapping MUST preserve documented client error classes. HTTP 400 responses MUST map to a dedicated typed error case and MUST NOT be downgraded to generic unexpected/undocumented errors.
 - **FR-019**: SDK methods exposing `limit`/`offset` for users, card types, and sprints MUST enforce documented endpoint caps locally with typed validation errors before network calls.
+- **FR-020**: SDK MUST expose space automations (list, create, update, delete). Nested `data` payloads of triggers and actions MUST stay free-form JSON objects — the documentation does not describe those fields, and reverse-engineering them from live responses is forbidden by FR-009.
+- **FR-020a**: Automation discriminators (`type`, `status`, `clause`) MUST be declared as plain `string` in the OpenAPI spec, not as closed enums. Kaiten returns values its documentation does not list (confirmed live: action type `change_type`), and a generated closed enum fails the entire response instead of the single field. The typed surface MUST instead be hand-written enums in `Enums.swift` with an `unknown(String)` case, per the forward-compatibility rule those enums already follow.
+- **FR-021**: For resources addressed by a string UID rather than an integer id (currently automations), a HTTP 404 MUST surface as `unexpectedResponse(statusCode: 404)`. `notFound(resource:id:)` carries an `Int` id and MUST NOT be populated with an unrelated identifier (for example the parent space id) to fake specificity.
+- **FR-022**: Endpoints documented as returning HTTP 200 with no response body (currently `delete_automation`) MUST map to a `Void`-returning SDK method. The SDK MUST NOT invent a response payload for them.
 
 ### Non-Functional Requirements
 
@@ -153,6 +157,7 @@ A developer requests all spaces and boards — for navigation.
 - **Member**: id, userId, fullName, role
 - **CustomProperty**: id, name, type, value (typed: string, number, select, multiselect, date, user)
 - **CustomPropertySelectValue**: id, customPropertyId, value, color, condition, sortOrder, externalId, updated, created, authorId, companyId
+- **Automation**: id (string UID), name, type (`on_action` / `on_date` / `on_demand`), status (`active` / `disabled` / `removed` / `broken`), spaceUid, sortOrder, updaterId, trigger, actions, conditions
 
 ### User Story 7a — List and Get Custom Property Select Values (Priority: P2)
 

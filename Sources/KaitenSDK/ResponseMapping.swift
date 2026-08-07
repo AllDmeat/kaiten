@@ -283,9 +283,7 @@ extension Operations.get_property.Output {
 }
 
 extension Operations.get_list_of_select_values.Output {
-  func toCase()
-    -> KaitenClient.ResponseCase<Operations.get_list_of_select_values.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_list_of_select_values.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -545,9 +543,7 @@ extension Operations.list_sprints.Output {
 // MARK: - External Links
 
 extension Operations.list_card_external_links.Output {
-  func toCase()
-    -> KaitenClient.ResponseCase<Operations.list_card_external_links.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_card_external_links.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -559,9 +555,7 @@ extension Operations.list_card_external_links.Output {
 }
 
 extension Operations.create_card_external_link.Output {
-  func toCase()
-    -> KaitenClient.ResponseCase<Operations.create_card_external_link.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.create_card_external_link.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -573,9 +567,7 @@ extension Operations.create_card_external_link.Output {
 }
 
 extension Operations.update_card_external_link.Output {
-  func toCase()
-    -> KaitenClient.ResponseCase<Operations.update_card_external_link.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.update_card_external_link.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -587,9 +579,7 @@ extension Operations.update_card_external_link.Output {
 }
 
 extension Operations.remove_card_external_link.Output {
-  func toCase()
-    -> KaitenClient.ResponseCase<Operations.remove_card_external_link.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.remove_card_external_link.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -603,9 +593,7 @@ extension Operations.remove_card_external_link.Output {
 // MARK: - Card Location History
 
 extension Operations.get_card_location_history.Output {
-  func toCase()
-    -> KaitenClient.ResponseCase<Operations.get_card_location_history.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_card_location_history.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -827,6 +815,60 @@ extension Operations.get_card_baselines.Output {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
     case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+// MARK: - Automations
+
+extension Operations.list_automations.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_automations.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.create_automation.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.create_automation.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_automation.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.update_automation.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.delete_automation.Output {
+  func toCase() -> KaitenClient.ResponseCase<Void> {
+    switch self {
+    case .ok: .ok(())
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
     case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
     }
   }

@@ -4528,20 +4528,19 @@ components:
         updated:
           type: string
           description: Last update timestamp
+        # NOTE: these three are nullable, but expressed as plain $refs rather than
+        # `anyOf: [$ref, 'null']` — swift-openapi-generator silently drops properties using
+        # that pattern, so the fields never reached callers at all. The properties are
+        # optional, and the synthesized decoder maps an explicit JSON `null` to `nil`.
+        # Guarded by Tests/KaitenSDKTests/OpenAPISpecIntegrityTests.swift.
         blocked_card:
-          anyOf:
-          - $ref: '#/components/schemas/Card'
-          - type: 'null'
+          $ref: '#/components/schemas/Card'
           description: Blocked card info
         card:
-          anyOf:
-          - $ref: '#/components/schemas/Card'
-          - type: 'null'
+          $ref: '#/components/schemas/Card'
           description: Blocking card info
         blocker:
-          anyOf:
-          - $ref: '#/components/schemas/User'
-          - type: 'null'
+          $ref: '#/components/schemas/User'
           description: Info of user who blocked card
     CreateCardBlockerRequest:
       type: object
@@ -5091,7 +5090,7 @@ components:
     AutomationAction:
       type: object
       properties:
-        # DOC_MISMATCH: docs=`enum` (25 values), actual=`string`; observed undocumented value: "change_type" — https://developers.kaiten.ru/automations/get-list-of-automations
+        # DOC_MISMATCH: docs=`enum` (25 values), actual=`string`; observed undocumented values: "change_type", "add_template_checklists" — https://developers.kaiten.ru/automations/get-list-of-automations
         type:
           type: string
           description: 'Action type. Documented values: add_assignee, remove_assignee, add_card_users, remove_card_users, add_user_groups, add_tag, remove_tags, add_property, property_add_to_child_card, add_size, add_timeline, change_asap, add_due_date, remove_due_date, move_to_path, move_on_board, archive, add_child_card, add_parent_card, connect_parent_card, complete_checklists, sort_cards, add_comment, card_add_sla, card_remove_sla. Map to the AutomationActionType Swift enum, which preserves unknown values.'

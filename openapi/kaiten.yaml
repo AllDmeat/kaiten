@@ -2312,6 +2312,34 @@ paths:
           description: Invalid token
         '403':
           description: Forbidden
+  /cards/{card_id}/sla-rules-measurements:
+    get:
+      summary: Retrieve card SLA measurements
+      operationId: get_card_sla_measurements
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              # DOC_MISMATCH: docs=`Array` response type, actual=`object` with `calendars` and `rulesTimeData` arrays — https://developers.kaiten.ru/card-sla/retrieve-card-sla-measurements
+              schema:
+                $ref: '#/components/schemas/CardSlaMeasurements'
+        # DOC_MISMATCH: not in docs, actual returns 400 for archived cards and for cards that are not service desk requests — https://developers.kaiten.ru/card-sla/retrieve-card-sla-measurements
+        '400':
+          description: Bad request
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /spaces/{space_id}/automations:
     get:
       summary: Get list of automations
@@ -5234,6 +5262,122 @@ components:
           - string
           - 'null'
           description: Baseline end time
+    CardSlaMeasurements:
+      type: object
+      properties:
+        calendars:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlaCalendar'
+          description: Calendar objects used for SLA calculations
+        rulesTimeData:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlaRuleTimeData'
+          description: SLA rules data
+    SlaCalendar:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the calendar
+        timezone:
+          type: string
+          description: Timezone used for calculations
+        holidays:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlaCalendarHoliday'
+          description: List of holidays
+        work_days:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlaCalendarWorkDay'
+          description: List of working days configuration
+    SlaCalendarHoliday:
+      type: object
+      properties:
+        created:
+          type: string
+          description: Timestamp when the holiday record was created
+        updated:
+          type: string
+          description: Timestamp when the holiday record was last updated
+        id:
+          type: string
+          description: Unique identifier of the holiday record
+        calendar_id:
+          type: string
+          description: Identifier of the calendar this holiday belongs to
+        day:
+          type: integer
+          description: Day of the month (1-31)
+        month:
+          type: integer
+          description: Month of the year (1-12)
+        year:
+          type:
+          - integer
+          - 'null'
+          description: Year of the holiday
+        description:
+          type: string
+          description: Description or name of the holiday
+    SlaCalendarWorkDay:
+      type: object
+      properties:
+        created:
+          type: string
+          description: The timestamp when the record was created
+        updated:
+          type: string
+          description: The timestamp when the record was last updated
+        id:
+          type: string
+          description: Identifier of the record
+        calendar_id:
+          type: string
+          description: Identifier of the calendar this record belongs to
+        day:
+          type:
+          - integer
+          - 'null'
+          description: Day number
+        date:
+          type:
+          - string
+          - 'null'
+          description: Calendar date
+        period_start:
+          type: integer
+          description: The starting hour of the working period
+        period_finish:
+          type: integer
+          description: The ending hour of the working period
+    SlaRuleTimeData:
+      type: object
+      properties:
+        rule_id:
+          type: string
+          description: Unique identifier of the SLA rule
+        card_id:
+          type: integer
+          description: Card id for SLA measurements
+        actual_time:
+          type: integer
+          description: Actual work time spent in seconds, calculated considering working hours
+        started:
+          type: boolean
+          description: Indicates if time tracking for this rule has started
+        completed:
+          type: boolean
+          description: Indicates if time tracking for this rule is completed
+        last_calculated_at:
+          type: string
+          description: Timestamp of the last calculation
+        is_last_calculated_at_work_time:
+          type: boolean
+          description: Indicates if the last calculation was during working hours
     Automation:
       type: object
       properties:

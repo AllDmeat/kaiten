@@ -833,6 +833,21 @@ extension Operations.get_card_baselines.Output {
   }
 }
 
+// MARK: - Card SLA
+
+extension Operations.get_card_sla_measurements.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_card_sla_measurements.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 // MARK: - Automations
 
 extension Operations.list_automations.Output {

@@ -150,6 +150,11 @@ let sections: [Section] = [
   Section(mark: "Card Baselines", operations: [
     Operation(name: "get_card_baselines", errors: [.unauthorized, .forbidden]),
   ]),
+  Section(mark: "Card SLA", operations: [
+    Operation(
+      name: "get_card_sla_measurements",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+  ]),
   Section(mark: "Automations", operations: [
     Operation(name: "list_automations", errors: [.unauthorized, .forbidden, .notFound]),
     Operation(

@@ -2194,6 +2194,114 @@ paths:
           description: Invalid token
         '403':
           description: Forbidden
+    post:
+      summary: Create new card type
+      operationId: create_card_type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCardTypeRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardType'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+  /card-types/{id}:
+    get:
+      summary: Get card type
+      operationId: get_card_type
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card type ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardType'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    patch:
+      summary: Update card type
+      operationId: update_card_type
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card type ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCardTypeRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardType'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Remove card type
+      operationId: delete_card_type
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card type ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteCardTypeRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardType'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /sprints:
     get:
       summary: List sprints
@@ -4790,10 +4898,23 @@ components:
         suggest_fields:
           type: boolean
           description: Suggest fields flag
+        card_properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardTypeProperty'
+          description: Array of card properties that will be suggested for filling in cards of this type
+        locked:
+          # DOC_MISMATCH: not in docs, present in actual API responses; observed only `null` — https://developers.kaiten.ru/card-types/get-card-type
+          type:
+          - boolean
+          - 'null'
+          description: Lock flag
         uid:
+          # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-types/get-card-type
           type: string
           description: Card type uid
         author_uid:
+          # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-types/get-card-type
           type:
           - string
           - 'null'
@@ -4804,6 +4925,120 @@ components:
         updated:
           type: string
           description: Last update timestamp
+    CardTypeProperty:
+      type: object
+      properties:
+        type_uid:
+          # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-types/get-card-type
+          type: string
+          description: UID of the card type the property belongs to
+        regular_property:
+          type:
+          - string
+          - 'null'
+          description: 'Key of the regular property or null for a custom property. Documented values: size, due_date, tags, timeline, description. Map to the CardTypeRegularProperty Swift enum, which preserves unknown values.'
+        property_uid:
+          type:
+          - string
+          - 'null'
+          description: UID of the custom property or null for a regular property
+        sort_order:
+          type: number
+          description: Order of the property in the card
+        required:
+          type: boolean
+          description: If true, this property will be required to fill in the card
+    CardTypePropertyInput:
+      type: object
+      required:
+      - required
+      properties:
+        regular_property:
+          type:
+          - string
+          - 'null'
+          description: 'Key of the regular property. Documented values: size, due_date, tags, timeline, description. Exactly one of regular_property or property_uid must be set.'
+        property_uid:
+          type:
+          - string
+          - 'null'
+          description: UID of the custom property. Exactly one of regular_property or property_uid must be set.
+        sort_order:
+          type: number
+          description: Order of the property in the card
+        required:
+          type: boolean
+          description: If true, this property will be required to fill in the card
+    CreateCardTypeRequest:
+      type: object
+      required:
+      - letter
+      - name
+      - color
+      properties:
+        letter:
+          type: string
+          minLength: 1
+          maxLength: 11
+          description: Character that represents type. Maximum length for letters is 1 (length 11 is for emoji)
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Type name
+        color:
+          type: integer
+          minimum: 2
+          maximum: 25
+          description: Color number
+        properties:
+          type: object
+          description: Properties of the card suggested for filling - old format, deprecated, use card_properties instead
+        card_properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardTypePropertyInput'
+          description: Array of card properties that will be suggested for filling in cards of this type
+        suggest_fields:
+          type: boolean
+          description: If true, cards of this type will be offered to display additional fields based on statistics
+    UpdateCardTypeRequest:
+      type: object
+      properties:
+        letter:
+          type: string
+          minLength: 1
+          maxLength: 11
+          description: Character that represents type. Maximum length for letters is 1 (length 11 is for emoji)
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Type name
+        color:
+          type: integer
+          minimum: 2
+          maximum: 25
+          description: Color number
+        properties:
+          type: object
+          description: Properties of the card suggested for filling - old format, deprecated, use card_properties instead
+        card_properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardTypePropertyInput'
+          description: Array of card properties that will be suggested for filling in cards of this type
+        suggest_fields:
+          type: boolean
+          description: If true, cards of this type will be offered to display additional fields based on statistics
+    DeleteCardTypeRequest:
+      type: object
+      required:
+      - replace_type_id
+      properties:
+        replace_type_id:
+          type: number
+          description: ID of the card type that replaces the removed type in existing cards
     CardTypeTreeEntity:
       type: object
       properties:

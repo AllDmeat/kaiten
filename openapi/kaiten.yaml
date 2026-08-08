@@ -640,6 +640,66 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /cards/{card_id}/allowed-users:
+    get:
+      summary: Retrieve users list
+      operationId: retrieve_card_allowed_users
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: type
+        in: query
+        schema:
+          type: string
+        description: 'Type of users to return. Documented values: sd-owners (company users with access to service-desk), virtual-users (company virtual users), mention'
+      # DOC_MISMATCH: docs=filter by full_name, email or username, actual has no observed effect (full list returned regardless) — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
+      - name: search
+        in: query
+        schema:
+          type: string
+        description: Filter by full_name, email or username
+      # DOC_MISMATCH: docs=the field to sort by (default id), actual has no observed effect (response order unchanged and not sorted by id) — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
+      - name: orderBy
+        in: query
+        schema:
+          type: string
+        description: The field to sort by
+      - name: role
+        in: query
+        schema:
+          type: integer
+        description: Filter by role
+      # DOC_MISMATCH: docs=maximum amount of users in response, actual has no observed effect (full list returned regardless) — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum amount of users in response
+      # DOC_MISMATCH: docs=number of records to skip, actual has no observed effect (full list returned regardless) — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of records to skip
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AllowedUser'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /cards/{card_id}/comments:
     get:
       summary: Retrieve card comments
@@ -3858,6 +3918,89 @@ components:
           - string
           - 'null'
           description: Date of last request
+    AllowedUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
+        uid:
+          type: string
+          description: User uid
+        full_name:
+          type: string
+          description: User full name
+        email:
+          type: string
+          description: User email
+        username:
+          type: string
+          description: Username for mentions and login
+        avatar_initials_url:
+          type: string
+          description: Default user avatar
+        avatar_uploaded_url:
+          type:
+          - string
+          - 'null'
+          description: User uploaded avatar url
+        initials:
+          type: string
+          description: User initials
+        avatar_type:
+          type: integer
+          description: 1 - gravatar, 2 - initials, 3 - uploaded
+        lng:
+          type: string
+          description: Language
+        timezone:
+          type: string
+          description: Time zone
+        theme:
+          type: string
+          description: light - light color theme, dark - dark color theme, auto - color theme based on OS settings
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        activated:
+          type: boolean
+          description: User activated flag
+        ui_version:
+          type: integer
+          description: 1 - old ui, 2 - new ui
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
+        virtual:
+          type: boolean
+          description: Virtual user flag
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
+        email_blocked:
+          type:
+          - string
+          - 'null'
+          description: Email blocked status
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
+        email_blocked_reason:
+          type:
+          - string
+          - 'null'
+          description: Email blocked reason
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
+        delete_requested_at:
+          type:
+          - string
+          - 'null'
+          description: Delete request timestamp
+        # DOC_MISMATCH: not in docs, occasionally present in actual API responses (array of objects) — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
+        timeOffRequests:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: Time-off requests of the user. Item shape is not described in the Kaiten documentation.
     CardType:
       type: object
       properties:

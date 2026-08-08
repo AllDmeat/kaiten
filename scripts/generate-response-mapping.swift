@@ -190,6 +190,9 @@ let sections: [Section] = [
       name: "delete_card_type_tree_entity",
       errors: [.unauthorized, .paymentRequired, .forbidden]),
   ]),
+  Section(mark: "Card Allowed Users", operations: [
+    Operation(name: "retrieve_card_allowed_users", errors: [.unauthorized, .forbidden, .notFound])
+  ]),
 ]
 
 // MARK: - Generator

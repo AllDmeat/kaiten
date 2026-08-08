@@ -1715,3 +1715,44 @@ extension Operations.delete_custom_property_tree_entity.Output {
     }
   }
 }
+
+// MARK: - Group Admins
+
+extension Operations.list_group_admins.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_group_admins.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.add_group_admin.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.add_group_admin.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.remove_group_admin.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.remove_group_admin.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

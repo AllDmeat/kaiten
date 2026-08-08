@@ -326,6 +326,15 @@ let sections: [Section] = [
       name: "delete_custom_property_tree_entity",
       errors: [.unauthorized, .paymentRequired, .forbidden]),
   ]),
+  Section(mark: "Group Admins", operations: [
+    Operation(name: "list_group_admins", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "add_group_admin",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "remove_group_admin",
+      errors: [.unauthorized, .paymentRequired, .forbidden, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

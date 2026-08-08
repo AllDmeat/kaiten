@@ -1680,6 +1680,179 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /company/custom-properties/{property_id}/catalog-values:
+    get:
+      summary: Get list of catalog values
+      operationId: get_list_of_catalog_values
+      parameters:
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      - name: query
+        in: query
+        schema:
+          type: string
+        description: Text search filter by catalog values
+      - name: conditions
+        in: query
+        schema:
+          type: string
+        description: "Filter by catalog value condition: active or inactive"
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum amount of values in response
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of values to skip
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomPropertyCatalogValue'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    post:
+      summary: Create new catalog value
+      operationId: create_catalog_value
+      parameters:
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCatalogValueRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPropertyCatalogValue'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /company/custom-properties/{property_id}/catalog-values/{id}:
+    get:
+      summary: Get catalog value
+      operationId: get_catalog_value
+      parameters:
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CatalogValue ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPropertyCatalogValue'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    patch:
+      summary: Update catalog value
+      operationId: update_catalog_value
+      parameters:
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CatalogValue ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCatalogValueRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPropertyCatalogValue'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Remove catalog value
+      operationId: remove_catalog_value
+      parameters:
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CatalogValue ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPropertyCatalogValue'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /company/custom-directories/{directory_id}/fields:
     get:
       summary: Get list of fields
@@ -5324,6 +5497,74 @@ components:
         is_used_as_progress:
           type: boolean
           description: Whether to use this property value as a progress
+    CustomPropertyCatalogValue:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Catalog option id
+        custom_property_id:
+          type: integer
+          description: Custom property id
+        value:
+          type: object
+          description: Custom property catalog value. Pairs of catalog field uid to field value.
+          additionalProperties: true
+        name:
+          type: string
+          description: Custom property catalog value name
+        author_id:
+          type: integer
+          description: Author id
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/custom-property-catalog-values/get-list-of-catalog-values
+        updater_id:
+          type:
+          - integer
+          - 'null'
+          description: Last updater id
+        condition:
+          type: string
+          description: "Custom property catalog value condition: active or inactive"
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/custom-property-catalog-values/get-list-of-catalog-values
+        deleted:
+          type: boolean
+          description: Whether the catalog value has been deleted
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/custom-property-catalog-values/get-list-of-catalog-values
+        uid:
+          type: string
+          description: Catalog value UID
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/custom-property-catalog-values/get-list-of-catalog-values
+        fts_version:
+          type: string
+          description: Full-text search version
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+    CreateCatalogValueRequest:
+      type: object
+      required:
+      - value
+      properties:
+        value:
+          type: object
+          description: Pairs of catalog field uid to field value
+          additionalProperties: true
+    UpdateCatalogValueRequest:
+      type: object
+      properties:
+        condition:
+          type: string
+          description: "Custom property catalog value condition: active or inactive"
+        value:
+          type: object
+          description: Pairs of catalog field uid to field value
+          additionalProperties: true
+        deleted:
+          type: boolean
+          description: Custom property catalog value delete condition
     CreateCommentRequest:
       type: object
       required:

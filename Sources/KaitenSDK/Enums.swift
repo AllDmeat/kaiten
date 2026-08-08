@@ -398,6 +398,56 @@ public enum CardHistoryCondition: Sendable, Equatable, CaseIterable, Codable {
   }
 }
 
+// MARK: - Custom Property Catalog Values
+//
+// The catalog value condition is declared as a plain string in the OpenAPI
+// spec because Kaiten may return values its documentation does not list. A
+// generated closed enum would fail to decode those responses outright, so the
+// typed surface lives here instead — with an `unknown(String)` case that
+// preserves anything new the API adds.
+
+/// Custom property catalog value condition.
+///
+/// Used in ``KaitenClient/listCustomPropertyCatalogValues(propertyId:query:conditions:offset:limit:)``
+/// and ``KaitenClient/updateCustomPropertyCatalogValue(propertyId:id:condition:value:deleted:)``.
+/// - SeeAlso: [Kaiten API – Custom Property Catalog Values](https://developers.kaiten.ru/custom-property-catalog-values/update-catalog-value)
+public enum CatalogValueCondition: Sendable, Equatable, CaseIterable, Codable {
+  /// Catalog value is active.
+  case active
+  /// Catalog value is inactive.
+  case inactive
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CatalogValueCondition] { [.active, .inactive] }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "active": self = .active
+    case "inactive": self = .inactive
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .active: "active"
+    case .inactive: "inactive"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
 // MARK: - Automations
 //
 // Automation discriminators are declared as plain strings in the OpenAPI spec

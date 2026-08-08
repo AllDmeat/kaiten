@@ -21,6 +21,8 @@ enum ErrorCase: String {
   case forbidden
   case notFound
   case conflict
+  case found
+  case unprocessableContent
   case serviceUnavailable
 }
 
@@ -226,6 +228,16 @@ let sections: [Section] = [
     Operation(
       name: "update_card_file", errors: [.unauthorized, .forbidden, .notFound], hasBody: false),
     Operation(name: "detach_file_from_card", errors: [.unauthorized, .forbidden, .notFound]),
+  ]),
+  Section(mark: "Private Card Files", operations: [
+    Operation(
+      name: "attach_private_card_file",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "get_private_card_file",
+      errors: [.found, .unauthorized, .forbidden, .notFound, .unprocessableContent]),
+    Operation(
+      name: "delete_private_card_file", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
   Section(mark: "Automations", operations: [
     Operation(name: "list_automations", errors: [.unauthorized, .forbidden, .notFound]),
@@ -464,6 +476,10 @@ func generateExtension(_ op: Operation) -> String {
       cases.append("    case .notFound: .notFound")
     case .conflict:
       cases.append("    case .conflict: .undocumented(statusCode: 409)")
+    case .found:
+      cases.append("    case .found: .undocumented(statusCode: 302)")
+    case .unprocessableContent:
+      cases.append("    case .unprocessableContent: .undocumented(statusCode: 422)")
     case .serviceUnavailable:
       cases.append("    case .serviceUnavailable: .undocumented(statusCode: 503)")
     }

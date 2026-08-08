@@ -269,6 +269,26 @@ kaiten update-card-file --card-id 123 --file-id 7 --card-cover true
 kaiten detach-card-file --card-id 123 --file-id 7
 ```
 
+### Private Card Files
+
+| Method | Description |
+|--------|-------------|
+| `attachPrivateFile(cardUid:fileData:filename:)` | Attach a file to a card addressed by UID (multipart upload) |
+| `getPrivateFile(cardUid:fileId:responseType:)` | Get the signed URL of a private card file |
+| `deletePrivateFile(cardUid:fileId:)` | Delete a private card file |
+
+These routes address the card by UID and the file by UUID string id, and are live only
+when "Restricted file access" is enabled in company settings. The docs mark the section
+as under active development.
+
+From the CLI:
+
+```bash
+kaiten attach-private-card-file --card-uid aaaa-11 --file ./diagram.png
+kaiten get-private-card-file --card-uid aaaa-11 --file-id bbbb-22
+kaiten delete-private-card-file --card-uid aaaa-11 --file-id bbbb-22
+```
+
 ### Spaces
 
 | Method | Description |

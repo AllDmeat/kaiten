@@ -2910,6 +2910,124 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  # Private card files (docs section "private-card-files") address the card by UID and the
+  # file by UUID string id — a route family separate from the integer-id card-files paths
+  # above, live only when "Restricted file access" is enabled in company settings. The docs
+  # mark the whole section as under active development.
+  /cards/{card_uid}/files:
+    post:
+      summary: Attach file to card (private files)
+      operationId: attach_private_card_file
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - file
+              properties:
+                # NOTE: the docs describe a multipart/form-data upload but never name the
+                # form field; `file` matches the legacy attach endpoint above.
+                file:
+                  type: string
+                  contentEncoding: binary
+                  description: File content
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateCardFile'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /cards/{card_uid}/files/{id}:
+    get:
+      summary: Get card file
+      operationId: get_private_card_file
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: File ID
+      - name: response_type
+        in: query
+        schema:
+          # Documented as an enum (json, inline, attachment); declared as a plain string per
+          # FR-020a, with the typed surface in Enums.swift (PrivateCardFileResponseType).
+          type: string
+        description: >-
+          One of `json`, `inline`, `attachment`. If set to `json`, returns a signed URL in
+          JSON. If set to `inline` or `attachment`, requests the corresponding content
+          disposition via a 302 redirect.
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateCardFileUrlResponse'
+        '302':
+          description: Redirect to the signed file URL
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '422':
+          description: The file is malicious
+    delete:
+      summary: Delete card file
+      operationId: delete_private_card_file
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: File ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedPrivateCardFileResponse'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /card-types:
     get:
       summary: List card types
@@ -8169,6 +8287,65 @@ components:
         created:
           type: string
           description: Create date
+    # The private-card-files attach response. Documented with fewer fields than the
+    # PrivateFile shape a card's `files` array carries; the endpoint could not be verified
+    # live ("Restricted file access" is not enabled on the verification instance — the route
+    # answers 404 with an empty body), so this schema follows the docs exactly.
+    PrivateCardFile:
+      type: object
+      description: Private card file returned by the private-card-files attach endpoint
+      properties:
+        id:
+          type: string
+          description: File id
+        name:
+          type: string
+          description: File name
+        size:
+          type: string
+          description: File size in bytes (bigint serialized as string)
+        mime_type:
+          type: string
+          description: MIME type
+        author_uid:
+          type: string
+          description: Author UID
+        card_uid:
+          type: string
+          description: Card UID
+        company_uid:
+          type: string
+          description: Company UID
+        entity_type:
+          type: string
+          description: File entity type
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        card_cover:
+          type: boolean
+          description: Flag indicating that image is used as card cover
+    PrivateCardFileUrlResponse:
+      type: object
+      description: Signed URL of a private card file, returned when `response_type` is `json`
+      required:
+      - url
+      properties:
+        url:
+          type: string
+          description: Signed file URL
+    DeletedPrivateCardFileResponse:
+      type: object
+      description: Response of the private-card-files delete endpoint
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: Deleted file id
     SLARule:
       type: object
       properties:

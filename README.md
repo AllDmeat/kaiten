@@ -300,9 +300,22 @@ kaiten detach-card-file --card-id 123 --file-id 7
 |--------|-------------|
 | `listCustomProperties()` | List all custom property definitions |
 | `getCustomProperty(id:)` | Get a single custom property definition |
+| `createCustomProperty(name:type:...)` | Create a custom property definition |
+| `updateCustomProperty(id:...)` | Update a custom property definition |
+| `removeCustomProperty(id:)` | Remove a custom property definition |
 | `listCustomPropertySelectValues(propertyId:)` | List select values for a custom property |
 | `getCustomPropertySelectValue(propertyId:id:)` | Get a single select value |
 | `createCustomPropertySelectValue(propertyId:value:color:)` | Create a select value for a custom property |
+
+Property discriminators are exposed as Swift enums (`CustomPropertyType`,
+`CustomPropertyCondition`, `CustomPropertyVoteVariant`,
+`CustomPropertyValuesType`). Each has an `unknown(String)` case that preserves
+values the documentation does not list. The `data` and `fields_settings`
+payloads stay free-form JSON — their shape depends on the property type.
+
+CLI: `create-custom-property --name <name> [--type <type>] ...`,
+`update-custom-property --id <id> [--name <name>] [--condition <condition>] ...`,
+`remove-custom-property --id <id>`.
 
 ### Users
 

@@ -445,6 +445,12 @@ let sections: [Section] = [
     Operation(
       name: "delete_document", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
   ]),
+  Section(mark: "Space Template Checklists", operations: [
+    Operation(name: "list_space_template_checklists", errors: [.unauthorized]),
+    Operation(name: "create_space_template_checklist", errors: [.unauthorized]),
+    Operation(name: "update_space_template_checklist", errors: [.unauthorized]),
+    Operation(name: "remove_space_template_checklist", errors: [.unauthorized]),
+  ]),
 ]
 
 // MARK: - Generator

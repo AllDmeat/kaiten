@@ -2317,3 +2317,53 @@ extension Operations.delete_document.Output {
     }
   }
 }
+
+// MARK: - Space Template Checklists
+
+extension Operations.list_space_template_checklists.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.list_space_template_checklists.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.create_space_template_checklist.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.create_space_template_checklist.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_space_template_checklist.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.update_space_template_checklist.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.remove_space_template_checklist.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.remove_space_template_checklist.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

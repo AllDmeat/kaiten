@@ -539,6 +539,24 @@ CLI: `list-space-users --space-id <id>`,
 `get-space-user --space-id <id> --user-id <id>`,
 `update-space-user --space-id <id> --user-id <id>`,
 `remove-space-user --space-id <id> --user-id <id>`.
+### Space Template Checklists
+
+| Method | Description |
+|--------|-------------|
+| `listSpaceTemplateChecklists(spaceUid:)` | List template checklists in a space |
+| `createSpaceTemplateChecklist(spaceUid:name:sortOrder:)` | Create a template checklist in a space |
+| `updateSpaceTemplateChecklist(spaceUid:templateChecklistUid:name:sortOrder:newSpaceUid:)` | Update a space template checklist |
+| `removeSpaceTemplateChecklist(spaceUid:templateChecklistUid:)` | Remove a template checklist from a space |
+
+Spaces and template checklists are addressed by string UIDs here, not integer
+IDs. The list response embeds the checklist items; the documented create and
+update responses return the checklist without them. Remove answers with an
+object carrying only the deleted checklist UID.
+
+CLI: `list-space-template-checklists --space-uid <uid>`,
+`create-space-template-checklist --space-uid <uid> [--name <name>] [--sort-order <n>]`,
+`update-space-template-checklist --space-uid <uid> --template-checklist-uid <uid> [--name <name>] [--sort-order <n>] [--new-space-uid <uid>]`,
+`remove-space-template-checklist --space-uid <uid> --template-checklist-uid <uid>`.
 
 ### Blocker Categories
 

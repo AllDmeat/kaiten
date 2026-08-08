@@ -329,6 +329,23 @@ CLI: `create-custom-property --name <name> [--type <type>] ...`,
 | `getCurrentUser()` | Get the current user |
 | `getCurrentUserBlockers()` | Get cards blocked on the current user (see [Card Blocker Users](#card-blocker-users)) |
 
+### Company Users
+
+| Method | Description |
+|--------|-------------|
+| `listCompanyUsers(invitesOnly:withTransferAccessStatus:forMembersSection:ownerOnly:onlyPaid:onlyRecordsCount:onlyVirtual:offset:limit:query:accessTypePermissions:sdAccessType:takeLicence:temporarilyInactiveStatus:groupIds:permissions:)` | List company users |
+| `updateCompanyUser(id:appsPermissions:temporarilyInactive:)` | Update a company user |
+| `removeVirtualUser(id:)` | Remove a virtual user |
+
+Listing and updating require an API token of a user with access to the
+administrative section "Members"; removing a virtual user requires access to
+the administrative section "Resource planning". Without that access the API
+returns 403.
+
+CLI: `kaiten list-company-users` (with the same filters as the SDK method),
+`kaiten update-company-user` with `--id`, `--apps-permissions`,
+`--temporarily-inactive`, and `kaiten remove-virtual-user` with `--id`.
+
 ### Card Types & Sprints
 
 | Method | Description |

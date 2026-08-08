@@ -3596,6 +3596,166 @@ paths:
           description: Invalid token
         '404':
           description: Not found
+  /company/users:
+    get:
+      summary: Get list of users
+      operationId: get_company_users
+      description: Get company users filtered by query parameters. Requires access to the administrative section "Members".
+      parameters:
+      - name: invitesOnly
+        in: query
+        schema:
+          type: boolean
+        description: Filter to return only invites
+      - name: withTransferAccessStatus
+        in: query
+        schema:
+          type: boolean
+        description: Data about the user rights transfer process is added
+      - name: for_members_section
+        in: query
+        schema:
+          type: boolean
+        description: When this flag is enabled, users for the "Members" administrative section are returned and the result is displayed page by page (see limit and offset params)
+      - name: owner_only
+        in: query
+        schema:
+          type: boolean
+        description: When this flag is enabled the company owner is returned
+      - name: only_paid
+        in: query
+        schema:
+          type: boolean
+        description: Only users with paid access are returned
+      - name: only_records_count
+        in: query
+        schema:
+          type: boolean
+        description: Only the number of users is returned. Works only with the for_members_section or only_virtual parameters. The count-only response shape is not described in the Kaiten documentation and is not modelled here
+      - name: only_virtual
+        in: query
+        schema:
+          type: boolean
+        description: Only virtual users are returned and the result is displayed page by page (see limit and offset params)
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of records to skip. Does not apply when exporting users
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: 'Maximum amount of users in response. Default: 100, max: 100. Does not apply when exporting users'
+      - name: query
+        in: query
+        schema:
+          type: string
+        description: Filter by email and full_name. Works only with for_members_section parameter
+      - name: access_type_permissions
+        in: query
+        schema:
+          type: string
+        description: Filter by access to Kaiten. Works only with for_members_section parameter
+      - name: sd_access_type
+        in: query
+        schema:
+          type: string
+        description: Filter by access to Service Desk. Works only with for_members_section parameter
+      - name: take_licence
+        in: query
+        schema:
+          type: string
+        description: Filter by users consuming the license. Works only with for_members_section parameter
+      - name: temporarily_inactive_status
+        in: query
+        schema:
+          type: string
+        description: Filter by temporarily inactive users. Works only with for_members_section parameter
+      - name: group_ids
+        in: query
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Filter by group ids. Works only with for_members_section parameter
+      - name: permissions
+        in: query
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Filter by access granted to users. Works only with for_members_section parameter
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompanyUser'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /company/users/{id}:
+    patch:
+      summary: Update user
+      operationId: update_company_user
+      description: Requires access to the administrative section "Members".
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: User ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyUserRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyUser'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Remove virtual user
+      operationId: remove_virtual_user
+      description: Requires access to the administrative section "Resource planning".
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: User ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedCompanyUserResponse'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 components:
   securitySchemes:
     bearerAuth:
@@ -8167,3 +8327,381 @@ components:
         condition:
           type: string
           description: 'Directory condition after deletion. Documented value: removed. Map to the CustomDirectoryCondition Swift enum, which preserves unknown values.'
+    # NOTE: shared by get-list-of-users and update-user, whose documented response
+    # shapes differ slightly: the union of both field sets is modelled, every property
+    # is optional, and where the two pages disagree on nullability the nullable variant
+    # from the get-list-of-users page is used.
+    CompanyUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Id
+        uid:
+          type: string
+          description: Uid
+        full_name:
+          type: string
+          description: User full name
+        email:
+          type: string
+          description: User email
+        username:
+          type: string
+          description: Username for mentions and login
+        avatar_initials_url:
+          type: string
+          description: Default user avatar url
+        avatar_uploaded_url:
+          type:
+          - string
+          - 'null'
+          description: User uploaded avatar url
+        initials:
+          type: string
+          description: User initials
+        avatar_type:
+          type: integer
+          description: 1 - gravatar, 2 - initials, 3 - uploaded
+        lng:
+          type: string
+          description: Language
+        timezone:
+          type: string
+          description: Time zone
+        theme:
+          type: string
+          description: light - light color theme, dark - dark color theme, auto - color theme based on OS settings
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        activated:
+          type: boolean
+          description: User activated flag
+        ui_version:
+          type: integer
+          description: 1 - old ui, 2 - new ui
+        virtual:
+          type: boolean
+          description: Is user virtual
+        email_blocked:
+          type:
+          - string
+          - 'null'
+          description: Email blocked timestamp
+        email_blocked_reason:
+          type:
+          - string
+          - 'null'
+          description: Email blocked reason
+        delete_requested_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp of delete request
+        permissions:
+          type: integer
+          description: User company permissions (with inherited permissions through groups)
+        own_permissions:
+          type: integer
+          description: User personal company permissions
+        user_id:
+          type: integer
+          description: User id
+        company_id:
+          type: integer
+          description: Company id
+        default_space_id:
+          type:
+          - integer
+          - 'null'
+          description: Default space
+        role:
+          type: integer
+          description: 'User role in company: 1 - owner, 2 - user, 3 - deactivated'
+        email_frequency:
+          type: integer
+          description: 1 - never, 2 - instantly
+        # NOTE: nullable in practice, but expressed as a plain $ref rather than
+        # `anyOf: [$ref, 'null']` — swift-openapi-generator silently drops properties
+        # using that pattern; the property is optional and the synthesized decoder
+        # maps an explicit JSON `null` to `nil`.
+        email_settings:
+          $ref: '#/components/schemas/CompanyUserEmailSettings'
+          description: Email settings
+        slack_id:
+          type:
+          - integer
+          - 'null'
+          description: User slack id
+        slack_settings:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Slack settings. The object shape is not described in the Kaiten documentation
+        notification_settings:
+          $ref: '#/components/schemas/CompanyUserNotificationSettings'
+          description: Notification settings
+        notification_enabled_channels:
+          type: array
+          items:
+            type: string
+          description: List of enabled channels for notifications
+        slack_private_channel_id:
+          type:
+          - integer
+          - 'null'
+          description: User slack private channel id
+        telegram_sd_bot_enabled:
+          type: boolean
+          description: Telegram bot enable flag
+        # DOC_MISMATCH: docs=`string`, actual=`integer` — observed via the shared user serializer on GET /users; GET /company/users itself returned 403 for the verification token — https://developers.kaiten.ru/company-users/get-list-of-users
+        apps_permissions:
+          type: integer
+          description: '0 - no access, 1 - full access to Kaiten, access to service desk denied, 2 - guest access to Kaiten, access to service desk denied, 4 - access only to service desk, 5 - full access to Kaiten and service desk, 6 - guest access to Kaiten, access to service desk'
+        invite_last_sent_at:
+          type: string
+          description: Last invite date
+        external:
+          type: boolean
+          description: Is user external
+        last_request_date:
+          type:
+          - string
+          - 'null'
+          description: Date of last request
+        last_request_method:
+          type:
+          - string
+          - 'null'
+          description: Type of last request
+        work_time_settings:
+          $ref: '#/components/schemas/CompanyUserWorkTimeSettings'
+          description: Work time settings
+        personal_settings:
+          $ref: '#/components/schemas/CompanyUserPersonalSettings'
+          description: Personal settings
+        locked:
+          type: boolean
+          description: Is user locked for update
+        take_licence:
+          type: boolean
+          description: Flag indicating whether the user holds the company's license
+        temporarily_inactive:
+          type: boolean
+          description: 'Temporarily inactive: user is still in company, but cannot sign in and does not need a license'
+        spaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyUserSpace'
+          description: Spaces where the user is invited
+        groups:
+          $ref: '#/components/schemas/CompanyUserGroup'
+          description: User groups
+    CompanyUserEmailSettings:
+      type: object
+      properties:
+        deadlines:
+          type: boolean
+          description: Daily due dates digest flag
+        subject_by:
+          type: integer
+          description: 'Subject: 1 - id and title, 2 - action'
+    CompanyUserNotificationSettings:
+      type: object
+      description: Per-event lists of notification channels. The documentation does not describe the channel item type
+      properties:
+        card_add:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on card add
+        card_move:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on card move
+        card_unblock:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on card unblock
+        card_block_add:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on card add block
+        card_member_add:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on card add member
+        card_comment_add:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on card add comment
+        due_date_reminder:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on due date remind
+        card_member_remove:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on card remove member
+        card_comment_mention:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on mention in card comment
+        card_due_data_change:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on card due date change
+        card_description_change:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on card description change
+        card_member_become_responsible:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on card change set responsible
+        checklist_item_responsible_add:
+          type: array
+          items:
+            type: string
+          description: Notification enabled on card set responsible for checklist item
+    CompanyUserWorkTimeSettings:
+      type: object
+      properties:
+        work_days:
+          type: array
+          items:
+            type: integer
+          description: Work days
+        hours_count:
+          type: integer
+          description: Work time hours count
+    CompanyUserPersonalSettings:
+      type: object
+      properties:
+        current_card_view_id:
+          type: string
+          description: Current card view uid
+    CompanyUserSpace:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Space id
+        uid:
+          type: string
+          description: Space uid
+        title:
+          type: string
+          description: Space title
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: External id
+        company_id:
+          type: integer
+          description: Company id
+        path:
+          type: string
+          description: Inner path to entity
+        sort_order:
+          type: number
+          description: Space sort order
+        parent_entity_uid:
+          type:
+          - string
+          - 'null'
+          description: Parent entity uid
+        archived:
+          type: boolean
+          description: Space archived flag
+        access:
+          type: string
+          description: Space access
+        for_everyone_access_role_id:
+          type: string
+          description: Role id for everyone access
+        entity_uid:
+          type: string
+          description: Entity uid
+        user_id:
+          type: integer
+          description: User id
+        access_mod:
+          type: string
+          description: User access modifier
+        role:
+          type: string
+          description: 'User space role: 1 - commentator, 2 - writer, 3 - admin'
+    CompanyUserGroup:
+      type: object
+      properties:
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        id:
+          type: integer
+          description: Group id
+        uid:
+          type: string
+          description: Group uid
+        name:
+          type: string
+          description: Group name
+        permissions:
+          type: integer
+          description: Group permissions
+        company_id:
+          type: integer
+          description: Company id
+        add_to_cards_and_spaces_enabled:
+          type: boolean
+          description: Should add cards and spaces
+        user_id:
+          type: integer
+          description: User id
+        group_id:
+          type: integer
+          description: Group id
+        spaces:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: Group spaces. Item shape is not described in the Kaiten documentation
+    UpdateCompanyUserRequest:
+      type: object
+      properties:
+        apps_permissions:
+          type: integer
+          description: 'User access: 0 - no access, 1 - full access to Kaiten, access to service desk denied, 2 - guest access to Kaiten, access to service desk denied, 4 - access only to service desk, 5 - full access to Kaiten and service desk, 6 - guest access to Kaiten, access to service desk'
+        temporarily_inactive:
+          type: boolean
+          description: 'Temporarily inactive: user is still in company, but cannot sign in and does not need a license'
+    DeletedCompanyUserResponse:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: integer
+          description: Deleted user id

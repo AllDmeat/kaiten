@@ -2453,3 +2453,273 @@ public enum TreeEntityType: Sendable, Equatable, CaseIterable, Codable {
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Users
+
+/// User avatar type.
+///
+/// Used in ``KaitenClient/updateUser(id:username:fullName:initials:avatarType:password:oldPassword:lng:defaultSpaceId:theme:emailFrequency:timezone:subjectBy:emailSettings:telegramSettings:slackSettings:notificationEnabledChannels:notificationSettings:uiVersion:)``.
+/// - SeeAlso: [Kaiten API – Users](https://developers.kaiten.ru/users/update-user)
+public enum UserAvatarType: Sendable, Equatable, CaseIterable, Codable {
+  /// Gravatar avatar.
+  case gravatar
+  /// Avatar generated from the user initials.
+  case initials
+  /// Uploaded image avatar.
+  case uploaded
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(Int)
+
+  public static var allCases: [UserAvatarType] { [.gravatar, .initials, .uploaded] }
+
+  public init(rawValue: Int) {
+    switch rawValue {
+    case 1: self = .gravatar
+    case 2: self = .initials
+    case 3: self = .uploaded
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .gravatar: 1
+    case .initials: 2
+    case .uploaded: 3
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(Int.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// User interface color theme.
+///
+/// Used in ``KaitenClient/updateUser(id:username:fullName:initials:avatarType:password:oldPassword:lng:defaultSpaceId:theme:emailFrequency:timezone:subjectBy:emailSettings:telegramSettings:slackSettings:notificationEnabledChannels:notificationSettings:uiVersion:)``.
+/// - SeeAlso: [Kaiten API – Users](https://developers.kaiten.ru/users/update-user)
+public enum UserTheme: Sendable, Equatable, CaseIterable, Codable {
+  /// Light color theme.
+  case light
+  /// Dark color theme.
+  case dark
+  /// Color theme based on OS settings.
+  case auto
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [UserTheme] { [.light, .dark, .auto] }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "light": self = .light
+    case "dark": self = .dark
+    case "auto": self = .auto
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .light: "light"
+    case .dark: "dark"
+    case .auto: "auto"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// Email notification frequency.
+///
+/// Used in ``KaitenClient/updateUser(id:username:fullName:initials:avatarType:password:oldPassword:lng:defaultSpaceId:theme:emailFrequency:timezone:subjectBy:emailSettings:telegramSettings:slackSettings:notificationEnabledChannels:notificationSettings:uiVersion:)``.
+/// - SeeAlso: [Kaiten API – Users](https://developers.kaiten.ru/users/update-user)
+public enum UserEmailFrequency: Sendable, Equatable, CaseIterable, Codable {
+  /// Never send email notifications.
+  case never
+  /// Send email notifications instantly.
+  case instantly
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(Int)
+
+  public static var allCases: [UserEmailFrequency] { [.never, .instantly] }
+
+  public init(rawValue: Int) {
+    switch rawValue {
+    case 1: self = .never
+    case 2: self = .instantly
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .never: 1
+    case .instantly: 2
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(Int.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// Email notification subject format.
+///
+/// Used in ``KaitenClient/updateUser(id:username:fullName:initials:avatarType:password:oldPassword:lng:defaultSpaceId:theme:emailFrequency:timezone:subjectBy:emailSettings:telegramSettings:slackSettings:notificationEnabledChannels:notificationSettings:uiVersion:)``.
+/// - SeeAlso: [Kaiten API – Users](https://developers.kaiten.ru/users/update-user)
+public enum UserEmailSubject: Sendable, Equatable, CaseIterable, Codable {
+  /// Subject contains the entity id and title.
+  case idAndTitle
+  /// Subject contains the action.
+  case action
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(Int)
+
+  public static var allCases: [UserEmailSubject] { [.idAndTitle, .action] }
+
+  public init(rawValue: Int) {
+    switch rawValue {
+    case 1: self = .idAndTitle
+    case 2: self = .action
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .idAndTitle: 1
+    case .action: 2
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(Int.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// User interface version.
+///
+/// Used in ``KaitenClient/updateUser(id:username:fullName:initials:avatarType:password:oldPassword:lng:defaultSpaceId:theme:emailFrequency:timezone:subjectBy:emailSettings:telegramSettings:slackSettings:notificationEnabledChannels:notificationSettings:uiVersion:)``.
+/// - SeeAlso: [Kaiten API – Users](https://developers.kaiten.ru/users/update-user)
+public enum UserUiVersion: Sendable, Equatable, CaseIterable, Codable {
+  /// Old user interface.
+  case oldUi
+  /// New user interface.
+  case newUi
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(Int)
+
+  public static var allCases: [UserUiVersion] { [.oldUi, .newUi] }
+
+  public init(rawValue: Int) {
+    switch rawValue {
+    case 1: self = .oldUi
+    case 2: self = .newUi
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .oldUi: 1
+    case .newUi: 2
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(Int.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// Notification delivery channel.
+///
+/// Used in ``KaitenClient/updateUser(id:username:fullName:initials:avatarType:password:oldPassword:lng:defaultSpaceId:theme:emailFrequency:timezone:subjectBy:emailSettings:telegramSettings:slackSettings:notificationEnabledChannels:notificationSettings:uiVersion:)``.
+/// - SeeAlso: [Kaiten API – Users](https://developers.kaiten.ru/users/update-user)
+public enum UserNotificationChannel: Sendable, Equatable, CaseIterable, Codable {
+  /// In-app notifications.
+  case inner
+  /// Mobile app push notifications.
+  case mobileApp
+  /// Email notifications.
+  case email
+  /// Slack notifications.
+  case slack
+  /// Telegram notifications.
+  case telegram
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [UserNotificationChannel] {
+    [.inner, .mobileApp, .email, .slack, .telegram]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "inner": self = .inner
+    case "mobile_app": self = .mobileApp
+    case "email": self = .email
+    case "slack": self = .slack
+    case "telegram": self = .telegram
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .inner: "inner"
+    case .mobileApp: "mobile_app"
+    case .email: "email"
+    case .slack: "slack"
+    case .telegram: "telegram"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

@@ -2454,6 +2454,38 @@ paths:
                   $ref: '#/components/schemas/User'
         '401':
           description: Invalid token
+  /users/{id}:
+    patch:
+      summary: Update user
+      operationId: update_user
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: User ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateUserResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /users/current:
     get:
       summary: Retrieve current user
@@ -8768,6 +8800,189 @@ components:
           - string
           - 'null'
           description: Date of last request
+    UpdateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Username for mentions and login
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Full name
+        initials:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: Initials
+        avatar_type:
+          type: integer
+          description: 1 - gravatar, 2 - initials, 3 - uploaded
+        password:
+          type: string
+          minLength: 6
+          description: New password
+        old_password:
+          type:
+          - string
+          - 'null'
+          description: Old password
+        lng:
+          type: string
+          description: Language
+        default_space_id:
+          type:
+          - integer
+          - 'null'
+          description: Default space
+        theme:
+          type: string
+          description: light - light color theme, dark - dark color theme, auto - color theme based on OS settings
+        email_frequency:
+          type: integer
+          description: 1 - never, 2 - instantly
+        timezone:
+          type: string
+          description: Time zone
+        subject_by:
+          type: integer
+          description: 1 - id and title, 2 - action
+        email_settings:
+          type: object
+          additionalProperties: true
+          description: Email settings
+        telegram_settings:
+          type: object
+          additionalProperties: true
+          description: Telegram settings
+        slack_settings:
+          type: object
+          additionalProperties: true
+          description: Slack settings
+        notification_enabled_channels:
+          type: array
+          items:
+            type: string
+          description: 'List of enabled channels for notifications. Documented values: inner, mobile_app, email, slack, telegram'
+        notification_settings:
+          type: object
+          additionalProperties: true
+          description: Channel lists where notifications for specified events should be sent
+        ui_version:
+          type: integer
+          description: 1 - old ui, 2 - new ui
+    UpdateUserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User id
+        full_name:
+          type: string
+          description: User full name
+        email:
+          type: string
+          description: User email
+        username:
+          type: string
+          description: Username for mentions and login
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        avatar_initials_url:
+          type: string
+          description: Default user avatar
+        avatar_uploaded_url:
+          type:
+          - string
+          - 'null'
+          description: User uploaded avatar url
+        activated:
+          type: boolean
+          description: User activated flag
+        initials:
+          type: string
+          description: User initials
+        avatar_type:
+          type: integer
+          description: 1 - gravatar, 2 - initials, 3 - uploaded
+        lng:
+          type: string
+          description: Language
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` (the docs' own 200 example shows null) — https://developers.kaiten.ru/users/update-user
+        sd_telegram_id:
+          type:
+          - integer
+          - 'null'
+          description: Service desk telegram id
+        timezone:
+          type: string
+          description: Time zone
+        news_subscription:
+          type: boolean
+          description: News subscription flag
+        theme:
+          type: string
+          description: light - light color theme, dark - dark color theme, auto - based on OS settings
+        ui_version:
+          type: integer
+          description: 1 - old ui, 2 - new ui
+        default_space_id:
+          type:
+          - integer
+          - 'null'
+          description: Default space
+        email_frequency:
+          type: integer
+          description: 1 - never, 2 - instantly
+        # NOTE: nullable, but expressed as a plain $ref rather than `anyOf: [$ref, 'null']` —
+        # swift-openapi-generator silently drops properties using that pattern. The property is
+        # optional, and the synthesized decoder maps an explicit JSON `null` to `nil`.
+        # Guarded by Tests/KaitenSDKTests/OpenAPISpecIntegrityTests.swift.
+        # DOC_MISMATCH: docs=non-nullable `object`, actual=`object | null` (null in the docs' own 200 example and in live user responses) — https://developers.kaiten.ru/users/update-user
+        email_settings:
+          $ref: '#/components/schemas/UserEmailSettings'
+          description: Email settings
+        work_time_settings:
+          $ref: '#/components/schemas/UserWorkTimeSettings'
+          description: Work time settings
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` (null in the docs' own 200 example and in live user responses) — https://developers.kaiten.ru/users/update-user
+        telegram_id:
+          type:
+          - integer
+          - 'null'
+          description: Telegram id
+        telegram_settings:
+          type: object
+          additionalProperties: true
+          description: Telegram settings
+        has_password:
+          type: boolean
+          description: Has user password flag
+    UserEmailSettings:
+      type: object
+      properties:
+        deadlines:
+          type: boolean
+          description: Daily due dates digest flag
+        subject_by:
+          type: integer
+          description: Subject format. 1 - id and title, 2 - action
+    UserWorkTimeSettings:
+      type: object
+      properties:
+        work_days:
+          type: array
+          items:
+            type: integer
+          description: Work days
+        hours_count:
+          type: integer
+          description: Work time hours count
     AllowedUser:
       type: object
       properties:

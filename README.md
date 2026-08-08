@@ -455,7 +455,19 @@ CLI: `list-collective-vote-values`, `create-collective-vote-value`,
 |--------|-------------|
 | `listUsers()` | List all users |
 | `getCurrentUser()` | Get the current user |
+| `updateUser(id:...)` | Update a user |
 | `getCurrentUserBlockers()` | Get cards blocked on the current user (see [Card Blocker Users](#card-blocker-users)) |
+
+`updateUser` changes only the fields that are set; the API requires at least
+one field and answers HTTP 400 otherwise. Closed-set fields are exposed as
+Swift enums (`UserAvatarType`, `UserTheme`, `UserEmailFrequency`,
+`UserEmailSubject`, `UserUiVersion`, `UserNotificationChannel`), each with an
+`unknown` case that preserves values the documentation does not list. The
+`email_settings`, `telegram_settings`, `slack_settings` and
+`notification_settings` payloads stay free-form JSON — the documentation does
+not describe their fields.
+
+CLI: `update-user --id <id> [--full-name <name>] [--theme <theme>] ...`.
 
 ### Company Users
 

@@ -275,6 +275,35 @@ let sections: [Section] = [
       name: "remove_space_user",
       errors: [.unauthorized, .forbidden, .notFound, .conflict]),
   ]),
+  Section(mark: "Iterations", operations: [
+    Operation(
+      name: "get_card_iterations_history",
+      errors: [.unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "list_iterations",
+      errors: [.unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "create_iteration",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "get_iteration",
+      errors: [.unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "update_iteration",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "delete_iteration",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "list_iteration_cards",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "add_card_to_iteration",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "remove_card_from_iteration",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+  ]),
   Section(mark: "Service Desk External Recipients", operations: [
     Operation(
       name: "add_sd_external_recipient",

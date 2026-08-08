@@ -200,6 +200,15 @@ struct Kaiten: AsyncParsableCommand {
       CreateSpaceTemplateChecklistItem.self,
       UpdateSpaceTemplateChecklistItem.self,
       RemoveSpaceTemplateChecklistItem.self,
+      GetCardIterationsHistory.self,
+      ListIterations.self,
+      CreateIteration.self,
+      GetIteration.self,
+      UpdateIteration.self,
+      DeleteIteration.self,
+      ListIterationCards.self,
+      AddCardToIteration.self,
+      RemoveCardFromIteration.self,
     ]
   )
 }

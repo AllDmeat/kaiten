@@ -4526,6 +4526,350 @@ paths:
                 $ref: '#/components/schemas/DeletedSpaceTemplateChecklistItemResponse'
         '401':
           description: Invalid token
+  /cards/{card_uid}/iterations-history:
+    get:
+      summary: Get card iterations history
+      operationId: get_card_iterations_history
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IterationCard'
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Card not found
+  /spaces/{space_uid}/iterations:
+    get:
+      summary: Retrieve list of iterations
+      operationId: list_iterations
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      - name: status
+        in: query
+        schema:
+          type: string
+        description: 'Filter by iteration status. Comma-separated list of: planned, active, closed, removed'
+      - name: with_data
+        in: query
+        schema:
+          type: string
+        description: 'Include related data. Comma-separated list of: cards. Iterations with the removed status do not contain cards'
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: 'Maximum number of iterations to return. Clamped to the range 1-100. Default: 100'
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: 'Number of iterations to skip from the beginning of the result set. Default: 0'
+      - name: order
+        in: query
+        schema:
+          type: string
+        description: 'Sort order by creation date: asc or desc. Default: asc'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Iteration'
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Space not found
+    post:
+      summary: Create iteration
+      operationId: create_iteration
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIterationRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Iteration'
+        '400':
+          description: Validation error, including an invalid date range
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Space not found
+  /spaces/{space_uid}/iterations/{id}:
+    get:
+      summary: Get iteration
+      operationId: get_iteration
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Iteration ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Iteration'
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Iteration not found
+    patch:
+      summary: Update iteration
+      operationId: update_iteration
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Iteration ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIterationRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Iteration'
+        '400':
+          description: Validation error or lifecycle rule violation
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Iteration not found
+    delete:
+      summary: Delete iteration
+      operationId: delete_iteration
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Iteration ID
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteIterationRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Iteration'
+        '400':
+          description: Invalid new_iteration_id
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Iteration not found
+  /spaces/{space_uid}/iterations/{iteration_id}/cards:
+    get:
+      summary: Retrieve cards in iteration
+      operationId: list_iteration_cards
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      - name: iteration_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Iteration ID
+      - name: status
+        in: query
+        schema:
+          type: string
+        description: 'Filter iteration card records by status: active or removed. If omitted, returns both active and removed records'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IterationCard'
+        '400':
+          description: Invalid status filter value
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Iteration not found
+    post:
+      summary: Add card to iteration
+      operationId: add_card_to_iteration
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      - name: iteration_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Iteration ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCardToIterationRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IterationCard'
+        '400':
+          description: Validation error or card rule violation
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Iteration or card not found
+  /spaces/{space_uid}/iterations/{iteration_id}/cards/{uid}:
+    delete:
+      summary: Remove card from iteration
+      operationId: remove_card_from_iteration
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      - name: iteration_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Iteration ID
+      - name: uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IterationCard'
+        '400':
+          description: The card cannot be removed from the iteration
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Iteration or card not found
   /categories:
     get:
       summary: Retrieve list of categories
@@ -11022,6 +11366,225 @@ components:
         uid:
           type: string
           description: Deleted template checklist item UID
+    Iteration:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Iteration ID (UUID)
+        space_uid:
+          type: string
+          description: UID of the space the iteration belongs to
+        title:
+          type: string
+          description: Iteration title
+        goal:
+          type:
+          - string
+          - 'null'
+          description: Iteration goal
+        status:
+          type: string
+          description: 'Iteration status. Documented values: planned, active, closed, removed. Map to the IterationStatus Swift enum, which preserves unknown values.'
+        creator_uid:
+          type: string
+          description: UID of the user who created the iteration
+        updater_uid:
+          type: string
+          description: UID of the user who last updated the iteration
+        start_date:
+          type:
+          - string
+          - 'null'
+          description: Start date, ISO 8601 format
+        finish_date:
+          type:
+          - string
+          - 'null'
+          description: Planned finish date, ISO 8601 format
+        actual_finish_date:
+          type:
+          - string
+          - 'null'
+          description: Actual finish date, ISO 8601 format
+        sort_order:
+          type: number
+          description: Sort order of the iteration within the space
+        # NOTE: nullable, but expressed as a plain $ref rather than `anyOf: [$ref, 'null']` —
+        # swift-openapi-generator silently drops properties using that pattern. The property is
+        # optional, and the synthesized decoder maps an explicit JSON `null` to `nil`.
+        # Guarded by Tests/KaitenSDKTests/OpenAPISpecIntegrityTests.swift.
+        data:
+          $ref: '#/components/schemas/IterationData'
+          description: Cached iteration statistics. Null for planned iterations; active iterations contain committed, and closed iterations also contain velocity, doneCount and totalCount
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/IterationCard'
+          description: Iteration card records. Included only when with_data=cards is requested. Cards removed from the iteration are excluded, and iterations with the removed status do not contain cards
+        moved_cards:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/IterationMovedCard'
+          description: Cards moved to new_iteration_id. Present only in update and delete responses when unfinished cards were moved, null in the delete response when no cards were moved
+        created:
+          type: string
+          description: Creation timestamp
+        updated:
+          type: string
+          description: Last update timestamp
+    IterationData:
+      type: object
+      description: Cached iteration statistics
+      properties:
+        committed:
+          type: object
+          additionalProperties: true
+          description: Committed card size captured when the iteration starts. The Kaiten documentation does not describe the fields of this object
+        velocity:
+          type: object
+          additionalProperties: true
+          description: Completed card size captured when the iteration closes. The Kaiten documentation does not describe the fields of this object
+        doneCount:
+          type: integer
+          description: Number of completed cards when the iteration closes
+        totalCount:
+          type: integer
+          description: Total number of cards when the iteration closes
+    IterationCard:
+      type: object
+      description: Iteration card record linking a card to an iteration
+      properties:
+        iteration_id:
+          type: string
+          description: ID of the iteration (UUID)
+        card_uid:
+          type: string
+          description: UID of the card
+        added_by_uid:
+          type: string
+          description: UID of the user who added the card to the iteration
+        removed_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp when the card was removed from the iteration, null if still active
+        removed_by_uid:
+          type:
+          - string
+          - 'null'
+          description: UID of the user who removed the card from the iteration, null if still active
+        sort_order:
+          type: number
+          description: Sort order of the card within the iteration
+        created:
+          type: string
+          description: Creation timestamp
+        updated:
+          type: string
+          description: Last update timestamp
+    IterationMovedCard:
+      type: object
+      description: Iteration card record created in the target iteration when cards are moved
+      properties:
+        iteration_id:
+          type: string
+          description: ID of the target iteration (UUID)
+        card_uid:
+          type: string
+          description: UID of the moved card
+        added_by_uid:
+          type: string
+          description: UID of the user who moved the card
+        sort_order:
+          type: number
+          description: Sort order in the target iteration
+        created:
+          type: string
+          description: Creation timestamp of the target iteration card record
+        updated:
+          type: string
+          description: Last update timestamp of the target iteration card record
+    CreateIterationRequest:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Iteration title
+        goal:
+          type:
+          - string
+          - 'null'
+          description: Iteration goal
+        start_date:
+          type:
+          - string
+          - 'null'
+          description: Start date. ISO 8601 format
+        finish_date:
+          type:
+          - string
+          - 'null'
+          description: Finish date. ISO 8601 format
+    UpdateIterationRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Iteration title
+        goal:
+          type:
+          - string
+          - 'null'
+          description: Iteration goal
+        status:
+          type: string
+          description: 'Iteration status. Documented values: planned, active, closed. Supported transitions are planned to active and active to closed. Use DELETE to remove an iteration. Map to the IterationStatus Swift enum, which preserves unknown values.'
+        start_date:
+          type:
+          - string
+          - 'null'
+          description: Start date. ISO 8601 format
+        finish_date:
+          type:
+          - string
+          - 'null'
+          description: Finish date. ISO 8601 format
+        actual_finish_date:
+          type:
+          - string
+          - 'null'
+          description: Actual finish date, applied when closing an iteration (status closed). Must be later than start_date. Defaults to the current time if omitted. ISO 8601 format
+        new_iteration_id:
+          type:
+          - string
+          - 'null'
+          description: ID of the iteration to move unfinished cards to when closing with status closed. Must belong to the same space and have the planned or active status
+    DeleteIterationRequest:
+      type: object
+      properties:
+        new_iteration_id:
+          type:
+          - string
+          - 'null'
+          description: ID of the iteration to move cards to when this iteration is removed. Must belong to the same space and have the planned or active status
+    AddCardToIterationRequest:
+      type: object
+      required:
+      - card_uid
+      properties:
+        card_uid:
+          type: string
+          minLength: 1
+          description: UID of the card to add to the iteration
     BlockerCategory:
       type: object
       properties:

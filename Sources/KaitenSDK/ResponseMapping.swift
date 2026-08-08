@@ -2703,3 +2703,16 @@ extension Operations.delete_user_role.Output {
     }
   }
 }
+
+// MARK: - Tree Entity Roles
+
+extension Operations.list_tree_entity_roles.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_tree_entity_roles.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

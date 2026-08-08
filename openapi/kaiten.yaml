@@ -7119,6 +7119,24 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /tree-entity-roles:
+    get:
+      summary: Get list of tree entity roles
+      operationId: list_tree_entity_roles
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                # DOC_MISMATCH: docs=`object`, actual=`array` of role objects — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+                type: array
+                items:
+                  $ref: '#/components/schemas/TreeEntityRole'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
 components:
   securitySchemes:
     bearerAuth:
@@ -15435,3 +15453,349 @@ components:
         updated:
           type: string
           description: Last update timestamp. ISO 8601 format
+    # NOTE: the documentation marks the tree-entity-roles endpoint as under active development,
+    # so parameters, attributes and response formats are subject to change.
+    TreeEntityRole:
+      type: object
+      description: Company tree entity role
+      properties:
+        id:
+          type: string
+          description: Role uid
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        name:
+          type: string
+          description: Role name
+        sort_order:
+          type: number
+          description: Role sort order
+        new_permissions_default_value:
+          type: boolean
+          description: When changing the permissions structure, grant rights to new actions by default
+        # DOC_MISMATCH: docs=`role_permissions`, actual key is `permissions` — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        permissions:
+          $ref: '#/components/schemas/TreeEntityRolePermissions'
+          description: Group entity permissions
+        # DOC_MISMATCH: docs=`role_permissions`, absent from actual API responses (actual key is `permissions`) — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        role_permissions:
+          $ref: '#/components/schemas/TreeEntityRolePermissions'
+          description: Group entity permissions under the documented key
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        company_uid:
+          type:
+          - string
+          - 'null'
+          description: Company uid. Built-in roles carry null
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only `null` — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        locked:
+          type:
+          - boolean
+          - 'null'
+          description: Whether the role is locked. Only null has been observed in live responses
+    TreeEntityRolePermissions:
+      type: object
+      description: Group entity permissions of a tree entity role
+      properties:
+        root:
+          $ref: '#/components/schemas/TreeEntityRoleRootPermissions'
+          description: Permissions for menu root
+        space:
+          $ref: '#/components/schemas/TreeEntityRoleSpacePermissions'
+          description: Permissions for space
+        document:
+          $ref: '#/components/schemas/TreeEntityRoleDocumentPermissions'
+          description: Permissions for documents
+        document_group:
+          $ref: '#/components/schemas/TreeEntityRoleDocumentGroupPermissions'
+          description: Permissions for folders
+        story_map:
+          $ref: '#/components/schemas/TreeEntityRoleStoryMapPermissions'
+          description: Permissions for story maps
+    TreeEntityRoleRootPermissions:
+      type: object
+      description: Tree entity role permissions for the menu root
+      properties:
+        move:
+          type: boolean
+          description: Permissions for move in the menu root
+        create:
+          type: boolean
+          description: Permissions for create in the menu root
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        import:
+          type: boolean
+          description: Permissions for import in the menu root
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        share:
+          type: boolean
+          description: Permissions for share in the menu root
+    TreeEntityRoleSpacePermissions:
+      type: object
+      description: Tree entity role permissions for spaces
+      properties:
+        read:
+          type: boolean
+          description: Permissions to view space
+        create:
+          type: boolean
+          description: Permissions for create space
+        delete:
+          type: boolean
+          description: Permissions for delete space
+        update:
+          type: boolean
+          description: Permissions for update space
+        move_within:
+          type: boolean
+          description: Permissions for moving within a hierarchy
+        move_outside:
+          type: boolean
+          description: Permissions for moving outside a hierarchy
+        access_control:
+          type: boolean
+          description: Permissions for space access control
+        card:
+          $ref: '#/components/schemas/TreeEntityRoleCardPermissions'
+          description: Permissions for space cards
+        board:
+          $ref: '#/components/schemas/TreeEntityRoleBoardPermissions'
+          description: Permissions for boards
+        # DOC_MISMATCH: docs=`webhooks`, absent from actual API responses (actual key is `webhook`) — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        webhooks:
+          $ref: '#/components/schemas/TreeEntityRoleResourcePermissions'
+          description: Permissions for webhooks under the documented key
+        # DOC_MISMATCH: not in docs (docs use `webhooks`), present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        webhook:
+          $ref: '#/components/schemas/TreeEntityRoleResourcePermissions'
+          description: Permissions for webhooks
+        automation:
+          $ref: '#/components/schemas/TreeEntityRoleResourcePermissions'
+          description: Permissions for automations
+        i_calendar:
+          $ref: '#/components/schemas/TreeEntityRoleResourcePermissions'
+          description: Permissions for calendar integrations
+        restriction:
+          $ref: '#/components/schemas/TreeEntityRoleResourcePermissions'
+          description: Permissions for restrictions
+        external_webhook:
+          $ref: '#/components/schemas/TreeEntityRoleResourcePermissions'
+          description: Permissions for external webhook
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        import:
+          type: boolean
+          description: Permissions for import in the space
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        share:
+          type: boolean
+          description: Permissions for share the space
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        public_filters_manage:
+          type: boolean
+          description: Permissions for managing public filters
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        view_settings:
+          type: boolean
+          description: Permissions for space view settings
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        addons:
+          type: object
+          additionalProperties: true
+          description: Permissions for addons. Shape is not described in the Kaiten documentation
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        iteration:
+          type: object
+          additionalProperties: true
+          description: Permissions for iterations. Shape is not described in the Kaiten documentation
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        user_group:
+          type: object
+          additionalProperties: true
+          description: Permissions for user groups. Shape is not described in the Kaiten documentation
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        workflow:
+          type: object
+          additionalProperties: true
+          description: Permissions for workflows. Shape is not described in the Kaiten documentation
+    TreeEntityRoleCardPermissions:
+      type: object
+      description: Tree entity role permissions for space cards
+      properties:
+        move:
+          type: boolean
+          description: Permissions for move card
+        read:
+          type: boolean
+          description: Permissions for read card
+        create:
+          type: boolean
+          description: Permissions for create card
+        delete:
+          type: boolean
+          description: Permissions for delete card
+        update:
+          type: boolean
+          description: Permissions for update card
+        comment:
+          type: boolean
+          description: Permissions for leave card comments
+        read_own:
+          type: boolean
+          description: Permissions for reading card, where user is a member or owner
+        properties:
+          anyOf:
+          - type: boolean
+          - type: object
+            additionalProperties: true
+          description: Permissions for managing card custom properties. If it is an object, then there will be permissions to specific custom properties inside
+    TreeEntityRoleBoardPermissions:
+      type: object
+      description: Tree entity role permissions for boards
+      properties:
+        create:
+          type: boolean
+          description: Permissions for creating boards
+        read:
+          type: boolean
+          description: Permissions to view board
+        update:
+          type: boolean
+          description: Permissions for update board
+        delete:
+          type: boolean
+          description: Permissions for delete board
+    TreeEntityRoleResourcePermissions:
+      type: object
+      description: Tree entity role read, update, and delete permissions for a space resource, such as webhooks, automations, calendar integrations, restrictions, or external webhooks
+      properties:
+        read:
+          type: boolean
+          description: Permissions to view the resource
+        update:
+          type: boolean
+          description: Permissions for update the resource
+        delete:
+          type: boolean
+          description: Permissions for delete the resource
+    TreeEntityRoleDocumentPermissions:
+      type: object
+      description: Tree entity role permissions for documents
+      properties:
+        read:
+          type: boolean
+          description: Permissions to view document
+        create:
+          type: boolean
+          description: Permissions for create document
+        delete:
+          type: boolean
+          description: Permissions for delete document
+        update:
+          type: boolean
+          description: Permissions for update document
+        move_within:
+          type: boolean
+          description: Permissions for moving within a hierarchy
+        move_outside:
+          type: boolean
+          description: Permissions for moving outside a hierarchy
+        access_control:
+          type: boolean
+          description: Permissions for document access control
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        comment:
+          type: boolean
+          description: Permissions for leave document comments
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        import:
+          type: boolean
+          description: Permissions for import documents
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        share:
+          type: boolean
+          description: Permissions for share documents
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        user_group:
+          type: object
+          additionalProperties: true
+          description: Permissions for user groups. Shape is not described in the Kaiten documentation
+    TreeEntityRoleDocumentGroupPermissions:
+      type: object
+      description: Tree entity role permissions for folders
+      properties:
+        read:
+          type: boolean
+          description: Permissions to view folder
+        create:
+          type: boolean
+          description: Permissions for create folder
+        delete:
+          type: boolean
+          description: Permissions for delete folder
+        update:
+          type: boolean
+          description: Permissions for update folder
+        move_within:
+          type: boolean
+          description: Permissions for moving within a hierarchy
+        move_outside:
+          type: boolean
+          description: Permissions for moving outside a hierarchy
+        access_control:
+          type: boolean
+          description: Permissions for folder access control
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        import:
+          type: boolean
+          description: Permissions for import folders
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        share:
+          type: boolean
+          description: Permissions for share folders
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        user_group:
+          type: object
+          additionalProperties: true
+          description: Permissions for user groups. Shape is not described in the Kaiten documentation
+    TreeEntityRoleStoryMapPermissions:
+      type: object
+      description: Tree entity role permissions for story maps
+      properties:
+        read:
+          type: boolean
+          description: Permissions to view story map
+        create:
+          type: boolean
+          description: Permissions for create story map
+        delete:
+          type: boolean
+          description: Permissions for delete story map
+        update:
+          type: boolean
+          description: Permissions for update story map
+        move_within:
+          type: boolean
+          description: Permissions for moving within a hierarchy
+        move_outside:
+          type: boolean
+          description: Permissions for moving outside a hierarchy
+        access_control:
+          type: boolean
+          description: Permissions for story map access control
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        import:
+          type: boolean
+          description: Permissions for import story maps
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        share:
+          type: boolean
+          description: Permissions for share story maps
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        user_group:
+          type: object
+          additionalProperties: true
+          description: Permissions for user groups. Shape is not described in the Kaiten documentation

@@ -219,6 +219,7 @@ struct Kaiten: AsyncParsableCommand {
       GetUserRole.self,
       UpdateUserRole.self,
       DeleteUserRole.self,
+      ListTreeEntityRoles.self,
     ]
   )
 }

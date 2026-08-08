@@ -1185,3 +1185,47 @@ extension Operations.retrieve_audit_log_events.Output {
     }
   }
 }
+
+// MARK: - Card Blocker Users
+
+extension Operations.list_card_blocker_users.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_card_blocker_users.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.add_card_blocker_user.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.add_card_blocker_user.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.remove_card_blocker_user.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.remove_card_blocker_user.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.retrieve_current_user_blockers.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.retrieve_current_user_blockers.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

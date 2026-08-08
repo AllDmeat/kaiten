@@ -242,6 +242,12 @@ let sections: [Section] = [
     Operation(
       name: "retrieve_audit_log_events", errors: [.badRequest, .unauthorized, .forbidden]),
   ]),
+  Section(mark: "Card Blocker Users", operations: [
+    Operation(name: "list_card_blocker_users", errors: [.unauthorized]),
+    Operation(name: "add_card_blocker_user", errors: [.unauthorized]),
+    Operation(name: "remove_card_blocker_user", errors: [.unauthorized]),
+    Operation(name: "retrieve_current_user_blockers", errors: [.unauthorized]),
+  ]),
 ]
 
 // MARK: - Generator

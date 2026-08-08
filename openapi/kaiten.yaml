@@ -1751,6 +1751,19 @@ paths:
                 $ref: '#/components/schemas/User'
         '401':
           description: Invalid token
+  /users/current/blockers:
+    get:
+      summary: Retrieve blockers cards list on current user
+      operationId: retrieve_current_user_blockers
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUserBlockers'
+        '401':
+          description: Invalid token
   /cards/{card_id}/location-history:
     get:
       summary: Get card location history
@@ -2880,6 +2893,79 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /blockers/{blocker_id}/users:
+    get:
+      summary: Retrieve list of users
+      operationId: list_card_blocker_users
+      parameters:
+      - name: blocker_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Blocker ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardBlockerUser'
+        '401':
+          description: Invalid token
+    post:
+      summary: Add user to the card blocker
+      operationId: add_card_blocker_user
+      parameters:
+      - name: blocker_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Blocker ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCardBlockerUserRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardBlockerUser'
+        '401':
+          description: Invalid token
+  /blockers/{blocker_id}/users/{user_id}:
+    delete:
+      summary: Remove user
+      operationId: remove_card_blocker_user
+      parameters:
+      - name: blocker_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Blocker ID
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: User ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemovedCardBlockerUserResponse'
+        '401':
+          description: Invalid token
   /card-types/{type_id}/tree-entities:
     get:
       summary: Get list of type tree entities
@@ -6439,6 +6525,238 @@ components:
         uid:
           type: string
           description: Blocker category UID
+    # User assigned to a card blocker. The retrieve-list-of-users page documents the full field
+    # set below; the add-user-to-the-card-blocker page documents a subset of the same fields, so
+    # both endpoints share this schema. Live verification only observed empty arrays (no blocker
+    # in the instance had assigned users), so the item shape follows the documentation.
+    CardBlockerUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User id
+        uid:
+          type: string
+          description: User unique identifier
+        full_name:
+          type: string
+          description: User full name
+        email:
+          type: string
+          description: User email
+        username:
+          type: string
+          description: Username for mentions and login
+        avatar_initials_url:
+          type: string
+          description: Default user avatar
+        avatar_uploaded_url:
+          type:
+          - string
+          - 'null'
+          description: User uploaded avatar url
+        initials:
+          type: string
+          description: User initials
+        avatar_type:
+          type: integer
+          description: 1 - gravatar, 2 - initials, 3 - uploaded
+        lng:
+          type: string
+          description: Language
+        timezone:
+          type: string
+          description: Time zone
+        theme:
+          type: string
+          description: light - light color theme, dark - dark color theme, auto - based on OS settings
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        activated:
+          type: boolean
+          description: User activated flag
+        ui_version:
+          type: integer
+          description: 1 - old ui, 2 - new ui
+        virtual:
+          type: boolean
+          description: Whether the user is virtual
+        email_blocked:
+          type:
+          - string
+          - 'null'
+          description: If blocked, email block timestamp
+        email_blocked_reason:
+          type:
+          - string
+          - 'null'
+          description: Reason of blocking
+        delete_requested_at:
+          type:
+          - string
+          - 'null'
+          description: Delete date
+        show_tour:
+          type: boolean
+          description: Whether to show tour to user
+        chat_enabled:
+          type: boolean
+          description: Chat enabled flag
+        sd_telegram_id:
+          type:
+          - string
+          - 'null'
+          description: Telegram ID
+        news_subscription:
+          type: boolean
+          description: News subscription status
+        delete_confirmation_sent_at:
+          type:
+          - string
+          - 'null'
+          description: Delete confirmation sent timestamp
+        eula_accepted_at:
+          type:
+          - string
+          - 'null'
+          description: EULA acceptance timestamp
+        terms_of_service_accepted_at:
+          type:
+          - string
+          - 'null'
+          description: Terms of service acceptance timestamp
+        privacy_policy_accepted_at:
+          type:
+          - string
+          - 'null'
+          description: Privacy policy acceptance timestamp
+        block_uid:
+          type: string
+          description: Block unique identifier
+        user_uid:
+          type: string
+          description: User unique identifier (duplicate)
+    AddCardBlockerUserRequest:
+      type: object
+      required:
+      - user_id
+      properties:
+        user_id:
+          type: integer
+          description: User id
+    RemovedCardBlockerUserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User identifier
+    # DOC_MISMATCH: docs=`object`, actual=empty `array` when the current user has no blockers — https://developers.kaiten.ru/card-blocker-users/retrieve-blockers-cards-list-on-current-user
+    # Modelled as `anyOf` so both observed shapes decode: the documented object and the empty
+    # array a live instance returns for a user with no blockers. The SDK maps the array shape
+    # to an empty `CurrentUserBlockersList`. This is not the `anyOf: [$ref, 'null']` pattern the
+    # generator drops — the second branch is an array, and the guard in
+    # OpenAPISpecIntegrityTests only rejects the null variant.
+    CurrentUserBlockers:
+      anyOf:
+      - $ref: '#/components/schemas/CurrentUserBlockersList'
+      - type: array
+        items:
+          type: object
+      description: Blockers on the current user - the documented object, or an empty array when the user has no blockers
+    CurrentUserBlockersList:
+      type: object
+      properties:
+        blocked_cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrentUserBlockedCard'
+          description: Retrieve cards with blockers
+        summary:
+          $ref: '#/components/schemas/CurrentUserBlockersSummary'
+          description: Blocked cards summary
+    # Item shape follows the documentation only — live verification could not produce a
+    # non-empty response (the current user had no blockers), so field types and nullability
+    # are unverified against a real instance.
+    CurrentUserBlockedCard:
+      type: object
+      properties:
+        card_id:
+          type: integer
+          description: Card identifier
+        card_title:
+          type: string
+          description: Card title
+        blocked_by:
+          $ref: '#/components/schemas/CurrentUserBlockedBy'
+          description: Blocker information
+        block_reason:
+          type:
+          - string
+          - 'null'
+          description: Block reason
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrentUserBlockerCategory'
+          description: Blocker categories information
+        block_created:
+          type: integer
+          description: When block was created
+        updated:
+          type: string
+          description: Last update timestamp
+        released:
+          type: boolean
+          description: Release information
+    CurrentUserBlockedBy:
+      type: object
+      properties:
+        card_id:
+          type: integer
+          description: Card identifier
+        card_title:
+          type: string
+          description: Card title
+        blocker_id:
+          type: integer
+          description: User id who blocked card
+        blocker_name:
+          type: string
+          description: User name
+        # NOTE: the documentation spells this field `blocker_emale`. Live verification could not
+        # confirm the real key (no blocker users existed in the instance), so the documented
+        # spelling is kept as-is.
+        blocker_emale:
+          type: string
+          description: User email
+    CurrentUserBlockerCategory:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Blocker identifier
+        name:
+          type: string
+          description: Blocker category name
+        color:
+          type: integer
+          description: Blocker category color
+    CurrentUserBlockersSummary:
+      type: object
+      properties:
+        total_blocked:
+          type: integer
+          description: Quantity of blocked cards
+        blocked_by_user:
+          type: string
+          description: User name
+        cards_without_reason:
+          type: integer
+          description: Quantity of blocked cards without reason
     CardTimeLog:
       type: object
       properties:

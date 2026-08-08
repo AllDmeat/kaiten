@@ -3909,6 +3909,261 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /company/custom-directories/{directory_id}/records:
+    get:
+      summary: Get list of records
+      operationId: list_custom_directory_records
+      parameters:
+      - name: directory_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Directory ID
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: 'Maximum number of records in response. Default: 100, max: 100'
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of records to skip
+      - name: query
+        in: query
+        schema:
+          type: string
+        description: Quick search by record display value
+      - name: profile
+        in: query
+        schema:
+          type: string
+        description: 'Controls included relations in response. Documented values: none, summary, details, full. Map to the CustomDirectoryProfile Swift enum, which preserves unknown values.'
+      - name: include_values
+        in: query
+        schema:
+          type: boolean
+        description: 'Legacy: include values array'
+      - name: include_author
+        in: query
+        schema:
+          type: boolean
+        description: Include author user object
+      - name: conditions
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: 'Filter by condition values. Documented values: active, inactive, removed. Map to the CustomDirectoryRecordCondition Swift enum, which preserves unknown values.'
+      # NOTE: docs declare `object` (JSON); represented as a JSON-encoded string because
+      # swift-openapi-generator cannot serialize free-form objects in query parameters.
+      - name: filters
+        in: query
+        schema:
+          type: string
+        description: Advanced field-based filters as a JSON-encoded object
+      - name: filter_operator
+        in: query
+        schema:
+          type: string
+        description: 'Boolean operator for filters. Documented values: and, or. Default: and. Map to the CustomDirectoryFilterOperator Swift enum, which preserves unknown values.'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomDirectoryRecord'
+        '401':
+          description: Invalid token
+        # DOC_MISMATCH: docs=404 for a missing directory, actual=HTTP 500 observed for an unknown directory ID — https://developers.kaiten.ru/custom-directory-records/get-list-of-records
+        '404':
+          description: Not found
+    post:
+      summary: Create record
+      operationId: create_custom_directory_record
+      parameters:
+      - name: directory_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Directory ID
+      - name: response_profile
+        in: query
+        schema:
+          type: string
+        description: 'Controls response size. Use `none` to return `{ id }` only. Documented values: none, summary, details, full. Map to the CustomDirectoryProfile Swift enum, which preserves unknown values.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomDirectoryRecordRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDirectoryRecord'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '404':
+          description: Not found
+  /company/custom-directories/{directory_id}/records/{record_id}:
+    get:
+      summary: Get record
+      operationId: get_custom_directory_record
+      parameters:
+      - name: directory_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Directory ID
+      - name: record_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Record ID
+      - name: profile
+        in: query
+        schema:
+          type: string
+        description: 'Controls included relations in response. Documented values: none, summary, details, full. Map to the CustomDirectoryProfile Swift enum, which preserves unknown values.'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDirectoryRecord'
+        '401':
+          description: Invalid token
+        '404':
+          description: Not found
+    patch:
+      summary: Update record
+      operationId: update_custom_directory_record
+      parameters:
+      - name: directory_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Directory ID
+      - name: record_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Record ID
+      - name: response_profile
+        in: query
+        schema:
+          type: string
+        description: 'Controls response size. Use `none` to return `{ id }` only. Documented values: none, summary, details, full. Map to the CustomDirectoryProfile Swift enum, which preserves unknown values.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomDirectoryRecordRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDirectoryRecord'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '404':
+          description: Not found
+    delete:
+      summary: Delete record
+      operationId: delete_custom_directory_record
+      parameters:
+      - name: directory_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Directory ID
+      - name: record_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Record ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDirectoryRecord'
+        '401':
+          description: Invalid token
+        '404':
+          description: Not found
+  /company/custom-directories/{directory_id}/records/{record_id}/cards:
+    get:
+      summary: Get cards linked to record
+      operationId: list_custom_directory_record_cards
+      parameters:
+      - name: directory_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Directory ID
+      - name: record_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Record ID
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: 'Maximum number of cards in response. Default: 100, max: 100'
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of records to skip
+      - name: filter
+        in: query
+        schema:
+          type: string
+        description: Base64-encoded JSON card filter, merged with the base filter
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomDirectoryLinkedCard'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '404':
+          description: Not found
 components:
   securitySchemes:
     bearerAuth:
@@ -8898,3 +9153,140 @@ components:
         id:
           type: integer
           description: Deleted user id
+    # The Kaiten documentation describes this entity per endpoint with different subsets of
+    # fields — which fields are present depends on the requested profile/response_profile —
+    # so one shared schema declares the union with every property optional.
+    # The custom directories API is documented as beta and subject to change.
+    CustomDirectoryRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Record ID (UUID)
+        custom_directory_id:
+          type: string
+          description: Directory ID (UUID)
+        display_value:
+          type:
+          - string
+          - 'null'
+          description: Pre-computed record display value
+        condition:
+          type: string
+          description: 'Record condition. Documented values: active, inactive, removed. Map to the CustomDirectoryRecordCondition Swift enum, which preserves unknown values.'
+        author_uid:
+          type: string
+          description: Author user UID (UUID)
+        updater_uid:
+          type: string
+          description: Updater user UID (UUID)
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        author:
+          type: object
+          additionalProperties: true
+          description: Author user object. Included depending on profile/include_author; its shape is not described in the Kaiten documentation
+        updater:
+          type: object
+          additionalProperties: true
+          description: Updater user object. Included depending on profile; its shape is not described in the Kaiten documentation
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomDirectoryRecordValue'
+          description: Field values. Included depending on profile/include_values
+    CustomDirectoryRecordValue:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Value ID (UUID)
+        field_id:
+          type: string
+          description: Field ID (UUID)
+        value_text:
+          type:
+          - string
+          - 'null'
+          description: Text value (string/email/url/phone/checkbox)
+        value_number:
+          type:
+          - number
+          - 'null'
+          description: Numeric value
+        value_date:
+          type:
+          - string
+          - 'null'
+          description: Date value as ISO string
+        select_value_uid:
+          type:
+          - string
+          - 'null'
+          description: Select option UID
+        catalog_value_uid:
+          type:
+          - string
+          - 'null'
+          description: Catalog value UID
+        user_uid:
+          type:
+          - string
+          - 'null'
+          description: User UID
+        directory_record_id:
+          type:
+          - string
+          - 'null'
+          description: Linked directory record ID (UUID)
+        selectValue:
+          type: object
+          additionalProperties: true
+          description: Populated select option (when profile includes values). Its shape is not described in the Kaiten documentation
+        catalogValue:
+          type: object
+          additionalProperties: true
+          description: Populated catalog value (when profile includes values). Its shape is not described in the Kaiten documentation
+        user:
+          type: object
+          additionalProperties: true
+          description: Populated user object (when profile includes values). Its shape is not described in the Kaiten documentation
+        linkedRecord:
+          type: object
+          additionalProperties: true
+          description: Populated linked record (directory_link field). Its shape is not described in the Kaiten documentation
+    CustomDirectoryLinkedCard:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Card ID
+        uid:
+          type: string
+          description: Card UID (UUID)
+        title:
+          type: string
+          description: Card title
+    CreateCustomDirectoryRecordRequest:
+      type: object
+      required:
+      - values
+      properties:
+        values:
+          type: object
+          additionalProperties: true
+          description: Values map where keys are custom directory field IDs. Each value is either an object (single-value) or an array of objects (multi-select)
+    UpdateCustomDirectoryRecordRequest:
+      type: object
+      properties:
+        condition:
+          type: string
+          description: 'Custom directory record condition. Documented values: active, inactive, removed. Map to the CustomDirectoryRecordCondition Swift enum, which preserves unknown values.'
+        values:
+          type: object
+          additionalProperties: true
+          description: Values map where keys are custom directory field IDs. Each value is either an object (single-value) or an array of objects (multi-select)

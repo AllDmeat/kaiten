@@ -127,6 +127,12 @@ struct Kaiten: AsyncParsableCommand {
       GetCustomDirectoryField.self,
       UpdateCustomDirectoryField.self,
       DeleteCustomDirectoryField.self,
+      ListCustomDirectoryRecords.self,
+      CreateCustomDirectoryRecord.self,
+      GetCustomDirectoryRecord.self,
+      UpdateCustomDirectoryRecord.self,
+      DeleteCustomDirectoryRecord.self,
+      ListCustomDirectoryRecordCards.self,
     ]
   )
 }

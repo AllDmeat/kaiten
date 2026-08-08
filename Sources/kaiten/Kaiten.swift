@@ -147,18 +147,43 @@ struct GlobalOptions: ParsableArguments {
   func makeClient() async throws -> KaitenClient {
     let configPath = selectedConfigPath
     let config = try await Self.loadConfigReader(configPath: configPath)
+    let connection = try Self.resolveConnection(
+      environment: ProcessInfo.processInfo.environment,
+      configURL: config?.string(forKey: "url"),
+      configToken: config?.string(forKey: "token"),
+      configPath: configPath
+    )
+    return try KaitenClient(baseURL: connection.url, token: connection.token)
+  }
 
-    guard let baseURL = config?.string(forKey: "url") else {
+  /// Resolves each connection parameter independently: environment variable first,
+  /// selected config file second. An empty environment value counts as unset —
+  /// CI substitutes an empty string for a missing secret, and an empty token must
+  /// fail here rather than reach the API.
+  static func resolveConnection(
+    environment: [String: String],
+    configURL: String?,
+    configToken: String?,
+    configPath: String
+  ) throws -> (url: String, token: String) {
+    guard let url = nonEmpty(environment["KAITEN_URL"]) ?? configURL else {
       throw ValidationError(
-        "Missing Kaiten API URL. Pass --config <path> or set \"url\" in \(configPath)"
+        "Missing Kaiten API URL. Set KAITEN_URL, set \"url\" in \(configPath), "
+          + "or pass --config <path>"
       )
     }
-    guard let apiToken = config?.string(forKey: "token") else {
+    guard let token = nonEmpty(environment["KAITEN_TOKEN"]) ?? configToken else {
       throw ValidationError(
-        "Missing Kaiten API token. Pass --config <path> or set \"token\" in \(configPath)"
+        "Missing Kaiten API token. Set KAITEN_TOKEN, set \"token\" in \(configPath), "
+          + "or pass --config <path>"
       )
     }
-    return try KaitenClient(baseURL: baseURL, token: apiToken)
+    return (url, token)
+  }
+
+  private static func nonEmpty(_ value: String?) -> String? {
+    guard let value, !value.isEmpty else { return nil }
+    return value
   }
 
   static var defaultConfigPath: String {

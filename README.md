@@ -59,7 +59,7 @@ let card = try await client.getCard(id: 123)
 
 ### As a CLI
 
-The CLI resolves credentials in order: flags → config file.
+The CLI resolves each credential independently: environment variable → config file.
 
 #### 1. Get a Kaiten API Token
 
@@ -67,7 +67,7 @@ Get your API token at `https://<your-company>.kaiten.ru/profile/api-key`.
 
 #### 2. Configure Credentials
 
-**Option 1 — Config file** (recommended):
+**Option 1 — Config file** (recommended for interactive use):
 
 Create `~/.config/kaiten/config.json`:
 
@@ -84,6 +84,18 @@ Then run commands:
 kaiten list-spaces
 kaiten get-card --id 123
 ```
+
+**Option 2 — Environment variables** (recommended for CI):
+
+```bash
+export KAITEN_URL="https://<your-company>.kaiten.ru/api/latest"
+export KAITEN_TOKEN="<your-api-token>"
+kaiten list-spaces
+```
+
+No file on disk. An environment variable overrides the same parameter from the
+config file; one set to an empty string counts as unset, so a missing CI secret
+fails resolution instead of sending an empty token.
 
 #### 3. Output Size
 

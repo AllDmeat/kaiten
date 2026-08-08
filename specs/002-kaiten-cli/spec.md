@@ -33,10 +33,22 @@ stdout confirms it works.
 3. **Given** both default and custom config files exist with different values,
    **When** the user specifies `--config`, **Then** the specified config path
    takes priority over the default config path.
-4. **Given** neither selected config file nor default config file provide a required
-   parameter, **When** the user runs a subcommand, **Then** the
+4. **Given** neither the environment nor the selected config file provide a
+   required parameter, **When** the user runs a subcommand, **Then** the
    CLI exits with a clear error message indicating which parameter
-   is missing and where it can be set (config file).
+   is missing and where it can be set (environment variable or config file).
+4a. **Given** `KAITEN_URL` and `KAITEN_TOKEN` are set and no config file
+   exists, **When** the user runs a subcommand, **Then** the CLI uses the
+   environment values without error.
+4b. **Given** an environment variable and the config file both provide the
+   same parameter with different values, **When** the user runs a subcommand,
+   **Then** the environment value wins for that parameter.
+4c. **Given** the config file provides only `url` and `KAITEN_TOKEN` is set,
+   **When** the user runs a subcommand, **Then** both parameters resolve —
+   each parameter falls back independently.
+4d. **Given** an environment variable is set to an empty string, **When** the
+   user runs a subcommand, **Then** the CLI treats it as unset and falls back
+   to the config file.
 5. **Given** the SDK returns an error, **When** the user runs a
    subcommand, **Then** the CLI outputs a human-readable error
    message to stderr and exits with a non-zero exit code.
@@ -61,8 +73,9 @@ stdout confirms it works.
 - What if the config file exists but contains invalid JSON? The CLI
   MUST output an error describing the configuration problem.
 - What if the config file does not exist and no `--config` is passed?
-  The CLI MUST output an error with instructions: pass `--config` or
-  create `~/.config/kaiten/config.json`.
+  If the environment supplies the missing parameters, the CLI proceeds;
+  otherwise it MUST output an error with instructions: set `KAITEN_URL` /
+  `KAITEN_TOKEN`, pass `--config`, or create `~/.config/kaiten/config.json`.
 - What if enum-like options are invalid (for example lane condition,
   column type, card state)? The CLI MUST fail with a validation error
   listing allowed values.
@@ -86,10 +99,13 @@ stdout confirms it works.
 - **FR-002a**: The CLI MUST support a `--config` argument that points
   to the configuration file path. If omitted, CLI uses the default
   `~/.config/kaiten/config.json`.
-- **FR-003**: The CLI MUST resolve connection parameters in
-   priority order: explicit `--config` path > default config path.
-   URL and token MUST be read from the selected config file.
-   Environment variables are NOT used.
+- **FR-003**: The CLI MUST resolve each connection parameter independently in
+   priority order: environment variable > selected config file. `KAITEN_URL`
+   supplies the URL and `KAITEN_TOKEN` supplies the token; whichever is unset
+   falls back to the selected config file (explicit `--config` path > default
+   config path). An environment variable set to an empty string MUST be
+   treated as unset — CI systems substitute an empty string for a missing
+   secret, and an empty token must fail resolution rather than reach the API.
 - **FR-004**: The CLI MUST output structured data to stdout and
   errors to stderr.
 - **FR-005**: The CLI MUST exit with code 0 on success and
@@ -136,8 +152,11 @@ stdout confirms it works.
   Silent dropping via optional coercion is forbidden.
 - **FR-015**: CSV/list-style ID filters MUST use strict token parsing consistently
   across commands (including `list-users --ids`); malformed tokens MUST fail locally.
-- **FR-016**: The only supported connection argument is `--config`.
-  URL and token input is allowed only via selected config file (`--config` path or default config path).
+- **FR-016**: The only supported connection argument is `--config`. There are
+  no `--url` or `--token` flags: a token in argv is visible to process lists
+  and shell history. Connection input comes from the `KAITEN_URL` /
+  `KAITEN_TOKEN` environment variables or the selected config file
+  (`--config` path or default config path).
 - **FR-017**: SDK inputs that are free-form JSON objects rather than scalars
   (card custom properties) MUST still be reachable from the CLI, as a single
   option carrying a JSON object string. The CLI MUST parse and validate that
@@ -232,8 +251,10 @@ stdout confirms it works.
 ### Measurable Outcomes
 
 - **SC-001**: The CLI can be used in automation scripts — each
-  subcommand accepts all input via selected config file and
-  produces machine-readable output.
+  subcommand accepts all input via environment variables or the selected
+  config file and produces machine-readable output. A CI job can run the
+  CLI with credentials passed entirely through the environment, writing
+  no file to disk.
 - **SC-002**: The CLI contains no duplication of SDK logic — each
   subcommand only calls the corresponding SDK method.
 - **SC-003**: The CLI compiles and runs on macOS (ARM) and

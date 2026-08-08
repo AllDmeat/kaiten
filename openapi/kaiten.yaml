@@ -1833,6 +1833,93 @@ paths:
           description: Invalid token
         '404':
           description: Not found
+  /company/custom-properties/{property_id}/tree-entities:
+    get:
+      summary: Get list of custom property tree entities
+      operationId: list_custom_property_tree_entities
+      parameters:
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Custom property ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomPropertyTreeEntity'
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+    post:
+      summary: Add tree entity to custom property
+      operationId: add_custom_property_tree_entity
+      parameters:
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Custom property ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCustomPropertyTreeEntityRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPropertyIdResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+  /company/custom-properties/{property_id}/tree-entities/{uid}:
+    delete:
+      summary: Delete tree entity from custom property
+      operationId: delete_custom_property_tree_entity
+      parameters:
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Custom property ID
+      - name: uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Tree entity uid
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPropertyIdResponse'
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
   /spaces:
     post:
       summary: Create new space
@@ -5050,6 +5137,56 @@ components:
         company_id:
           type: integer
           description: Company id
+    CustomPropertyTreeEntity:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Entity uid
+        title:
+          type: string
+          description: Entity title
+        sort_order:
+          type: number
+          description: Entity sort order
+        archived:
+          type: boolean
+          description: Archived flag
+        access:
+          type: string
+          description: Entity access
+        for_everyone_access_role_id:
+          type: string
+          description: Role id for when access is for_everyone
+        entity_type:
+          type: string
+          description: Entity type
+        path:
+          type: string
+          description: Inner path to entity
+        parent_entity_uid:
+          type: string
+          description: Parent entity uid
+        company_id:
+          type: integer
+          description: Company id
+        protected:
+          type: boolean
+          description: Flag that disables the display of an element in the sidebar
+    AddCustomPropertyTreeEntityRequest:
+      type: object
+      required:
+      - tree_entity_uid
+      properties:
+        tree_entity_uid:
+          type: string
+          description: Tree entity uuid
+    CustomPropertyIdResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Custom property id
     UpdateChecklistRequest:
       type: object
       properties:

@@ -1581,3 +1581,48 @@ extension Operations.list_custom_directory_record_cards.Output {
     }
   }
 }
+
+// MARK: - Custom Property Tree Entities
+
+extension Operations.list_custom_property_tree_entities.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.list_custom_property_tree_entities.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.add_custom_property_tree_entity.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.add_custom_property_tree_entity.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.delete_custom_property_tree_entity.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.delete_custom_property_tree_entity.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

@@ -310,6 +310,9 @@ kaiten detach-card-file --card-id 123 --file-id 7
 | `listCustomPropertySelectValues(propertyId:)` | List select values for a custom property |
 | `getCustomPropertySelectValue(propertyId:id:)` | Get a single select value |
 | `createCustomPropertySelectValue(propertyId:value:color:)` | Create a select value for a custom property |
+| `listCustomPropertyTreeEntities(propertyId:)` | List tree entities of a custom property |
+| `addCustomPropertyTreeEntity(propertyId:treeEntityUid:)` | Add a tree entity to a custom property |
+| `deleteCustomPropertyTreeEntity(propertyId:uid:)` | Delete a tree entity from a custom property |
 
 Property discriminators are exposed as Swift enums (`CustomPropertyType`,
 `CustomPropertyCondition`, `CustomPropertyVoteVariant`,

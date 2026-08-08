@@ -133,6 +133,9 @@ struct Kaiten: AsyncParsableCommand {
       UpdateCustomDirectoryRecord.self,
       DeleteCustomDirectoryRecord.self,
       ListCustomDirectoryRecordCards.self,
+      ListCustomPropertyTreeEntities.self,
+      AddCustomPropertyTreeEntity.self,
+      DeleteCustomPropertyTreeEntity.self,
     ]
   )
 }

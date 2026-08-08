@@ -80,6 +80,8 @@ struct Kaiten: AsyncParsableCommand {
       CreateAutomation.self,
       UpdateAutomation.self,
       DeleteAutomation.self,
+      AddServiceDeskExternalRecipient.self,
+      RemoveServiceDeskExternalRecipient.self,
     ]
   )
 }

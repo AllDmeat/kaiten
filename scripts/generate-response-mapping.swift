@@ -74,6 +74,8 @@ let sections: [Section] = [
     Operation(name: "get_list_of_properties", errors: [.unauthorized, .forbidden]),
     Operation(name: "get_property", errors: [.unauthorized, .forbidden, .notFound]),
     Operation(name: "get_list_of_select_values", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "create_select_value", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
     Operation(name: "get_select_value", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
   Section(mark: "Boards", operations: [
@@ -158,6 +160,14 @@ let sections: [Section] = [
       errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
     Operation(
       name: "delete_automation", errors: [.unauthorized, .forbidden, .notFound], hasBody: false),
+  ]),
+  Section(mark: "Service Desk External Recipients", operations: [
+    Operation(
+      name: "add_sd_external_recipient",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "remove_sd_external_recipient",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
   ]),
 ]
 

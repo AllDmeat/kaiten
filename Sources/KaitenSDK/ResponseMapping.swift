@@ -886,3 +886,33 @@ extension Operations.delete_automation.Output {
     }
   }
 }
+
+// MARK: - Service Desk External Recipients
+
+extension Operations.add_sd_external_recipient.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.add_sd_external_recipient.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.remove_sd_external_recipient.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.remove_sd_external_recipient.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

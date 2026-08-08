@@ -1248,6 +1248,47 @@ extension Operations.delete_private_card_file.Output {
   }
 }
 
+// MARK: - Private Comment Files
+
+extension Operations.attach_file_to_comment.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.attach_file_to_comment.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.get_comment_file.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_comment_file.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .found: .undocumented(statusCode: 302)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .unprocessableContent: .undocumented(statusCode: 422)
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.delete_comment_file.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.delete_comment_file.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 // MARK: - Automations
 
 extension Operations.list_automations.Output {

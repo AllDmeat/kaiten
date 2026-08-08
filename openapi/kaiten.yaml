@@ -3028,6 +3028,147 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /cards/{card_uid}/comments/{comment_uid}/files:
+    post:
+      summary: Attach file to comment
+      operationId: attach_file_to_comment
+      description: >-
+        Requires "Restricted file access" enabled in company settings. The documentation
+        marks this endpoint as under active development.
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      - name: comment_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Comment UID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - file
+              properties:
+                # NOTE: the docs declare the multipart/form-data content type but list no body
+                # attributes; the `file` part mirrors attach_file_to_card, the closest documented
+                # upload endpoint.
+                file:
+                  type: string
+                  contentEncoding: binary
+                  description: File content
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentFile'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /cards/{card_uid}/comments/{comment_uid}/files/{id}:
+    get:
+      summary: Get comment file
+      operationId: get_comment_file
+      description: >-
+        Requires "Restricted file access" enabled in company settings. The documentation
+        marks this endpoint as under active development. Without `response_type=json` the
+        endpoint answers with a redirect to the file content instead of a JSON body.
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      - name: comment_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Comment UID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: File ID
+      - name: response_type
+        in: query
+        schema:
+          type: string
+        description: >-
+          Documented values: json, inline, attachment. If set to json, returns a signed URL
+          in JSON. If set to inline or attachment, requests the corresponding content
+          disposition via a redirect.
+      responses:
+        '302':
+          description: Redirect to the file content
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentFileSignedUrl'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '422':
+          description: The file is malicious
+    delete:
+      summary: Delete comment file
+      operationId: delete_comment_file
+      description: >-
+        Requires "Restricted file access" enabled in company settings. The documentation
+        marks this endpoint as under active development.
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      - name: comment_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Comment UID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: File ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedCommentFileResponse'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /card-types:
     get:
       summary: List card types
@@ -8545,6 +8686,69 @@ components:
     DeletedPrivateCardFileResponse:
       type: object
       description: Response of the private-card-files delete endpoint
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: Deleted file id
+    # Field set taken verbatim from the docs. The verification instance has "Restricted file
+    # access" disabled, so no private comment file exists to verify against: the route answers
+    # 404 with an empty body, and every comment attachment observed live is a legacy `type: 8`
+    # File instead.
+    CommentFile:
+      type: object
+      description: >-
+        Private file attached to a card comment. Returned by the private-comment-files
+        endpoints, which require "Restricted file access" enabled in company settings.
+      properties:
+        id:
+          type: string
+          description: File id
+        name:
+          type: string
+          description: File name
+        size:
+          type: string
+          description: File size in bytes (bigint serialized as string)
+        mime_type:
+          type: string
+          description: MIME type
+        author_uid:
+          type: string
+          description: Author UID
+        card_uid:
+          type: string
+          description: Card UID
+        comment_uid:
+          type:
+          - string
+          - 'null'
+          description: Comment UID
+        entity_type:
+          type: string
+          description: File entity type
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        card_cover:
+          type: boolean
+          description: Flag indicating that image is used as card cover
+    CommentFileSignedUrl:
+      type: object
+      description: Signed URL of a private comment file, returned when `response_type` is `json`
+      required:
+      - url
+      properties:
+        url:
+          type: string
+          description: Signed file URL
+    DeletedCommentFileResponse:
+      type: object
+      description: Response of the private-comment-files delete endpoint
       required:
       - id
       properties:

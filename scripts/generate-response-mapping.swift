@@ -140,6 +140,12 @@ let sections: [Section] = [
   ]),
   Section(mark: "Card Types", operations: [
     Operation(name: "list_card_types", errors: [.unauthorized, .forbidden]),
+    Operation(name: "create_card_type", errors: [.badRequest, .unauthorized, .forbidden]),
+    Operation(name: "get_card_type", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "update_card_type", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "delete_card_type", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
   ]),
   Section(mark: "Sprints", operations: [
     Operation(name: "list_sprints", errors: [.unauthorized, .forbidden]),

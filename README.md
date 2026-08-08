@@ -334,11 +334,24 @@ CLI: `create-custom-property --name <name> [--type <type>] ...`,
 | Method | Description |
 |--------|-------------|
 | `listCardTypes()` | List card types |
+| `getCardType(id:)` | Get a card type |
+| `createCardType(letter:name:color:properties:cardProperties:suggestFields:)` | Create a new card type |
+| `updateCardType(id:letter:name:color:properties:cardProperties:suggestFields:)` | Update a card type |
+| `deleteCardType(id:replaceTypeId:)` | Remove a card type, replacing it in existing cards |
 | `listCardTypeTreeEntities(typeId:)` | List tree entities of a card type |
 | `addCardTypeTreeEntity(typeId:treeEntityUid:)` | Add a tree entity to a card type |
 | `deleteCardTypeTreeEntity(typeId:uid:)` | Delete a tree entity from a card type |
 | `listSprints()` | List sprints |
 | `getSprintSummary(...)` | Get sprint summary |
+
+The `regular_property` key of a card type's suggested properties is exposed as
+the `CardTypeRegularProperty` Swift enum with an `unknown(String)` case, so
+values the documentation does not list survive decoding.
+
+CLI: `list-card-types`, `get-card-type --id <id>`,
+`create-card-type --letter <letter> --name <name> --color <color>`,
+`update-card-type --id <id>`,
+`delete-card-type --id <id> --replace-type-id <id>`.
 
 ### Automations
 

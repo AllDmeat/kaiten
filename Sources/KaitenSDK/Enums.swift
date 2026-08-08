@@ -1182,6 +1182,64 @@ public enum BatchUpdateOrderField: Sendable, Equatable, CaseIterable, Codable {
   }
 }
 
+// MARK: - Card Types
+
+/// Regular (preset) card property suggested by a card type.
+///
+/// Travels as a plain string in ``Components/Schemas/CardTypeProperty`` and
+/// ``Components/Schemas/CardTypePropertyInput`` so undocumented values survive decoding.
+/// - SeeAlso: [Kaiten API – Card types](https://developers.kaiten.ru/card-types/get-card-type)
+public enum CardTypeRegularProperty: Sendable, Equatable, CaseIterable, Codable {
+  /// Card size.
+  case size
+  /// Card due date.
+  case dueDate
+  /// Card tags.
+  case tags
+  /// Card timeline.
+  case timeline
+  /// Card description.
+  case description
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CardTypeRegularProperty] {
+    [.size, .dueDate, .tags, .timeline, .description]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "size": self = .size
+    case "due_date": self = .dueDate
+    case "tags": self = .tags
+    case "timeline": self = .timeline
+    case "description": self = .description
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .size: "size"
+    case .dueDate: "due_date"
+    case .tags: "tags"
+    case .timeline: "timeline"
+    case .description: "description"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
 /// Sorting direction of a batch card update.
 /// - SeeAlso: [Kaiten API – Batch update for cards](https://developers.kaiten.ru/cards/batch-update-for-cards)
 public enum SortDirection: Sendable, Equatable, CaseIterable, Codable {

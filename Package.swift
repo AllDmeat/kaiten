@@ -76,6 +76,10 @@ let package = Package(
             dependencies: [
                 "KaitenSDK",
                 .product(
+                    name: "OpenAPIRuntime",
+                    package: "swift-openapi-runtime"
+                ),
+                .product(
                     name: "ArgumentParser",
                     package: "swift-argument-parser"
                 ),

@@ -160,13 +160,13 @@ A developer requests all spaces and boards — for navigation.
 - **Space**: id, title (boards fetched separately via `listBoards(spaceId:)`)
 - **Member**: id, userId, fullName, role
 - **CustomProperty**: id, name, type, value (typed: string, number, select, multiselect, date, user)
-- **CustomPropertySelectValue**: id, customPropertyId, value, color, condition, sortOrder, externalId, updated, created, authorId, companyId
+- **CustomPropertySelectValue**: id, customPropertyId, value, color, condition (`active` / `inactive`), sortOrder, externalId, updated, created, authorId, companyId; live responses also carry uid and deleted (undocumented)
 - **Automation**: id (string UID), name, type (`on_action` / `on_date` / `on_demand`), status (`active` / `disabled` / `removed` / `broken`), spaceUid, sortOrder, updaterId, trigger, actions, conditions
 - **BlockerCategory**: uid (string UID), name, color; live responses also carry companyUid, created and count (undocumented)
 
-### User Story 7a — List and Get Custom Property Select Values (Priority: P2)
+### User Story 7a — Manage Custom Property Select Values (Priority: P2)
 
-A developer retrieves the available select options for a select-type custom property, to populate dropdowns or validate user input.
+A developer retrieves, creates, updates and removes the available select options for a select-type custom property, to populate dropdowns or validate user input.
 
 **Why this priority**: Select values are needed for setting custom properties on cards — a key automation scenario.
 
@@ -178,6 +178,10 @@ A developer retrieves the available select options for a select-type custom prop
 2. **Given** a valid property ID and value ID, **When** I call `getCustomPropertySelectValue(propertyId:id:)`, **Then** I receive a single `CustomPropertySelectValue`
 3. **Given** an invalid property ID, **When** I call `listCustomPropertySelectValues(propertyId:)`, **Then** I receive a `notFound` error
 4. **Given** an invalid value ID, **When** I call `getCustomPropertySelectValue(propertyId:id:)`, **Then** I receive a `notFound` error
+5. **Given** a valid property ID and value text, **When** I call `createCustomPropertySelectValue(propertyId:value:color:)`, **Then** I receive the created `CustomPropertySelectValue`
+6. **Given** a valid property ID and value ID, **When** I call `updateCustomPropertySelectValue(propertyId:id:value:color:condition:sortOrder:deleted:)`, **Then** I receive the updated `CustomPropertySelectValue`
+7. **Given** a valid property ID and value ID, **When** I call `removeCustomPropertySelectValue(propertyId:id:)`, **Then** I receive the removed `CustomPropertySelectValue` — the endpoint returns the removed value
+8. The select value `condition` discriminator is declared as plain `string` in the OpenAPI spec per FR-020a; the typed surface is the `CustomPropertySelectValueCondition` enum in `Enums.swift` with an `unknown(String)` case
 
 ### User Story 7 — Create a Comment on a Card (Priority: P2)
 

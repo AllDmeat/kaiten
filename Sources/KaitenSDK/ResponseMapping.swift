@@ -411,6 +411,31 @@ extension Operations.get_select_value.Output {
   }
 }
 
+extension Operations.update_select_value.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.update_select_value.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.remove_select_value.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.remove_select_value.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 // MARK: - Custom Property Catalog Values
 
 extension Operations.get_list_of_catalog_values.Output {

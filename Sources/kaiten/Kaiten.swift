@@ -45,6 +45,8 @@ struct Kaiten: AsyncParsableCommand {
       ListCustomPropertySelectValues.self,
       GetCustomPropertySelectValue.self,
       CreateCustomPropertySelectValue.self,
+      UpdateCustomPropertySelectValue.self,
+      RemoveCustomPropertySelectValue.self,
       ListCustomPropertyCatalogValues.self,
       GetCustomPropertyCatalogValue.self,
       CreateCustomPropertyCatalogValue.self,

@@ -98,6 +98,14 @@ let sections: [Section] = [
   Section(mark: "Custom Properties", operations: [
     Operation(name: "get_list_of_properties", errors: [.unauthorized, .forbidden]),
     Operation(name: "get_property", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "create_property",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden]),
+    Operation(
+      name: "update_property",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "remove_property", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
     Operation(name: "get_list_of_select_values", errors: [.unauthorized, .forbidden, .notFound]),
     Operation(
       name: "create_select_value", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),

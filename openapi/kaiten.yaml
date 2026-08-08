@@ -3003,6 +3003,105 @@ paths:
           description: Invalid token
         '403':
           description: Forbidden
+  /checklists/{checklist_id}/items:
+    post:
+      summary: Add item to checklist
+      operationId: add_item_to_checklist
+      parameters:
+      - name: checklist_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Checklist ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChecklistItemRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChecklistItem'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /checklists/{checklist_id}/items/{id}:
+    patch:
+      summary: Update checklist item
+      operationId: update_item_in_checklist
+      parameters:
+      - name: checklist_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Checklist ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Checklist item ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChecklistItemRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChecklistItem'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Remove checklist item
+      operationId: remove_item_from_checklist
+      parameters:
+      - name: checklist_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Checklist ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Checklist item ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedChecklistItemResponse'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 components:
   securitySchemes:
     bearerAuth:

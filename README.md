@@ -208,6 +208,16 @@ Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
 | `createChecklistItem(...)` | Create a checklist item |
 | `updateChecklistItem(...)` | Update a checklist item |
 | `removeChecklistItem(...)` | Remove a checklist item |
+| `createChecklistItem(checklistId:text:...)` | Add an item to a checklist by checklist ID |
+| `updateChecklistItem(checklistId:itemId:...)` | Update a checklist item by checklist ID |
+| `removeChecklistItem(checklistId:itemId:)` | Remove a checklist item by checklist ID |
+
+The last three address a checklist directly (`/checklists/{checklist_id}/items`),
+without card context.
+
+CLI: `add-item-to-checklist --checklist-id <id> --text <text>`,
+`update-item-in-checklist --checklist-id <id> --item-id <id>`,
+`remove-item-from-checklist --checklist-id <id> --item-id <id>`.
 
 ### External Links
 

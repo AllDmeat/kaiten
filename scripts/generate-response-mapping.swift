@@ -405,6 +405,17 @@ let sections: [Section] = [
       name: "delete_document_group",
       errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
   ]),
+  Section(mark: "Groups", operations: [
+    Operation(name: "list_groups", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "create_group",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(name: "get_group", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "update_group",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(name: "remove_group", errors: [.unauthorized, .forbidden, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

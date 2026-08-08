@@ -309,6 +309,17 @@ let created = try await client.createAutomation(
 )
 ```
 
+### Blocker Categories
+
+| Method | Description |
+|--------|-------------|
+| `listBlockerCategories()` | List blocker categories in the company |
+| `addBlockerCategory(blockerId:name:)` | Add a category to a card blocker |
+| `removeBlockerCategory(blockerId:categoryUid:)` | Remove a category from a card blocker |
+
+CLI: `list-blocker-categories`, `add-blocker-category --blocker-id <id> --name <name>`,
+`remove-blocker-category --blocker-id <id> --category-uid <uid>`.
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

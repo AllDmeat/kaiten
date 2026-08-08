@@ -916,3 +916,40 @@ extension Operations.remove_sd_external_recipient.Output {
     }
   }
 }
+
+// MARK: - Blocker Categories
+
+extension Operations.list_blocker_categories.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_blocker_categories.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.add_blocker_category.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.add_blocker_category.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.remove_blocker_category.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.remove_blocker_category.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

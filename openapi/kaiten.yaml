@@ -446,6 +446,37 @@ paths:
           description: Unauthorized
         '403':
           description: Forbidden
+    patch:
+      summary: Batch update for cards
+      operationId: batch_update_cards
+      description: >
+        Updates multiple cards selected by criteria. Runs in the background and
+        returns a job ID. The documentation requires at least one criteria field
+        together with `attributes`, or `column_id` + `lane_id` together with
+        `order_by`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchUpdateCardsRequest'
+      responses:
+        '202':
+          description: Batch update accepted, runs in the background
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchUpdateCardsResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /cards/{card_id}:
     patch:
       summary: Update card
@@ -5140,6 +5171,128 @@ components:
           type: object
           additionalProperties: true
           description: "Custom properties. Format: 'id_{custom_property_id}: value'"
+    BatchUpdateCardsRequest:
+      type: object
+      description: >
+        Criteria and attributes for a batch card update. The documentation
+        requires at least one criteria field together with `attributes`, or
+        `column_id` + `lane_id` together with `order_by`.
+      properties:
+        board_id:
+          type: integer
+          description: Criteria board ID
+        column_id:
+          type: integer
+          description: Criteria column ID
+        lane_id:
+          type: integer
+          description: Criteria lane ID
+        owner_id:
+          type: integer
+          description: Criteria owner ID
+        type_id:
+          type: integer
+          description: Criteria card type ID
+        condition:
+          type: integer
+          description: "Criteria conditions: 1 - live, 2 - archived"
+        attributes:
+          $ref: '#/components/schemas/BatchUpdateCardsAttributes'
+        order_by:
+          $ref: '#/components/schemas/BatchUpdateCardsOrderBy'
+    BatchUpdateCardsAttributes:
+      type: object
+      description: Attributes to change on every card matching the criteria
+      properties:
+        board_id:
+          type: integer
+          description: Board ID
+        column_id:
+          type: integer
+          description: Column ID
+        lane_id:
+          type: integer
+          description: Lane ID
+        owner_id:
+          type: integer
+          description: Owner ID
+        type_id:
+          type: integer
+          description: Card type ID
+        condition:
+          type: integer
+          description: "1 - live, 2 - archived"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: Title
+        asap:
+          type: boolean
+          description: ASAP marker
+          default: false
+        due_date:
+          type:
+          - string
+          - 'null'
+          description: Deadline in ISO 8601 format (null to clear)
+        due_date_time_present:
+          type: boolean
+          description: Flag indicating that deadline is specified up to hours and minutes
+        sort_order:
+          type: number
+          exclusiveMinimum: 0
+          description: Position in the cell (board_id, column_id, lane_id)
+        description:
+          type:
+          - string
+          - 'null'
+          maxLength: 32768
+          description: Description for card (null to clear)
+        expires_later:
+          type: boolean
+          description: Fixed deadline or not. Date dependant flag in terms of Kanban
+        size_text:
+          type:
+          - string
+          - 'null'
+          maxLength: 267
+          description: "Size text (e.g. '1', 'S', 'XL', null to clear)"
+        service_id:
+          type:
+          - integer
+          - 'null'
+          description: Service ID (null to clear)
+        blocked:
+          type: boolean
+          description: Send false to release all blocks related to this card
+        external_id:
+          type:
+          - string
+          - 'null'
+          maxLength: 1024
+          description: Any external id to assign to the cards (null to clear)
+    BatchUpdateCardsOrderBy:
+      type: object
+      description: Sorting parameters for repositioning cards inside a cell
+      properties:
+        field_type:
+          type: string
+          description: "Field type to sort by: cp, size, created, due_date, title"
+        id:
+          type: integer
+          description: Field id to sort by
+        direction:
+          type: string
+          description: "Sorting direction: asc or desc"
+    BatchUpdateCardsResponse:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: Unique identifier (UUID) of the background job
     DeletedCommentResponse:
       type: object
       required:

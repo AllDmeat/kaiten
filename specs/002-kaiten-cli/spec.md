@@ -158,11 +158,12 @@ stdout confirms it works.
   `KAITEN_TOKEN` environment variables or the selected config file
   (`--config` path or default config path).
 - **FR-017**: SDK inputs that are free-form JSON objects rather than scalars
-  (card custom properties) MUST still be reachable from the CLI, as a single
-  option carrying a JSON object string. The CLI MUST parse and validate that
-  string locally before invoking the SDK method: input that is not a JSON
-  object, or that does not decode into the mapped payload, MUST produce a
-  validation error rather than being dropped or forwarded.
+  (card custom properties, batch-update `--attributes` and `--order-by`) MUST
+  still be reachable from the CLI, as a single option carrying a JSON object
+  string. The CLI MUST parse and validate that string locally before invoking
+  the SDK method: input that is not a JSON object, or that does not decode
+  into the mapped payload, MUST produce a validation error rather than being
+  dropped or forwarded.
 
 - **FR-018**: Command output MUST omit nested entities by default, keeping
   only scalar fields and `*_id` references. A `--expand` option MUST accept a

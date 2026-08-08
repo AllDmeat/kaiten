@@ -1124,3 +1124,101 @@ public enum AuditLogAction: Sendable, Equatable, CaseIterable, Codable {
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Batch Update Cards
+
+/// Field type cards are sorted by when a batch update repositions them.
+///
+/// Used in ``KaitenClient/batchUpdateCards(boardId:columnId:laneId:ownerId:typeId:condition:attributes:orderBy:)``.
+/// - SeeAlso: [Kaiten API – Batch update for cards](https://developers.kaiten.ru/cards/batch-update-for-cards)
+public enum BatchUpdateOrderField: Sendable, Equatable, CaseIterable, Codable {
+  /// Sort by a custom property (identified by the `id` sorting parameter).
+  case customProperty
+  /// Sort by card size.
+  case size
+  /// Sort by creation date.
+  case created
+  /// Sort by due date.
+  case dueDate
+  /// Sort by title.
+  case title
+  /// Unknown value (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [BatchUpdateOrderField] {
+    [.customProperty, .size, .created, .dueDate, .title]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "cp": self = .customProperty
+    case "size": self = .size
+    case "created": self = .created
+    case "due_date": self = .dueDate
+    case "title": self = .title
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .customProperty: "cp"
+    case .size: "size"
+    case .created: "created"
+    case .dueDate: "due_date"
+    case .title: "title"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// Sorting direction of a batch card update.
+/// - SeeAlso: [Kaiten API – Batch update for cards](https://developers.kaiten.ru/cards/batch-update-for-cards)
+public enum SortDirection: Sendable, Equatable, CaseIterable, Codable {
+  /// Ascending order.
+  case ascending
+  /// Descending order.
+  case descending
+  /// Unknown value (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [SortDirection] {
+    [.ascending, .descending]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "asc": self = .ascending
+    case "desc": self = .descending
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .ascending: "asc"
+    case .descending: "desc"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

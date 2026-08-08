@@ -1,6 +1,36 @@
 import Foundation
 import OpenAPIRuntime
 
+// MARK: - Typed Sorting Parameters
+
+// Batch-update sorting discriminators travel as plain strings (see the comment
+// above the automation enums in `Enums.swift`). These accessors and the
+// initializer give the generated payload a typed surface without losing
+// undocumented values.
+
+extension Components.Schemas.BatchUpdateCardsOrderBy {
+  /// The field cards are sorted by, or `nil` if the field is not set.
+  public var orderField: BatchUpdateOrderField? {
+    field_type.map(BatchUpdateOrderField.init(rawValue:))
+  }
+
+  /// The sorting direction, or `nil` if the field is not set.
+  public var sortDirection: SortDirection? {
+    direction.map(SortDirection.init(rawValue:))
+  }
+
+  /// Creates sorting parameters from typed values.
+  ///
+  /// - Parameters:
+  ///   - field: The field type to sort by.
+  ///   - id: The custom property identifier to sort by, required when `field`
+  ///     is ``BatchUpdateOrderField/customProperty``.
+  ///   - direction: The sorting direction.
+  public init(field: BatchUpdateOrderField, id: Int? = nil, direction: SortDirection) {
+    self.init(field_type: field.rawValue, id: id, direction: direction.rawValue)
+  }
+}
+
 // MARK: - Cards
 
 extension KaitenClient {
@@ -193,6 +223,58 @@ extension KaitenClient {
       )
     }
     return try decodeResponse(response.toCase(), notFoundResource: ("card", id)) { try $0.json }
+  }
+
+  /// Updates multiple cards selected by criteria.
+  ///
+  /// The update runs in the background — the method returns the identifier of the
+  /// background job, not the updated cards. The Kaiten documentation requires at
+  /// least one criteria parameter together with `attributes`, or `columnId` +
+  /// `laneId` together with `orderBy`.
+  ///
+  /// - Parameters:
+  ///   - boardId: Criteria board identifier.
+  ///   - columnId: Criteria column identifier.
+  ///   - laneId: Criteria lane identifier.
+  ///   - ownerId: Criteria owner identifier.
+  ///   - typeId: Criteria card type identifier.
+  ///   - condition: Criteria card condition (live or archived).
+  ///   - attributes: Attributes to change on every card matching the criteria.
+  ///   - orderBy: Sorting parameters for repositioning cards inside a cell.
+  /// - Returns: The accepted background job with its UUID.
+  /// - Throws:
+  ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
+  ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
+  ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
+  ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for bad request (400), unsupported
+  ///     tariff (402), forbidden (403), not found (404) or other undocumented HTTP status codes.
+  ///     A 404 is reported as `unexpectedResponse` rather than
+  ///     ``KaitenError/notFound(resource:id:)`` because cards are selected by criteria and the
+  ///     response does not say which referenced entity is missing.
+  public func batchUpdateCards(
+    boardId: Int? = nil,
+    columnId: Int? = nil,
+    laneId: Int? = nil,
+    ownerId: Int? = nil,
+    typeId: Int? = nil,
+    condition: CardCondition? = nil,
+    attributes: Components.Schemas.BatchUpdateCardsAttributes? = nil,
+    orderBy: Components.Schemas.BatchUpdateCardsOrderBy? = nil
+  ) async throws(KaitenError) -> Components.Schemas.BatchUpdateCardsResponse {
+    let body = Components.Schemas.BatchUpdateCardsRequest(
+      board_id: boardId,
+      column_id: columnId,
+      lane_id: laneId,
+      owner_id: ownerId,
+      type_id: typeId,
+      condition: condition?.rawValue,
+      attributes: attributes,
+      order_by: orderBy
+    )
+    let response = try await call {
+      try await client.batch_update_cards(body: .json(body))
+    }
+    return try decodeResponse(response.toCase()) { try $0.json }
   }
 
   /// Deletes a card.

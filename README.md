@@ -356,6 +356,35 @@ CLI: `list-blocker-categories`, `add-blocker-category --blocker-id <id> --name <
 SLA measurements exist only for service desk request cards; for any other card,
 and for archived cards, the API answers HTTP 400.
 
+### Audit Logs
+
+| Method | Description |
+|--------|-------------|
+| `listAuditLogs(from:to:authorId:authorUid:categories:actions:id:offset:limit:)` | List audit log events for the current company |
+
+Requires an API token of a user with access to the administrative section
+"Audit log". Events are ordered by creation time from newest to oldest.
+
+Category and action discriminators are exposed as Swift enums
+(`AuditLogCategory`, `AuditLogAction`), each with an `unknown(String)` case
+that preserves values the documentation does not list. The `details` payload
+stays free-form JSON — its shape depends on category and action and is not
+described in the documentation.
+
+```swift
+let page = try await client.listAuditLogs(
+  categories: [.auth],
+  actions: [.signInFail],
+  limit: 200
+)
+for event in page.items {
+  print(event.message ?? "")
+}
+```
+
+CLI: `kaiten list-audit-logs` with `--from`, `--to`, `--author-id`,
+`--author-uid`, `--categories`, `--actions`, `--id`, `--offset`, `--limit`.
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

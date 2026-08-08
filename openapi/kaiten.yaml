@@ -2936,6 +2936,73 @@ paths:
           description: Feature is not supported by tariff
         '403':
           description: Forbidden
+  /audit-logs:
+    get:
+      summary: Retrieve audit log events
+      operationId: retrieve_audit_log_events
+      parameters:
+      - name: from
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Return events created at or after this date-time. ISO 8601 format
+      - name: to
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Return events created at or before this date-time. ISO 8601 format
+      - name: author_id
+        in: query
+        schema:
+          type: integer
+        description: Filter events by author user ID
+      - name: author_uid
+        in: query
+        schema:
+          type: string
+        description: Filter events by author user UID
+      - name: categories
+        in: query
+        schema:
+          type: string
+        description: 'Comma-separated audit log categories. Documented values: app, auth, user_profile, user_management, group_management, service_desk, publication, import, company_profile'
+      - name: actions
+        in: query
+        schema:
+          type: string
+        description: 'Comma-separated audit log actions. Documented values: start, stop, sign_in, sign_in_fail, sign_out, request_auth_pin, change_password, request_change_email, change_email, invite, invite_fail, deactivate, activate, change_permissions, change_apps_permissions, grant_access, revoke_access, transfer_ownership, depersonalization, create, delete, group_activate, group_deactivate, add_user, add_admin, admin_add_user, delete_user, admin_delete_user, delete_admin, set_sd_password, change_temporary_sd_password, publish_document, publish_document_group, publish_card, unpublish_document, unpublish_document_group, unpublish_card, share_entity, unshare_entity, public_link, extend_trial'
+      - name: id
+        in: query
+        schema:
+          type: string
+        description: Filter by audit log event ID
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: 'Maximum number of audit log events to return. Default: 100, max: 500. The API applies 500 when the limit is greater, and the default when it is 0'
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: 'Number of audit log events to skip. Default: 0'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLogEvent'
+        '400':
+          description: Bad request
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
 components:
   securitySchemes:
     bearerAuth:
@@ -6235,3 +6302,80 @@ components:
         id:
           type: integer
           description: Deleted time log id
+    AuditLogEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Audit log event ID
+        app_name:
+          type:
+          - string
+          - 'null'
+          description: Application name that created the event
+        company_uid:
+          type:
+          - string
+          - 'null'
+          description: Company UID. For this endpoint, events belong to the current company
+        author_id:
+          type:
+          - integer
+          - 'null'
+          description: Author user ID
+        author_uid:
+          type:
+          - string
+          - 'null'
+          description: Author user UID
+        author_username:
+          type:
+          - string
+          - 'null'
+          description: Author username stored at event creation time
+        author_remote_address:
+          type:
+          - string
+          - 'null'
+          description: Author IP address stored at event creation time
+        # NOTE: nullable, but expressed as a plain $ref rather than `anyOf: [$ref, 'null']` —
+        # swift-openapi-generator silently drops properties using that pattern. The property is
+        # optional, and the synthesized decoder maps an explicit JSON `null` to `nil`.
+        # Guarded by Tests/KaitenSDKTests/OpenAPISpecIntegrityTests.swift.
+        author:
+          $ref: '#/components/schemas/AuditLogAuthor'
+          description: Current user data for the event author, when available. The stored author_* fields should be used when the user was deleted or changed after the event
+        category:
+          type: string
+          description: 'Audit log event category. Documented values: app, auth, user_profile, user_management, group_management, service_desk, publication, import, company_profile. Map to the AuditLogCategory Swift enum, which preserves unknown values.'
+        action:
+          type: string
+          description: 'Audit log event action. Documented values: start, stop, sign_in, sign_in_fail, sign_out, request_auth_pin, change_password, request_change_email, change_email, invite, invite_fail, deactivate, activate, change_permissions, change_apps_permissions, grant_access, revoke_access, transfer_ownership, depersonalization, create, delete, group_activate, group_deactivate, add_user, add_admin, admin_add_user, delete_user, admin_delete_user, delete_admin, set_sd_password, change_temporary_sd_password, publish_document, publish_document_group, publish_card, unpublish_document, unpublish_document_group, unpublish_card, share_entity, unshare_entity, public_link, extend_trial. Map to the AuditLogAction Swift enum, which preserves unknown values.'
+        message:
+          type: string
+          description: Human-readable audit log message
+        details:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Additional event details. The object shape depends on category and action, and is not described in the Kaiten documentation
+        created:
+          type: string
+          description: Event creation date-time in ISO 8601 format
+    AuditLogAuthor:
+      type: object
+      description: Current user data for an audit log event author. The Kaiten documentation describes this object only through its example
+      properties:
+        id:
+          type: integer
+          description: User ID
+        uid:
+          type: string
+          description: User UID
+        username:
+          type: string
+          description: Username
+        full_name:
+          type: string
+          description: User full name

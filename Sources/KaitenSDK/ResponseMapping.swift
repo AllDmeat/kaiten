@@ -1064,3 +1064,58 @@ extension Operations.retrieve_card_allowed_users.Output {
     }
   }
 }
+
+// MARK: - Card Time Logs
+
+extension Operations.get_card_time_logs.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_card_time_logs.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.create_card_time_log.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.create_card_time_log.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_card_time_log.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.update_card_time_log.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.delete_card_time_log.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.delete_card_time_log.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

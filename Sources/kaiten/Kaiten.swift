@@ -93,6 +93,10 @@ struct Kaiten: AsyncParsableCommand {
       ListCardTypeTreeEntities.self,
       AddCardTypeTreeEntity.self,
       DeleteCardTypeTreeEntity.self,
+      GetCardTimeLogs.self,
+      AddTimeLog.self,
+      UpdateTimeLog.self,
+      RemoveTimeLog.self,
     ]
   )
 }

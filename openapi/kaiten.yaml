@@ -2508,6 +2508,146 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /cards/{card_id}/time-logs:
+    get:
+      summary: Get time logs
+      operationId: get_card_time_logs
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: for_date
+        in: query
+        schema:
+          type: string
+        description: Filter by for_date attribute
+      - name: personal
+        in: query
+        schema:
+          type: boolean
+        description: Filter time logs by current user
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardTimeLog'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    post:
+      summary: Add time log
+      operationId: create_card_time_log
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTimeLogRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardTimeLog'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /cards/{card_id}/time-logs/{id}:
+    patch:
+      summary: Update log record
+      operationId: update_card_time_log
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Time log ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTimeLogRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardTimeLog'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Remove time log
+      operationId: delete_card_time_log
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Time log ID
+      responses:
+        '200':
+          description: Time log deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedTimeLogResponse'
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /spaces/{space_id}/automations:
     get:
       summary: Get list of automations
@@ -5980,3 +6120,118 @@ components:
         uid:
           type: string
           description: Blocker category UID
+    CardTimeLog:
+      type: object
+      properties:
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        id:
+          type: integer
+          description: Card time log id
+        card_id:
+          type: integer
+          description: Card id
+        user_id:
+          type: integer
+          description: User id
+        role_id:
+          type: integer
+          description: 'Role id, predefined role is: -1 - Employee'
+        author_id:
+          type: integer
+          description: Author id
+        updater_id:
+          type: integer
+          description: Last updater id
+        time_spent:
+          type: integer
+          description: Minutes to log
+        for_date:
+          type: string
+          description: Log date
+        comment:
+          type:
+          - string
+          - 'null'
+          description: Time log comment
+        # `role`, `user` and `author` are documented only on the GET response;
+        # POST and PATCH responses stop at `comment`, so all three stay optional.
+        role:
+          $ref: '#/components/schemas/TimeLogRole'
+          description: Role info
+        user:
+          $ref: '#/components/schemas/User'
+          description: User info
+        author:
+          $ref: '#/components/schemas/User'
+          description: Author info
+    TimeLogRole:
+      type: object
+      properties:
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        id:
+          type: integer
+          description: Role id
+        name:
+          type: string
+          description: Role name
+        company_id:
+          type:
+          - integer
+          - 'null'
+          description: Role company id
+    CreateTimeLogRequest:
+      type: object
+      required:
+      - role_id
+      - time_spent
+      - for_date
+      properties:
+        role_id:
+          type: integer
+          description: 'Role id, predefined role is: -1 - Employee'
+        time_spent:
+          type: integer
+          minimum: 1
+          description: Minutes to log
+        for_date:
+          type: string
+          description: Log date in format YYYY-MM-DD
+        comment:
+          type: string
+          maxLength: 4096
+          description: Time log comment
+    UpdateTimeLogRequest:
+      type: object
+      properties:
+        role_id:
+          type: integer
+          description: 'Role id, predefined role is: -1 - Employee'
+        time_spent:
+          type: integer
+          minimum: 1
+          description: Minutes to log
+        for_date:
+          type: string
+          description: Log date in format YYYY-MM-DD
+        comment:
+          type: string
+          maxLength: 4096
+          description: Time log comment
+    DeletedTimeLogResponse:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: integer
+          description: Deleted time log id

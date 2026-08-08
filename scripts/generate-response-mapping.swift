@@ -20,6 +20,7 @@ enum ErrorCase: String {
   case paymentRequired
   case forbidden
   case notFound
+  case serviceUnavailable
 }
 
 struct Operation {
@@ -155,6 +156,14 @@ let sections: [Section] = [
       name: "get_card_sla_measurements",
       errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
   ]),
+  Section(mark: "Card Files", operations: [
+    Operation(
+      name: "attach_file_to_card",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound, .serviceUnavailable]),
+    Operation(
+      name: "update_card_file", errors: [.unauthorized, .forbidden, .notFound], hasBody: false),
+    Operation(name: "detach_file_from_card", errors: [.unauthorized, .forbidden, .notFound]),
+  ]),
   Section(mark: "Automations", operations: [
     Operation(name: "list_automations", errors: [.unauthorized, .forbidden, .notFound]),
     Operation(
@@ -217,6 +226,8 @@ func generateExtension(_ op: Operation) -> String {
       cases.append("    case .forbidden: .forbidden")
     case .notFound:
       cases.append("    case .notFound: .notFound")
+    case .serviceUnavailable:
+      cases.append("    case .serviceUnavailable: .undocumented(statusCode: 503)")
     }
   }
 

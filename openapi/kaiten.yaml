@@ -1932,6 +1932,114 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /cards/{card_id}/files:
+    put:
+      summary: Attach file to card
+      operationId: attach_file_to_card
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - file
+              properties:
+                file:
+                  type: string
+                  contentEncoding: binary
+                  description: File content
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                # NOTE: the docs describe a single flat object, but its `type` enum includes
+                # 11 (private file), and type-11 files carry a structurally different shape
+                # (UUID string `id`) — see the comment above CardFileEntry. The response is
+                # therefore modelled with the same anyOf used for Card.files.
+                $ref: '#/components/schemas/CardFileEntry'
+        '400':
+          description: Upload file error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '503':
+          description: Service unavailable
+  /cards/{card_id}/files/{id}:
+    patch:
+      summary: Update file
+      operationId: update_card_file
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: File ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCardFileRequest'
+      responses:
+        '200':
+          # The docs define no schema for the 200 response; the documented example body
+          # is an empty object, so the response is modelled as having no content.
+          description: success
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Detach file from card
+      operationId: detach_file_from_card
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: File ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedCardFileResponse'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /card-types:
     get:
       summary: List card types
@@ -5016,6 +5124,20 @@ components:
           description: Recipient email
           minLength: 1
           maxLength: 128
+    UpdateCardFileRequest:
+      type: object
+      properties:
+        card_cover:
+          type: boolean
+          description: Flag indicating that image used as card cover
+    DeletedCardFileResponse:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: integer
+          description: Deleted file ID
     CardBlocker:
       type: object
       properties:

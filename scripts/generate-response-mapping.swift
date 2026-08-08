@@ -256,6 +256,11 @@ let sections: [Section] = [
     Operation(name: "remove_card_blocker_user", errors: [.unauthorized]),
     Operation(name: "retrieve_current_user_blockers", errors: [.unauthorized]),
   ]),
+  Section(mark: "Checklist Cards", operations: [
+    Operation(
+      name: "retrieve_cards_with_checklist",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

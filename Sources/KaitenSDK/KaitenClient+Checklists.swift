@@ -4,6 +4,41 @@ import OpenAPIRuntime
 // MARK: - Checklists
 
 extension KaitenClient {
+  /// Lists the cards that use a checklist.
+  ///
+  /// - Parameters:
+  ///   - checklistId: The checklist identifier.
+  ///   - onlySharedCards: Required by the API; requests without it are rejected with 400. No
+  ///     filtering effect has been observed — a card that is neither public nor shared is
+  ///     returned with either value.
+  /// - Returns: An array of cards that use the checklist. Returns an empty array if the API
+  ///   responds with an empty body.
+  /// - Throws:
+  ///   - ``KaitenError/notFound(resource:id:)`` if the checklist does not exist.
+  ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
+  ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
+  ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
+  ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for validation error (400),
+  ///     forbidden (403) or other undocumented HTTP status codes.
+  public func listCardsWithChecklist(
+    checklistId: Int,
+    onlySharedCards: Bool
+  ) async throws(KaitenError) -> [Components.Schemas.ChecklistCard] {
+    guard
+      let response = try await callList({
+        try await client.retrieve_cards_with_checklist(
+          path: .init(id: checklistId),
+          query: .init(only_shared_cards: onlySharedCards)
+        )
+      })
+    else {
+      return []
+    }
+    return try decodeResponse(response.toCase(), notFoundResource: ("checklist", checklistId)) {
+      try $0.json
+    }
+  }
+
   /// Creates a checklist on a card.
   ///
   /// - Parameters:

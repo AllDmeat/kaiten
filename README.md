@@ -212,13 +212,17 @@ Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
 | `createChecklistItem(checklistId:text:...)` | Add an item to a checklist by checklist ID |
 | `updateChecklistItem(checklistId:itemId:...)` | Update a checklist item by checklist ID |
 | `removeChecklistItem(checklistId:itemId:)` | Remove a checklist item by checklist ID |
+| `listCardsWithChecklist(checklistId:onlySharedCards:)` | List cards that use a checklist |
 
-The last three address a checklist directly (`/checklists/{checklist_id}/items`),
-without card context.
+The three checklist-item methods above address a checklist directly
+(`/checklists/{checklist_id}/items`), without card context.
 
 CLI: `add-item-to-checklist --checklist-id <id> --text <text>`,
 `update-item-in-checklist --checklist-id <id> --item-id <id>`,
-`remove-item-from-checklist --checklist-id <id> --item-id <id>`.
+`remove-item-from-checklist --checklist-id <id> --item-id <id>`,
+`list-checklist-cards --checklist-id <id> --only-shared-cards <bool>`.
+The `only_shared_cards` query parameter is required by the API — requests
+without it are rejected with 400 — but no filtering effect has been observed.
 
 ### External Links
 

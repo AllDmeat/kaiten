@@ -3202,6 +3202,41 @@ paths:
           description: Invalid token
         '403':
           description: Forbidden
+  /checklists/{id}:
+    get:
+      summary: Retrieve cards with checklist
+      operationId: retrieve_cards_with_checklist
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card checklist ID
+      # DOC_MISMATCH: docs=required `boolean` with no description, actual has no observed filtering effect (a card that is neither public nor shared is returned with either value; omitting the parameter is rejected with 400) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+      - name: only_shared_cards
+        in: query
+        required: true
+        schema:
+          type: boolean
+        description: Required by the API; requests without it are rejected with 400
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChecklistCard'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /checklists/{checklist_id}/items:
     post:
       summary: Add item to checklist
@@ -7138,3 +7173,379 @@ components:
         full_name:
           type: string
           description: User full name
+    ChecklistCard:
+      type: object
+      description: A card that uses a checklist, as returned by the checklists endpoint
+      properties:
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        archived:
+          type: boolean
+          description: Card archived flag
+        id:
+          type: integer
+          description: Card id
+        title:
+          type: string
+          description: Card title
+        description:
+          type:
+          - string
+          - 'null'
+          description: Card description
+        asap:
+          type: boolean
+          description: Card asap flag
+        due_date:
+          type:
+          - string
+          - 'null'
+          description: Card deadline
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        fifo_order:
+          type:
+          - integer
+          - 'null'
+          description: Number of card in the cell when fifo rule applied to cards column
+        state:
+          type: integer
+          description: 'Card state: 1-queued, 2-inProgress, 3-done'
+        condition:
+          type: integer
+          description: 'Card condition: 1-live, 2-archived, 3-deleted'
+        expires_later:
+          type: boolean
+          description: Fixed deadline or not. Date dependant flag in terms of Kanban
+        parents_count:
+          type: integer
+          description: Card parents count
+        children_count:
+          type: integer
+          description: Card children count
+        children_done:
+          type: integer
+          description: Card children done count
+        goals_total:
+          type: integer
+          description: Card goals count
+        goals_done:
+          type: integer
+          description: Number of card done goals
+        time_spent_sum:
+          type: integer
+          description: Amount of time spent (in minutes)
+        time_blocked_sum:
+          type: integer
+          description: Amount of blocked time (in minutes)
+        children_number_properties_sum:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Sum according to numerical data of child cards
+        parent_checklist_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: integer
+          description: Array of card parent checklist ids
+        parents_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: integer
+          description: Array of card parent ids
+        children_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: integer
+          description: Array of card children ids
+        blocking_card:
+          type: boolean
+          description: Is card blocking another card
+        blocked:
+          type: boolean
+          description: Is card blocked
+        size:
+          type:
+          - number
+          - 'null'
+          description: Numerical part of size
+        size_unit:
+          type:
+          - string
+          - 'null'
+          description: Text part of size
+        size_text:
+          type:
+          - string
+          - 'null'
+          description: Size text
+        due_date_time_present:
+          type: boolean
+          description: Flag indicating that deadline is specified up to hours and minutes
+        board_id:
+          type: integer
+          description: Board id
+        column_id:
+          type: integer
+          description: Column id
+        lane_id:
+          type: integer
+          description: Lane id
+        owner_id:
+          type: integer
+          description: Card owner id
+        type_id:
+          type: integer
+          description: Card type id
+        version:
+          type: integer
+          description: Card version
+        updater_id:
+          type: integer
+          description: User id who last updated card
+        completed_on_time:
+          type:
+          - boolean
+          - 'null'
+          description: Flag indicating that card completed on time when due date present
+        completed_at:
+          type:
+          - string
+          - 'null'
+          description: Date when card moved to done type column
+        last_moved_at:
+          type:
+          - string
+          - 'null'
+          description: Date when card last moved
+        lane_changed_at:
+          type:
+          - string
+          - 'null'
+          description: Date when card changed lane
+        column_changed_at:
+          type:
+          - string
+          - 'null'
+          description: Date when card changed column
+        first_moved_to_in_progress_at:
+          type:
+          - string
+          - 'null'
+          description: Date when card first moved to inProgress type column
+        last_moved_to_done_at:
+          type:
+          - string
+          - 'null'
+          description: Date when card last moved to done type column
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        sprint_id:
+          type:
+          - integer
+          - 'null'
+          description: Sprint id
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: External id
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        service_id:
+          type:
+          - integer
+          - 'null'
+          description: Service id
+        comments_total:
+          type: integer
+          description: Total card comments
+        comment_last_added_at:
+          type:
+          - string
+          - 'null'
+          description: Date when last comment added
+        properties:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: 'Card custom properties. Format: id_{propertyId}:value'
+        planned_start:
+          type:
+          - string
+          - 'null'
+          description: Card timeline planned start
+        planned_end:
+          type:
+          - string
+          - 'null'
+          description: Card timeline planned end
+        counters_recalculated_at:
+          type: string
+          description: Date of recalculating counters
+        sd_new_comment:
+          type: boolean
+          description: Has unseen service desk request author comments
+        import_id:
+          type:
+          - integer
+          - 'null'
+          description: Import id
+        public:
+          type: boolean
+          description: Is card public
+        share_settings:
+          type:
+          - object
+          - 'null'
+          description: Public share settings
+          properties:
+            fields:
+              type: object
+              additionalProperties: true
+              description: Visible card fields
+            share_due_date:
+              type: string
+              description: Share until
+            open_unauthorized_allowed:
+              type: boolean
+              description: Allow to open unauthorized to view the card in the read only mode
+        share_id:
+          type:
+          - string
+          - 'null'
+          description: Public share id
+        external_user_emails:
+          type:
+          - string
+          - 'null'
+          description: External users emails
+        description_filled:
+          type: boolean
+          description: Flag indicating that card has description
+        # DOC_MISMATCH: docs=`tags_ids` (non-nullable `array`), actual=`tag_ids` (`array | null`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        tag_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: integer
+          description: Array of card tags ids
+        has_access_to_space:
+          type: boolean
+          description: Flag indicating that user who made request has access to space
+        path_data:
+          type: object
+          description: Card path info (space, board, column, lane, etc)
+          properties:
+            lane:
+              type: object
+              additionalProperties: true
+              description: Card lane info
+            board:
+              type: object
+              additionalProperties: true
+              description: Card board info
+            space:
+              type: object
+              additionalProperties: true
+              description: Card space info
+            column:
+              type: object
+              additionalProperties: true
+              description: Card column info
+            # DOC_MISMATCH: docs=non-nullable `object`, absent from actual API responses when the card is not in a subcolumn — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+            subcolumn:
+              type: object
+              additionalProperties: true
+              description: Card subcolumn info
+        space_id:
+          type: integer
+          description: Space id
+        # DOC_MISMATCH: not in docs, present in actual API responses (`number`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        sort_order:
+          type: number
+          description: Sort order in column
+        # DOC_MISMATCH: not in docs, present in actual API responses (`array | null`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        parent_link_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: integer
+          description: Parent link ids
+        # DOC_MISMATCH: not in docs, present in actual API responses (`integer | null`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        milestone_id:
+          type:
+          - integer
+          - 'null'
+          description: Milestone id
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        sd_external_recipients:
+          type:
+          - string
+          - 'null'
+          description: Service desk external recipients
+        # DOC_MISMATCH: not in docs, present in actual API responses (`integer`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        estimate_workload:
+          type: integer
+          description: Estimated workload
+        # DOC_MISMATCH: not in docs, present in actual API responses (`boolean`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        has_blocked_children:
+          type: boolean
+          description: Whether card has blocked children
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        calculated_planned_start:
+          type:
+          - string
+          - 'null'
+          description: Calculated planned start
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        calculated_planned_end:
+          type:
+          - string
+          - 'null'
+          description: Calculated planned end
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        fts_version:
+          type: string
+          description: Full-text search version
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        uid:
+          type: string
+          description: Card UID
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        locked:
+          type:
+          - string
+          - 'null'
+          description: Lock status
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        source:
+          type:
+          - string
+          - 'null'
+          description: Card source
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        card_tag_fts_version:
+          type: string
+          description: Card tags full-text search version
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        card_cp_value_fts_version:
+          type: string
+          description: Card custom property values full-text search version
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        key:
+          type:
+          - string
+          - 'null'
+          description: Card key

@@ -86,6 +86,9 @@ struct Kaiten: AsyncParsableCommand {
       AddBlockerCategory.self,
       RemoveBlockerCategory.self,
       GetCardSlaMeasurements.self,
+      ListCardTypeTreeEntities.self,
+      AddCardTypeTreeEntity.self,
+      DeleteCardTypeTreeEntity.self,
     ]
   )
 }

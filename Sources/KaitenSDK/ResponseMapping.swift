@@ -968,3 +968,44 @@ extension Operations.remove_blocker_category.Output {
     }
   }
 }
+
+// MARK: - Card Type Tree Entities
+
+extension Operations.list_card_type_tree_entities.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_card_type_tree_entities.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.add_card_type_tree_entity.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.add_card_type_tree_entity.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.delete_card_type_tree_entity.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.delete_card_type_tree_entity.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

@@ -616,6 +616,21 @@ CLI: `list-custom-directory-records`, `create-custom-directory-record`,
 `delete-custom-directory-record`, `list-custom-directory-record-cards` — all
 take `--directory-id`, the record-scoped ones also `--record-id`.
 
+### Group Admins
+
+| Method | Description |
+|--------|-------------|
+| `listGroupAdmins(groupUid:)` | List admins of a group |
+| `addGroupAdmin(groupUid:userId:)` | Add a user as an admin of a group |
+| `removeGroupAdmin(groupUid:userId:)` | Remove an admin from a group |
+
+Groups are addressed by string UID. Adding and removing an admin both return
+the affected user.
+
+CLI: `list-group-admins --group-uid <uid>`,
+`add-group-admin --group-uid <uid> --user-id <id>`,
+`remove-group-admin --group-uid <uid> --user-id <id>`.
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

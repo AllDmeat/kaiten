@@ -4490,6 +4490,97 @@ paths:
           description: Invalid token
         '404':
           description: Not found
+  /groups/{group_uid}/admins:
+    get:
+      summary: Get list of group admins
+      operationId: list_group_admins
+      parameters:
+      - name: group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupAdmin'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    post:
+      summary: Add admin to group
+      operationId: add_group_admin
+      parameters:
+      - name: group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddGroupAdminRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupAdmin'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /groups/{group_uid}/admins/{user_id}:
+    delete:
+      summary: Remove admin from group
+      operationId: remove_group_admin
+      parameters:
+      - name: group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: User ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupAdmin'
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 components:
   securitySchemes:
     bearerAuth:
@@ -9761,3 +9852,98 @@ components:
           type: object
           additionalProperties: true
           description: Values map where keys are custom directory field IDs. Each value is either an object (single-value) or an array of objects (multi-select)
+    GroupAdmin:
+      type: object
+      description: A company user who administers a group. The Kaiten documentation lists `sd_telegram_id` and `news_subscription` only for the list endpoint, and `delete_confirmation_sent_at` is present only in the list endpoint response
+      properties:
+        id:
+          type: integer
+          description: User id
+        # DOC_MISMATCH: not in docs attribute tables, present in every documented example response — https://developers.kaiten.ru/group-admins/get-list-of-group-admins
+        uid:
+          type: string
+          description: User uid
+        full_name:
+          type: string
+          description: User full name
+        email:
+          type: string
+          description: User email
+        username:
+          type: string
+          description: Username for mentions and login
+        avatar_initials_url:
+          type: string
+          description: Default user avatar
+        avatar_uploaded_url:
+          type:
+          - string
+          - 'null'
+          description: User uploaded avatar url
+        initials:
+          type: string
+          description: User initials
+        avatar_type:
+          type: integer
+          description: 1 - gravatar, 2 - initials, 3 - uploaded
+        lng:
+          type: string
+          description: Language
+        timezone:
+          type: string
+          description: Time zone
+        theme:
+          type: string
+          description: light - light color theme, dark - dark color theme, auto - color theme based on OS settings
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        activated:
+          type: boolean
+          description: User activated flag
+        ui_version:
+          type: integer
+          description: 1 - old ui, 2 - new ui
+        virtual:
+          type: boolean
+          description: Is user virtual
+        email_blocked:
+          type:
+          - string
+          - 'null'
+          description: Email blocked timestamp
+        email_blocked_reason:
+          type:
+          - string
+          - 'null'
+          description: Email blocked reason
+        delete_requested_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp of delete request
+        delete_confirmation_sent_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp of sending confirmation of deletion
+        # DOC_MISMATCH: docs=`integer`, documented example response=`null` — https://developers.kaiten.ru/group-admins/get-list-of-group-admins
+        sd_telegram_id:
+          type:
+          - integer
+          - 'null'
+          description: Service desk telegram id
+        news_subscription:
+          type: boolean
+          description: News subscription flag
+    AddGroupAdminRequest:
+      type: object
+      required:
+      - user_id
+      properties:
+        user_id:
+          type: integer
+          description: User Id

@@ -143,6 +143,9 @@ struct Kaiten: AsyncParsableCommand {
       ListCustomPropertyTreeEntities.self,
       AddCustomPropertyTreeEntity.self,
       DeleteCustomPropertyTreeEntity.self,
+      ListGroupAdmins.self,
+      AddGroupAdmin.self,
+      RemoveGroupAdmin.self,
     ]
   )
 }

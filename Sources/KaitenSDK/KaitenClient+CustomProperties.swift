@@ -123,6 +123,37 @@ extension KaitenClient {
     return Page(items: items, offset: offset, limit: limit)
   }
 
+  /// Creates a select value for a select-type custom property.
+  ///
+  /// - Parameters:
+  ///   - propertyId: The custom property identifier.
+  ///   - value: The value text (1...128 characters).
+  ///   - color: Colour number, or `nil` for no colour.
+  /// - Returns: The created select value.
+  /// - Throws:
+  ///   - ``KaitenError/notFound(resource:id:)`` if the property does not exist.
+  ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
+  ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
+  ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
+  ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for bad request (400), forbidden (403), or other undocumented HTTP status codes.
+  public func createCustomPropertySelectValue(
+    propertyId: Int,
+    value: String,
+    color: Int? = nil
+  ) async throws(KaitenError) -> Components.Schemas.CustomPropertySelectValue {
+    let response = try await call {
+      try await client.create_select_value(
+        path: .init(property_id: propertyId),
+        body: .json(.init(value: value, color: color))
+      )
+    }
+    return try decodeResponse(
+      response.toCase(), notFoundResource: ("customProperty", propertyId)
+    ) {
+      try $0.json
+    }
+  }
+
   /// Fetches a single select value by its identifier.
   ///
   /// - Parameters:

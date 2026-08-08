@@ -277,6 +277,13 @@ let sections: [Section] = [
     Operation(
       name: "delete_custom_directory", errors: [.badRequest, .unauthorized, .notFound]),
   ]),
+  Section(mark: "Company Users", operations: [
+    Operation(name: "get_company_users", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "update_company_user",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(name: "remove_virtual_user", errors: [.forbidden, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

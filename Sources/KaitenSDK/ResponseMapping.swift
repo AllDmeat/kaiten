@@ -1396,3 +1396,41 @@ extension Operations.delete_custom_directory.Output {
     }
   }
 }
+
+// MARK: - Company Users
+
+extension Operations.get_company_users.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_company_users.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_company_user.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.update_company_user.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.remove_virtual_user.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.remove_virtual_user.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

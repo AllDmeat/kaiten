@@ -269,6 +269,9 @@ Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
 | Method | Description |
 |--------|-------------|
 | `listCardTypes()` | List card types |
+| `listCardTypeTreeEntities(typeId:)` | List tree entities of a card type |
+| `addCardTypeTreeEntity(typeId:treeEntityUid:)` | Add a tree entity to a card type |
+| `deleteCardTypeTreeEntity(typeId:uid:)` | Delete a tree entity from a card type |
 | `listSprints()` | List sprints |
 | `getSprintSummary(...)` | Get sprint summary |
 

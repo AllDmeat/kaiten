@@ -179,6 +179,17 @@ let sections: [Section] = [
     Operation(name: "add_blocker_category", errors: [.unauthorized, .forbidden, .notFound]),
     Operation(name: "remove_blocker_category", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
+  Section(mark: "Card Type Tree Entities", operations: [
+    Operation(
+      name: "list_card_type_tree_entities",
+      errors: [.unauthorized, .paymentRequired, .forbidden]),
+    Operation(
+      name: "add_card_type_tree_entity",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden]),
+    Operation(
+      name: "delete_card_type_tree_entity",
+      errors: [.unauthorized, .paymentRequired, .forbidden]),
+  ]),
 ]
 
 // MARK: - Generator

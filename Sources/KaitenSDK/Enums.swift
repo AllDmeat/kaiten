@@ -1518,3 +1518,140 @@ public enum CustomPropertyValuesType: Sendable, Equatable, CaseIterable, Codable
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Custom Directories
+//
+// Custom directory discriminators are declared as plain strings in the OpenAPI
+// spec: the custom-directories API is documented as beta and subject to change,
+// and a generated closed enum would fail the entire response on the first value
+// the documentation does not list. The typed surface lives here instead — with
+// an `unknown(String)` case that preserves anything new the API adds.
+
+/// Custom directory (and directory field) condition.
+/// - SeeAlso: [Kaiten API – Custom directories](https://developers.kaiten.ru/custom-directories/get-list-of-custom-directories)
+public enum CustomDirectoryCondition: Sendable, Equatable, CaseIterable, Codable {
+  /// Directory or field is active.
+  case active
+  /// Directory or field is inactive.
+  case inactive
+  /// Directory or field is soft-deleted.
+  case removed
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CustomDirectoryCondition] {
+    [.active, .inactive, .removed]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "active": self = .active
+    case "inactive": self = .inactive
+    case "removed": self = .removed
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .active: "active"
+    case .inactive: "inactive"
+    case .removed: "removed"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// Custom directory field type.
+/// - SeeAlso: [Kaiten API – Custom directories](https://developers.kaiten.ru/custom-directories/create-custom-directory)
+public enum CustomDirectoryFieldType: Sendable, Equatable, CaseIterable, Codable {
+  /// Text field.
+  case string
+  /// Numeric field.
+  case number
+  /// Date field.
+  case date
+  /// Email field.
+  case email
+  /// URL field.
+  case url
+  /// Phone number field.
+  case phone
+  /// Checkbox field.
+  case checkbox
+  /// Select field backed by a custom property.
+  case select
+  /// User field backed by a custom property.
+  case user
+  /// Catalog field backed by a custom property.
+  case catalog
+  /// Link to a record of another custom directory.
+  case directoryLink
+  /// File field.
+  case file
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CustomDirectoryFieldType] {
+    [
+      .string, .number, .date, .email, .url, .phone, .checkbox, .select, .user, .catalog,
+      .directoryLink, .file,
+    ]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "string": self = .string
+    case "number": self = .number
+    case "date": self = .date
+    case "email": self = .email
+    case "url": self = .url
+    case "phone": self = .phone
+    case "checkbox": self = .checkbox
+    case "select": self = .select
+    case "user": self = .user
+    case "catalog": self = .catalog
+    case "directory_link": self = .directoryLink
+    case "file": self = .file
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .string: "string"
+    case .number: "number"
+    case .date: "date"
+    case .email: "email"
+    case .url: "url"
+    case .phone: "phone"
+    case .checkbox: "checkbox"
+    case .select: "select"
+    case .user: "user"
+    case .catalog: "catalog"
+    case .directoryLink: "directory_link"
+    case .file: "file"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

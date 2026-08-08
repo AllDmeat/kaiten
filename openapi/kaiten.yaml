@@ -3444,6 +3444,158 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /company/custom-directories:
+    get:
+      summary: Get list of custom directories
+      operationId: list_custom_directories
+      parameters:
+      - name: include_fields
+        in: query
+        schema:
+          type: boolean
+        description: Include directory fields in each directory
+      - name: include_author
+        in: query
+        schema:
+          type: boolean
+        description: Include the author user object in each directory
+      - name: include_records_count
+        in: query
+        schema:
+          type: boolean
+        description: Include records_count in each directory
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: 'Maximum number of directories to return. Default: 200, max: 200'
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of directories to skip
+      - name: query
+        in: query
+        schema:
+          type: string
+        description: Search by directory name (case-insensitive)
+      # DOC_MISMATCH: docs=`conditions` array of strings, actual requires the bracket form `conditions[]` — a single bare `conditions` value is silently ignored and the default filter applies — https://developers.kaiten.ru/custom-directories/get-list-of-custom-directories
+      - name: conditions[]
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: 'Filter by condition values. Documented values: active, inactive, removed. Default: active'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomDirectory'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+    post:
+      summary: Create custom directory
+      operationId: create_custom_directory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomDirectoryRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDirectory'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+  /company/custom-directories/{directory_id}:
+    get:
+      summary: Get custom directory
+      operationId: get_custom_directory
+      parameters:
+      - name: directory_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Directory ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDirectory'
+        '401':
+          description: Invalid token
+        '404':
+          description: Not found
+    patch:
+      summary: Update custom directory
+      operationId: update_custom_directory
+      parameters:
+      - name: directory_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Directory ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomDirectoryRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDirectory'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '404':
+          description: Not found
+    delete:
+      summary: Delete custom directory
+      operationId: delete_custom_directory
+      parameters:
+      - name: directory_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Directory ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteCustomDirectoryResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '404':
+          description: Not found
 components:
   securitySchemes:
     bearerAuth:
@@ -7784,3 +7936,234 @@ components:
           - string
           - 'null'
           description: Card key
+    CustomDirectory:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Directory ID (UUID)
+        name:
+          type: string
+          description: Directory name
+        description:
+          type:
+          - string
+          - 'null'
+          description: Directory description
+        condition:
+          type: string
+          description: 'Directory condition. Documented values: active, inactive, removed. Map to the CustomDirectoryCondition Swift enum, which preserves unknown values.'
+        settings:
+          $ref: '#/components/schemas/CustomDirectorySettings'
+          description: Directory settings
+        # DOC_MISMATCH: not in list/get docs (documented only for the create response), present in actual list responses — https://developers.kaiten.ru/custom-directories/get-list-of-custom-directories
+        author_uid:
+          type: string
+          description: Author user UID (UUID)
+        # DOC_MISMATCH: not in list/get docs (documented only for the create response), present in actual list responses — https://developers.kaiten.ru/custom-directories/get-list-of-custom-directories
+        company_uid:
+          type: string
+          description: Company UID (UUID)
+        # DOC_MISMATCH: not in list/get docs (documented only for the create response), present in actual list responses — https://developers.kaiten.ru/custom-directories/get-list-of-custom-directories
+        created:
+          type: string
+          description: Create date
+        # DOC_MISMATCH: not in list/get docs (documented only for the create response), present in actual list responses — https://developers.kaiten.ru/custom-directories/get-list-of-custom-directories
+        updated:
+          type: string
+          description: Last update timestamp
+        records_count:
+          type: integer
+          description: Records count. Present only when the list is requested with include_records_count
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomDirectoryField'
+          description: Directory fields. Present in create and get responses, and in list responses requested with include_fields
+        author:
+          $ref: '#/components/schemas/User'
+          description: Author user object. Present in get responses, and in list responses requested with include_author
+    CustomDirectorySettings:
+      type: object
+      properties:
+        multi_select:
+          type: boolean
+          description: Allow multiple values per field in records
+        allow_editing:
+          type: boolean
+          description: Allow editing records from cards without custom properties permission
+    CustomDirectoryField:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Field ID (UUID)
+        custom_directory_id:
+          type: string
+          description: Directory ID (UUID)
+        name:
+          type: string
+          description: Field name
+        type:
+          type: string
+          description: 'Field type. Documented values: string, number, date, email, url, phone, checkbox, select, user, catalog, directory_link, file. Map to the CustomDirectoryFieldType Swift enum, which preserves unknown values.'
+        required:
+          type: boolean
+          description: Required flag
+        is_display:
+          type: boolean
+          description: Display field flag
+        sort_order:
+          type: integer
+          description: Field position
+        custom_property_uid:
+          type:
+          - string
+          - 'null'
+          description: Custom property UID (for select/user/catalog fields)
+        linked_directory_id:
+          type:
+          - string
+          - 'null'
+          description: Linked directory ID (for directory_link fields)
+        condition:
+          type: string
+          description: 'Field condition. Documented values: active, inactive, removed. Map to the CustomDirectoryCondition Swift enum, which preserves unknown values.'
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+    CreateCustomDirectoryRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Custom directory name
+        description:
+          type:
+          - string
+          - 'null'
+          description: Custom directory description
+        multi_select:
+          type: boolean
+          default: false
+          description: When enabled, directory records can store multiple values per field
+        allow_editing:
+          type: boolean
+          default: false
+          description: When enabled, directory records can be edited from cards without custom properties permission
+        display_field_index:
+          type: integer
+          minimum: 0
+          description: Index of the field to use as a display field. If omitted, the first field is used
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateCustomDirectoryFieldRequest'
+          description: Directory fields definition
+    CreateCustomDirectoryFieldRequest:
+      type: object
+      required:
+      - name
+      - type
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Field name
+        type:
+          type: string
+          description: 'Field type. Documented values: string, number, date, email, url, phone, checkbox, select, user, catalog, directory_link, file.'
+        required:
+          type: boolean
+          default: false
+          description: Required field flag
+        sort_order:
+          type: integer
+          minimum: 0
+          description: Field position
+        custom_property_uid:
+          type:
+          - string
+          - 'null'
+          description: Custom property UID (required for select/user/catalog fields)
+        linked_directory_id:
+          type:
+          - string
+          - 'null'
+          description: Linked custom directory ID (required for directory_link fields)
+    UpdateCustomDirectoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Custom directory name
+        description:
+          $ref: '#/components/schemas/NullableString'
+          description: Custom directory description. Send null to clear
+        condition:
+          type: string
+          description: 'Custom directory condition. Documented values: active, inactive, removed.'
+        multi_select:
+          type: boolean
+          description: When enabled, directory records can store multiple values per field
+        allow_editing:
+          type: boolean
+          description: When enabled, directory records can be edited from cards without custom properties permission
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateCustomDirectoryFieldRequest'
+          description: Full fields list. Fields omitted from this array are soft-deleted (condition=removed)
+    UpdateCustomDirectoryFieldRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Field ID (for updating an existing field)
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Field name
+        type:
+          type: string
+          description: 'Field type. Documented values: string, number, date, email, url, phone, checkbox, select, user, catalog, directory_link, file.'
+        required:
+          type: boolean
+          description: Required field flag
+        is_display:
+          type: boolean
+          description: Display field flag (only one field should have is_display=true)
+        sort_order:
+          type: integer
+          minimum: 0
+          description: Field position
+        custom_property_uid:
+          type:
+          - string
+          - 'null'
+          description: Custom property UID (required for select/user/catalog fields)
+        linked_directory_id:
+          type:
+          - string
+          - 'null'
+          description: Linked custom directory ID (required for directory_link fields)
+    DeleteCustomDirectoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Directory ID (UUID)
+        condition:
+          type: string
+          description: 'Directory condition after deletion. Documented value: removed. Map to the CustomDirectoryCondition Swift enum, which preserves unknown values.'

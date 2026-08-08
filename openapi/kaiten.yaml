@@ -6957,6 +6957,129 @@ paths:
           description: Invalid token
         '403':
           description: Forbidden
+  /user-roles:
+    get:
+      summary: Get list of user roles
+      operationId: list_user_roles
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserRole'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+    post:
+      summary: Create user role
+      operationId: create_user_role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRoleRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRole'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+  /user-roles/{role_id}:
+    get:
+      summary: Get user role
+      operationId: get_user_role
+      parameters:
+      - name: role_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Role ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRole'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    patch:
+      summary: Update user role
+      operationId: update_user_role
+      parameters:
+      - name: role_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Role ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRoleRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRole'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Remove user role
+      operationId: delete_user_role
+      parameters:
+      - name: role_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Role ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteUserRoleRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRole'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 components:
   securitySchemes:
     bearerAuth:
@@ -15078,3 +15201,55 @@ components:
           maxLength: 128
           pattern: '^[a-z0-9-]+$'
           description: Human-readable URL slug. Lowercase latin letters, digits and hyphens only. Must be unique within the public site subtree
+    UserRole:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Role id
+        uid:
+          type: string
+          description: Role uid
+        name:
+          type: string
+          description: Role name
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` (built-in company-wide roles carry no company id) — https://developers.kaiten.ru/user-roles/get-list-of-user-roles
+        company_id:
+          type:
+          - integer
+          - 'null'
+          description: Company Id
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+    CreateUserRoleRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Role name
+    UpdateUserRoleRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Role name
+    DeleteUserRoleRequest:
+      type: object
+      required:
+      - replace_role_id
+      properties:
+        replace_role_id:
+          type: integer
+          description: Role id to replace deleted

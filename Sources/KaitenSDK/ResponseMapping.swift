@@ -1411,8 +1411,7 @@ extension Operations.remove_space_user.Output {
 // MARK: - Iterations
 
 extension Operations.get_card_iterations_history.Output {
-  func toCase() -> KaitenClient.ResponseCase<Operations.get_card_iterations_history.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_card_iterations_history.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -1551,8 +1550,7 @@ extension Operations.add_sd_external_recipient.Output {
 }
 
 extension Operations.remove_sd_external_recipient.Output {
-  func toCase() -> KaitenClient.ResponseCase<Operations.remove_sd_external_recipient.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.remove_sd_external_recipient.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .badRequest: .undocumented(statusCode: 400)
@@ -1617,8 +1615,7 @@ extension Operations.remove_blocker_category.Output {
 // MARK: - Card Type Tree Entities
 
 extension Operations.list_card_type_tree_entities.Output {
-  func toCase() -> KaitenClient.ResponseCase<Operations.list_card_type_tree_entities.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_card_type_tree_entities.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -1643,8 +1640,7 @@ extension Operations.add_card_type_tree_entity.Output {
 }
 
 extension Operations.delete_card_type_tree_entity.Output {
-  func toCase() -> KaitenClient.ResponseCase<Operations.delete_card_type_tree_entity.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.delete_card_type_tree_entity.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -1658,8 +1654,7 @@ extension Operations.delete_card_type_tree_entity.Output {
 // MARK: - Card Allowed Users
 
 extension Operations.retrieve_card_allowed_users.Output {
-  func toCase() -> KaitenClient.ResponseCase<Operations.retrieve_card_allowed_users.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.retrieve_card_allowed_users.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -1901,8 +1896,7 @@ extension Operations.remove_virtual_user.Output {
 // MARK: - Custom Directory Fields
 
 extension Operations.list_custom_directory_fields.Output {
-  func toCase() -> KaitenClient.ResponseCase<Operations.list_custom_directory_fields.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_custom_directory_fields.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -1993,8 +1987,7 @@ extension Operations.create_custom_directory_record.Output {
 }
 
 extension Operations.get_custom_directory_record.Output {
-  func toCase() -> KaitenClient.ResponseCase<Operations.get_custom_directory_record.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_custom_directory_record.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -2603,8 +2596,7 @@ extension Operations.get_custom_property_file.Output {
 }
 
 extension Operations.delete_custom_property_file.Output {
-  func toCase() -> KaitenClient.ResponseCase<Operations.delete_custom_property_file.Output.Ok.Body>
-  {
+  func toCase() -> KaitenClient.ResponseCase<Operations.delete_custom_property_file.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
     case .unauthorized: .unauthorized
@@ -2624,6 +2616,68 @@ extension Operations.list_time_logs.Output {
     case .badRequest: .undocumented(statusCode: 400)
     case .unauthorized: .unauthorized
     case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+// MARK: - User Roles
+
+extension Operations.list_user_roles.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_user_roles.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.create_user_role.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.create_user_role.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.get_user_role.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_user_role.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_user_role.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.update_user_role.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.delete_user_role.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.delete_user_role.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
     case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
     }
   }

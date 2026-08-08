@@ -451,6 +451,11 @@ let sections: [Section] = [
     Operation(name: "update_space_template_checklist", errors: [.unauthorized]),
     Operation(name: "remove_space_template_checklist", errors: [.unauthorized]),
   ]),
+  Section(mark: "Space Template Checklist Items", operations: [
+    Operation(name: "create_space_template_checklist_item", errors: [.unauthorized]),
+    Operation(name: "update_space_template_checklist_item", errors: [.unauthorized]),
+    Operation(name: "remove_space_template_checklist_item", errors: [.unauthorized]),
+  ]),
 ]
 
 // MARK: - Generator

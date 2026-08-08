@@ -2367,3 +2367,41 @@ extension Operations.remove_space_template_checklist.Output {
     }
   }
 }
+
+// MARK: - Space Template Checklist Items
+
+extension Operations.create_space_template_checklist_item.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.create_space_template_checklist_item.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_space_template_checklist_item.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.update_space_template_checklist_item.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.remove_space_template_checklist_item.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.remove_space_template_checklist_item.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

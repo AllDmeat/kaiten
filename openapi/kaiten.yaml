@@ -4284,6 +4284,107 @@ paths:
                 $ref: '#/components/schemas/RemoveSpaceTemplateChecklistResponse'
         '401':
           description: Invalid token
+  /spaces/{space_uid}/template-checklists/{template_checklist_uid}/items:
+    post:
+      summary: Create new space template checklist item
+      operationId: create_space_template_checklist_item
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      - name: template_checklist_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Template checklist UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSpaceTemplateChecklistItemRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceTemplateChecklistItem'
+        '401':
+          description: Invalid token
+  /spaces/{space_uid}/template-checklists/{template_checklist_uid}/items/{item_uid}:
+    patch:
+      summary: Update space template checklist item
+      operationId: update_space_template_checklist_item
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      - name: template_checklist_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Template checklist UID
+      - name: item_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Template checklist item UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSpaceTemplateChecklistItemRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceTemplateChecklistItem'
+        '401':
+          description: Invalid token
+    delete:
+      summary: Remove space template checklist item
+      operationId: remove_space_template_checklist_item
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      - name: template_checklist_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Template checklist UID
+      - name: item_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Template checklist item UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedSpaceTemplateChecklistItemResponse'
+        '401':
+          description: Invalid token
   /categories:
     get:
       summary: Retrieve list of categories
@@ -10683,6 +10784,40 @@ components:
         uid:
           type: string
           description: Deleted template checklist UID
+    CreateSpaceTemplateChecklistItemRequest:
+      type: object
+      required:
+      - text
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Content of the checklist item
+        sort_order:
+          type: number
+          exclusiveMinimum: 0
+          description: Position
+    UpdateSpaceTemplateChecklistItemRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Content of the checklist item
+        sort_order:
+          type: number
+          exclusiveMinimum: 0
+          description: Position
+    DeletedSpaceTemplateChecklistItemResponse:
+      type: object
+      required:
+      - uid
+      properties:
+        uid:
+          type: string
+          description: Deleted template checklist item UID
     BlockerCategory:
       type: object
       properties:

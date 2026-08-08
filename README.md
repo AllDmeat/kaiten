@@ -320,6 +320,9 @@ kaiten detach-card-file --card-id 123 --file-id 7
 | `createCustomPropertyCatalogValue(propertyId:value:)` | Create a catalog value for a custom property |
 | `updateCustomPropertyCatalogValue(propertyId:id:condition:value:deleted:)` | Update a catalog value |
 | `removeCustomPropertyCatalogValue(propertyId:id:)` | Remove a catalog value |
+| `listCollectiveScoreValues(cardId:propertyId:)` | List collective score values of a custom property on a card |
+| `createCollectiveScoreValue(cardId:propertyId:value:)` | Create a collective score value |
+| `updateCollectiveScoreValue(cardId:propertyId:scoreValueId:value:)` | Update a collective score value |
 
 Property discriminators are exposed as Swift enums (`CustomPropertyType`,
 `CustomPropertyCondition`, `CustomPropertyVoteVariant`,

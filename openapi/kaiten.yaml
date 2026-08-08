@@ -3361,6 +3361,123 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /cards/{card_id}/custom-properties/{property_id}/collective-score-values:
+    get:
+      summary: Get list of score values
+      operationId: get_list_of_collective_score_values
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CollectiveScoreValue'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    post:
+      summary: Create new score value
+      operationId: create_collective_score_value
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollectiveScoreValueRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectiveScoreValue'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /cards/{card_id}/custom-properties/{property_id}/collective-score-values/{id}:
+    patch:
+      summary: Update score value
+      operationId: update_collective_score_value
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ScoreValue ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCollectiveScoreValueRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectiveScoreValue'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /spaces/{space_id}/automations:
     get:
       summary: Get list of automations
@@ -8768,6 +8885,60 @@ components:
         id:
           type: integer
           description: Deleted time log id
+    CollectiveScoreValue:
+      type: object
+      properties:
+        # `updated`, `created`, `updater_id` and `company_id` are documented only on the
+        # POST and PATCH responses; the GET list items stop at `author`, so all four stay optional.
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        id:
+          type: integer
+          description: Collective score id
+        value:
+          type: string
+          description: Collective score value
+        custom_property_id:
+          type: integer
+          description: Custom property id
+        author_id:
+          type: integer
+          description: Author id
+        updater_id:
+          type: integer
+          description: Last updater id
+        company_id:
+          type: integer
+          description: Company id
+        card_id:
+          type: integer
+          description: Card id
+        # `author` is documented only on the GET response; the documentation declares it as an
+        # object but defines no schema for it, so it stays a free-form object.
+        author:
+          type: object
+          additionalProperties: true
+          description: Author info. Shape is not described in the Kaiten documentation
+    CreateCollectiveScoreValueRequest:
+      type: object
+      required:
+      - value
+      properties:
+        value:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Value of card collective score custom property
+    UpdateCollectiveScoreValueRequest:
+      type: object
+      properties:
+        value:
+          $ref: '#/components/schemas/NullableString'
+          description: Value of card collective score custom property, 1 to 512 characters when set (null to clear, absent to leave unchanged)
     AuditLogEvent:
       type: object
       properties:

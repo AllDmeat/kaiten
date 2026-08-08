@@ -151,6 +151,9 @@ struct Kaiten: AsyncParsableCommand {
       AddGroupEntity.self,
       UpdateGroupEntity.self,
       RemoveGroupEntity.self,
+      ListCollectiveScoreValues.self,
+      CreateCollectiveScoreValue.self,
+      UpdateCollectiveScoreValue.self,
     ]
   )
 }

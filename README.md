@@ -310,6 +310,8 @@ kaiten detach-card-file --card-id 123 --file-id 7
 | `listCustomPropertySelectValues(propertyId:)` | List select values for a custom property |
 | `getCustomPropertySelectValue(propertyId:id:)` | Get a single select value |
 | `createCustomPropertySelectValue(propertyId:value:color:)` | Create a select value for a custom property |
+| `updateCustomPropertySelectValue(propertyId:id:value:color:condition:sortOrder:deleted:)` | Update a select value |
+| `removeCustomPropertySelectValue(propertyId:id:)` | Remove a select value |
 | `listCustomPropertyTreeEntities(propertyId:)` | List tree entities of a custom property |
 | `addCustomPropertyTreeEntity(propertyId:treeEntityUid:)` | Add a tree entity to a custom property |
 | `deleteCustomPropertyTreeEntity(propertyId:uid:)` | Delete a tree entity from a custom property |
@@ -338,6 +340,17 @@ the documentation does not list.
 CLI: `list-custom-property-catalog-values`, `get-custom-property-catalog-value`,
 `create-custom-property-catalog-value --property-id <id> --value '<JSON object>'`,
 `update-custom-property-catalog-value`, `remove-custom-property-catalog-value`.
+
+The select value `condition` discriminator is exposed as the
+`CustomPropertySelectValueCondition` Swift enum (`.active` / `.inactive`) with an
+`unknown(String)` case, so undocumented values are preserved rather than failing
+the whole response.
+
+CLI: `list-custom-property-select-values --property-id <id>`,
+`get-custom-property-select-value --property-id <id> --id <id>`,
+`create-custom-property-select-value --property-id <id> --value <text>`,
+`update-custom-property-select-value --property-id <id> --id <id>`,
+`remove-custom-property-select-value --property-id <id> --id <id>`.
 
 ### Users
 

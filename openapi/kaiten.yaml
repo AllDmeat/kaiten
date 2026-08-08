@@ -1680,6 +1680,72 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+    patch:
+      summary: Update select value
+      operationId: update_select_value
+      parameters:
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Select Value ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSelectValueRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPropertySelectValue'
+        '400':
+          description: Bad request
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Remove select value
+      operationId: remove_select_value
+      parameters:
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: SelectValue ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPropertySelectValue'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /company/custom-properties/{property_id}/catalog-values:
     get:
       summary: Get list of catalog values
@@ -5274,6 +5340,10 @@ components:
         id:
           type: integer
           description: Select option id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/custom-property-select-values/get-list-of-select-values
+        uid:
+          type: string
+          description: Select option uid
         custom_property_id:
           type: integer
           description: Custom property id
@@ -5289,7 +5359,7 @@ components:
           description: Whether the select value has been deleted
         condition:
           type: string
-          description: Custom property select value condition
+          description: 'Custom property select value condition. Documented values: active, inactive. Map to the CustomPropertySelectValueCondition Swift enum, which preserves unknown values.'
         sort_order:
           type: number
           description: Position
@@ -5390,6 +5460,29 @@ components:
           - integer
           - 'null'
           description: Color of custom property select value, null for no color
+    UpdateSelectValueRequest:
+      type: object
+      properties:
+        value:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Custom property select value
+        color:
+          type:
+          - integer
+          - 'null'
+          description: Color of custom property select value, null for no color
+        condition:
+          type: string
+          description: 'Custom property select value condition. Documented values: active, inactive. Map to the CustomPropertySelectValueCondition Swift enum, which preserves unknown values.'
+        sort_order:
+          type: number
+          minimum: 0
+          description: Position
+        deleted:
+          type: boolean
+          description: Custom property select value delete condition
     CreateCustomPropertyRequest:
       type: object
       required:

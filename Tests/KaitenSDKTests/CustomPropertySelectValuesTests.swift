@@ -91,6 +91,88 @@ struct CustomPropertySelectValuesTests {
     }
   }
 
+  @Test("updateCustomPropertySelectValue 200 returns updated value")
+  func updateSuccess() async throws {
+    // Shape based on a sanitized live select value plus the documented
+    // created/author_id/company_id fields of the update response.
+    let json = """
+      {"id": 7, "uid": "00000000-0000-0000-0000-000000000001", "custom_property_id": 100, \
+      "value": "Renamed", "color": 3, "deleted": false, "sort_order": 5.5, "external_id": null, \
+      "updated": "2024-01-02T03:04:05.000Z", "created": "2024-01-01T00:00:00.000Z", \
+      "condition": "inactive", "author_id": 42, "company_id": 1}
+      """
+    let transport = MockClientTransport.returning(statusCode: 200, body: json)
+    let client = try KaitenClient(
+      baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+    let value = try await client.updateCustomPropertySelectValue(
+      propertyId: 100, id: 7, value: "Renamed", color: 3, condition: .inactive, sortOrder: 5.5,
+      deleted: false)
+    #expect(value.id == 7)
+    #expect(value.uid == "00000000-0000-0000-0000-000000000001")
+    #expect(value.value == "Renamed")
+    #expect(value.color == 3)
+    #expect(value.selectValueCondition == .inactive)
+    #expect(value.sort_order == 5.5)
+    #expect(value.external_id == nil)
+  }
+
+  @Test("updateCustomPropertySelectValue 404 throws notFound")
+  func updateNotFound() async throws {
+    let transport = MockClientTransport.returning(statusCode: 404)
+    let client = try KaitenClient(
+      baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+    await #expect(throws: KaitenError.self) {
+      _ = try await client.updateCustomPropertySelectValue(propertyId: 100, id: 999, value: "X")
+    }
+  }
+
+  @Test("removeCustomPropertySelectValue 200 returns removed value")
+  func removeSuccess() async throws {
+    // Shape based on a sanitized live select value plus the documented
+    // created/author_id/company_id fields of the remove response.
+    let json = """
+      {"id": 7, "uid": "00000000-0000-0000-0000-000000000001", "custom_property_id": 100, \
+      "value": "Obsolete", "color": 3, "deleted": true, "sort_order": 5.5, "external_id": null, \
+      "updated": "2024-01-02T03:04:05.000Z", "created": "2024-01-01T00:00:00.000Z", \
+      "condition": "active", "author_id": 42, "company_id": 1}
+      """
+    let transport = MockClientTransport.returning(statusCode: 200, body: json)
+    let client = try KaitenClient(
+      baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+    let value = try await client.removeCustomPropertySelectValue(propertyId: 100, id: 7)
+    #expect(value.id == 7)
+    #expect(value.deleted == true)
+    #expect(value.custom_property_id == 100)
+    #expect(value.selectValueCondition == .active)
+  }
+
+  @Test("removeCustomPropertySelectValue 404 throws notFound")
+  func removeNotFound() async throws {
+    let transport = MockClientTransport.returning(statusCode: 404)
+    let client = try KaitenClient(
+      baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+    await #expect(throws: KaitenError.self) {
+      _ = try await client.removeCustomPropertySelectValue(propertyId: 100, id: 999)
+    }
+  }
+
+  @Test("selectValueCondition preserves undocumented values")
+  func conditionPreservesUnknown() async throws {
+    let json = """
+      {"id": 1, "custom_property_id": 100, "value": "iOS", "condition": "archived", "sort_order": 1.0}
+      """
+    let transport = MockClientTransport.returning(statusCode: 200, body: json)
+    let client = try KaitenClient(
+      baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+    let value = try await client.getCustomPropertySelectValue(propertyId: 100, id: 1)
+    #expect(value.selectValueCondition == .unknown("archived"))
+  }
+
   @Test("listCustomPropertySelectValues surfaces deleted values")
   func listExposesDeleted() async throws {
     let json = """

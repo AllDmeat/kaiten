@@ -110,6 +110,9 @@ let sections: [Section] = [
     Operation(
       name: "create_select_value", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
     Operation(name: "get_select_value", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "update_select_value", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(name: "remove_select_value", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
   Section(mark: "Custom Property Catalog Values", operations: [
     Operation(name: "get_list_of_catalog_values", errors: [.unauthorized, .forbidden, .notFound]),

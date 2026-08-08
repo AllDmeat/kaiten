@@ -1853,3 +1853,54 @@ public enum CustomDirectoryFilterOperator: Sendable, Equatable, CaseIterable, Co
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Custom Property Select Values
+//
+// The select value `condition` travels as a plain string in the OpenAPI spec
+// (see FR-020a): Kaiten may return values its documentation does not list, and
+// a generated closed enum would fail the entire response instead of the single
+// field. The typed surface lives here, with an `unknown(String)` case that
+// preserves anything new the API adds.
+
+/// Custom property select value condition.
+///
+/// Used in ``KaitenClient/updateCustomPropertySelectValue(propertyId:id:value:color:condition:sortOrder:deleted:)``.
+/// - SeeAlso: [Kaiten API – Custom Property Select Values](https://developers.kaiten.ru/custom-property-select-values/update-select-value)
+public enum CustomPropertySelectValueCondition: Sendable, Equatable, CaseIterable, Codable {
+  /// The select value is available for use.
+  case active
+  /// The select value is hidden from selection.
+  case inactive
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CustomPropertySelectValueCondition] {
+    [.active, .inactive]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "active": self = .active
+    case "inactive": self = .inactive
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .active: "active"
+    case .inactive: "inactive"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

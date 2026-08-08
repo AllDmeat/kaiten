@@ -1655,3 +1655,151 @@ public enum CustomDirectoryFieldType: Sendable, Equatable, CaseIterable, Codable
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Custom Directory Records
+//
+// Custom directory record discriminators are declared as plain strings in the
+// OpenAPI spec, per the forward-compatibility rule at the top of this file: the
+// custom directories API is documented as beta, so a generated closed enum
+// would fail entire responses when Kaiten adds a value. The typed surface
+// lives here instead, with an `unknown(String)` case.
+
+/// Custom directory record condition.
+/// - SeeAlso: [Kaiten API – Custom directory records](https://developers.kaiten.ru/custom-directory-records/get-list-of-records)
+public enum CustomDirectoryRecordCondition: Sendable, Equatable, CaseIterable, Codable {
+  /// Record is active.
+  case active
+  /// Record is inactive.
+  case inactive
+  /// Record is soft-deleted.
+  case removed
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CustomDirectoryRecordCondition] {
+    [.active, .inactive, .removed]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "active": self = .active
+    case "inactive": self = .inactive
+    case "removed": self = .removed
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .active: "active"
+    case .inactive: "inactive"
+    case .removed: "removed"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// Profile controlling which relations a custom directory record response includes.
+///
+/// The `none` profile is spelled ``noRelations`` on the Swift side: a case
+/// literally named `none` would be shadowed by `Optional.none` at every
+/// `CustomDirectoryProfile?` call site, silently omitting the parameter
+/// instead of sending `profile=none`.
+/// - SeeAlso: [Kaiten API – Custom directory records](https://developers.kaiten.ru/custom-directory-records/get-list-of-records)
+public enum CustomDirectoryProfile: Sendable, Equatable, CaseIterable, Codable {
+  /// No relations. Raw value `none`. In mutating endpoints the response is `{ id }` only.
+  case noRelations
+  /// Summary relations.
+  case summary
+  /// Detailed relations.
+  case details
+  /// All relations.
+  case full
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CustomDirectoryProfile] {
+    [.noRelations, .summary, .details, .full]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "none": self = .noRelations
+    case "summary": self = .summary
+    case "details": self = .details
+    case "full": self = .full
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .noRelations: "none"
+    case .summary: "summary"
+    case .details: "details"
+    case .full: "full"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// Boolean operator joining the filters of a custom directory record list request.
+/// - SeeAlso: [Kaiten API – Custom directory records](https://developers.kaiten.ru/custom-directory-records/get-list-of-records)
+public enum CustomDirectoryFilterOperator: Sendable, Equatable, CaseIterable, Codable {
+  /// All filters must match.
+  case and
+  /// Any filter must match.
+  case or
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CustomDirectoryFilterOperator] {
+    [.and, .or]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "and": self = .and
+    case "or": self = .or
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .and: "and"
+    case .or: "or"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

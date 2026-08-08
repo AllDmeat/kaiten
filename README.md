@@ -549,6 +549,41 @@ CLI: `list-custom-directory-fields`, `create-custom-directory-field`,
 `get-custom-directory-field`, `update-custom-directory-field`,
 `delete-custom-directory-field`, each taking `--directory-id` (and `--field-id`
 where a single field is addressed).
+### Custom Directory Records
+
+| Method | Description |
+|--------|-------------|
+| `listCustomDirectoryRecords(directoryId:query:profile:includeValues:includeAuthor:conditions:filters:filterOperator:offset:limit:)` | List records in a custom directory |
+| `createCustomDirectoryRecord(directoryId:values:responseProfile:)` | Create a record |
+| `getCustomDirectoryRecord(directoryId:recordId:profile:)` | Get a record |
+| `updateCustomDirectoryRecord(directoryId:recordId:condition:values:responseProfile:)` | Update a record's values and/or condition |
+| `deleteCustomDirectoryRecord(directoryId:recordId:)` | Soft-delete a record (condition becomes `removed`) |
+| `listCustomDirectoryRecordCards(directoryId:recordId:filter:offset:limit:)` | List cards linked to a record |
+
+The custom directories API is documented as beta and may change. Which record
+fields a response includes depends on the `profile`/`responseProfile`
+parameter (`CustomDirectoryProfile`; the documented `none` value is spelled
+`.noRelations` in Swift so it cannot be shadowed by `Optional.none`). The
+record condition is exposed as the `CustomDirectoryRecordCondition` enum with
+an `unknown(String)` case that preserves values the documentation does not
+list. Request `values` maps and populated relation objects stay free-form
+JSON — the documentation does not describe their shapes.
+
+```swift
+let page = try await client.listCustomDirectoryRecords(
+  directoryId: "d1",
+  profile: .details,
+  conditions: [.active]
+)
+for record in page.items {
+  print(record.display_value ?? "")
+}
+```
+
+CLI: `list-custom-directory-records`, `create-custom-directory-record`,
+`get-custom-directory-record`, `update-custom-directory-record`,
+`delete-custom-directory-record`, `list-custom-directory-record-cards` — all
+take `--directory-id`, the record-scoped ones also `--record-id`.
 
 ## Pagination
 

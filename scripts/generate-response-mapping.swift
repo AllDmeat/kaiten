@@ -292,6 +292,17 @@ let sections: [Section] = [
     Operation(name: "update_custom_directory_field", errors: [.unauthorized, .notFound]),
     Operation(name: "delete_custom_directory_field", errors: [.unauthorized, .notFound]),
   ]),
+  Section(mark: "Custom Directory Records", operations: [
+    Operation(name: "list_custom_directory_records", errors: [.unauthorized, .notFound]),
+    Operation(
+      name: "create_custom_directory_record", errors: [.badRequest, .unauthorized, .notFound]),
+    Operation(name: "get_custom_directory_record", errors: [.unauthorized, .notFound]),
+    Operation(
+      name: "update_custom_directory_record", errors: [.badRequest, .unauthorized, .notFound]),
+    Operation(name: "delete_custom_directory_record", errors: [.unauthorized, .notFound]),
+    Operation(
+      name: "list_custom_directory_record_cards", errors: [.badRequest, .unauthorized, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

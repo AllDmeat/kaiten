@@ -149,6 +149,10 @@ let sections: [Section] = [
     Operation(name: "add_card_tag", errors: [.unauthorized, .forbidden, .notFound]),
     Operation(name: "remove_card_tag", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
+  Section(mark: "Tags", operations: [
+    Operation(name: "retrieve_list_of_tags", errors: [.unauthorized, .forbidden]),
+    Operation(name: "add_tag", errors: [.badRequest, .unauthorized, .forbidden]),
+  ]),
   Section(mark: "Users", operations: [
     Operation(name: "retrieve_list_of_users", errors: [.unauthorized]),
     Operation(name: "retrieve_current_user", errors: [.unauthorized]),

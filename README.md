@@ -423,6 +423,21 @@ CLI: `list-group-users --group-uid <uid>`,
 and `--operator-comment`,
 `remove-group-user --group-uid <uid> --user-id <id>`.
 
+### Tags
+
+| Method | Description |
+|--------|-------------|
+| `listTags(limit:offset:spaceId:ids:query:)` | List tags in the company |
+| `addTag(name:...)` | Add a tag to the company |
+
+Live responses carry `uid`, `locked` and `fts_version` fields the documentation
+does not list. The documentation also lists the list endpoint's filter query
+parameters on the add endpoint; the SDK exposes them, their effect on creation
+is unverified.
+
+CLI: `list-tags` with `--limit`, `--offset`, `--space-id`, `--ids`, `--query`;
+`add-tag --name <name>`.
+
 ### Card Types & Sprints
 
 | Method | Description |

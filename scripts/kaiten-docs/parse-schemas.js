@@ -11,16 +11,22 @@ if (!url) {
   try {
     const schemas = await withPage(url, async page => {
       const results = [];
-      const buttons = await page.$$("button.MuiButton-root");
+      // Schema triggers render as either <button> or <a>, and their label is
+      // uppercased by CSS — match case-insensitively on both tags.
+      const buttons = await page.$$("button.MuiButton-root, a.MuiButton-root");
       const schemaButtons = [];
 
       for (const button of buttons) {
         const text = ((await button.textContent()) || "").trim();
-        if (text === "Schema") schemaButtons.push(button);
+        if (/^schema$/i.test(text)) schemaButtons.push(button);
       }
 
       for (const button of schemaButtons) {
-        const fieldContext = await button.evaluate(el => el.closest("tr")?.textContent || "unknown");
+        // The row's full textContent can contain serialized markup; the first
+        // cell holds the field name on its own.
+        const fieldContext = await button.evaluate(
+          el => el.closest("tr")?.querySelector("td")?.textContent || "unknown"
+        );
         try {
           await button.click({ timeout: 3000 });
           await page.waitForTimeout(700);

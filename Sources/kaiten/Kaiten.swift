@@ -75,6 +75,10 @@ struct Kaiten: AsyncParsableCommand {
       CreateLane.self,
       UpdateLane.self,
       GetCardBaselines.self,
+      ListAutomations.self,
+      CreateAutomation.self,
+      UpdateAutomation.self,
+      DeleteAutomation.self,
     ]
   )
 }

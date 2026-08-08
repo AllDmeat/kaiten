@@ -211,6 +211,10 @@ stdout confirms it works.
   MUST NOT carry worked examples or the evidence behind a stated limit —
   none of that is this CLI's behaviour to document. Properties shared by
   every response belong once in the root command's discussion.
+- **FR-024**: Options carrying structured JSON (currently automation `--trigger`,
+  `--conditions` and `--actions`) MUST be decoded and validated locally before the
+  SDK call. Malformed JSON MUST produce a validation error naming the offending
+  option; silently forwarding or dropping the value is forbidden.
 
 ### Non-Functional Requirements
 

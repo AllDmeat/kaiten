@@ -17,6 +17,7 @@
 enum ErrorCase: String {
   case badRequest
   case unauthorized
+  case paymentRequired
   case forbidden
   case notFound
 }
@@ -24,6 +25,15 @@ enum ErrorCase: String {
 struct Operation {
   let name: String
   let errors: [ErrorCase]
+  /// Whether the `200` response carries a body. Operations documented as
+  /// returning no content map to `ResponseCase<Void>`.
+  let hasBody: Bool
+
+  init(name: String, errors: [ErrorCase], hasBody: Bool = true) {
+    self.name = name
+    self.errors = errors
+    self.hasBody = hasBody
+  }
 }
 
 struct Section {
@@ -138,17 +148,28 @@ let sections: [Section] = [
   Section(mark: "Card Baselines", operations: [
     Operation(name: "get_card_baselines", errors: [.unauthorized, .forbidden]),
   ]),
+  Section(mark: "Automations", operations: [
+    Operation(name: "list_automations", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "create_automation",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "update_automation",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "delete_automation", errors: [.unauthorized, .forbidden, .notFound], hasBody: false),
+  ]),
 ]
 
 // MARK: - Generator
 
 func generateExtension(_ op: Operation) -> String {
   let typeName = "Operations.\(op.name).Output"
-  let returnType = "KaitenClient.ResponseCase<\(typeName).Ok.Body>"
+  let returnType = "KaitenClient.ResponseCase<\(op.hasBody ? "\(typeName).Ok.Body" : "Void")>"
 
   // Build switch cases
   var cases: [String] = []
-  cases.append("    case .ok(let ok): .ok(ok.body)")
+  cases.append(op.hasBody ? "    case .ok(let ok): .ok(ok.body)" : "    case .ok: .ok(())")
 
   for error in op.errors {
     switch error {
@@ -156,6 +177,8 @@ func generateExtension(_ op: Operation) -> String {
       cases.append("    case .badRequest: .undocumented(statusCode: 400)")
     case .unauthorized:
       cases.append("    case .unauthorized: .unauthorized")
+    case .paymentRequired:
+      cases.append("    case .code402: .undocumented(statusCode: 402)")
     case .forbidden:
       cases.append("    case .forbidden: .forbidden")
     case .notFound:

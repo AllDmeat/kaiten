@@ -20,6 +20,7 @@ enum ErrorCase: String {
   case paymentRequired
   case forbidden
   case notFound
+  case conflict
   case serviceUnavailable
 }
 
@@ -199,6 +200,19 @@ let sections: [Section] = [
     Operation(
       name: "delete_automation", errors: [.unauthorized, .forbidden, .notFound], hasBody: false),
   ]),
+  Section(mark: "Space Users", operations: [
+    Operation(name: "list_space_users", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "invite_user_to_space",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(name: "get_space_user", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "update_space_user",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "remove_space_user",
+      errors: [.unauthorized, .forbidden, .notFound, .conflict]),
+  ]),
   Section(mark: "Service Desk External Recipients", operations: [
     Operation(
       name: "add_sd_external_recipient",
@@ -277,6 +291,8 @@ func generateExtension(_ op: Operation) -> String {
       cases.append("    case .forbidden: .forbidden")
     case .notFound:
       cases.append("    case .notFound: .notFound")
+    case .conflict:
+      cases.append("    case .conflict: .undocumented(statusCode: 409)")
     case .serviceUnavailable:
       cases.append("    case .serviceUnavailable: .undocumented(statusCode: 503)")
     }

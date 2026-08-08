@@ -994,6 +994,71 @@ extension Operations.delete_automation.Output {
   }
 }
 
+// MARK: - Space Users
+
+extension Operations.list_space_users.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_space_users.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.invite_user_to_space.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.invite_user_to_space.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.get_space_user.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_space_user.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_space_user.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.update_space_user.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.remove_space_user.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.remove_space_user.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .conflict: .undocumented(statusCode: 409)
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 // MARK: - Service Desk External Recipients
 
 extension Operations.add_sd_external_recipient.Output {

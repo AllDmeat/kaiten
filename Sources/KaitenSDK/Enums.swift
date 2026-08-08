@@ -2092,3 +2092,97 @@ public enum GroupCondition: Sendable, Equatable, CaseIterable, Codable {
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Documents
+//
+// Document discriminators are declared as plain strings in the OpenAPI spec
+// because Kaiten returns values its documentation does not list (the icon type
+// `emoji` is a live example the retrieve endpoints omit). A generated closed
+// enum would fail to decode those responses outright, so the typed surface
+// lives here instead — with an `unknown(String)` case that preserves anything
+// new the API adds.
+
+/// Document access type.
+/// - SeeAlso: [Kaiten API – Documents](https://developers.kaiten.ru/documents/retrieve-document)
+public enum DocumentAccess: Sendable, Equatable, CaseIterable, Codable {
+  /// Accessible to all company members.
+  case forEveryone
+  /// Accessible only to invited members.
+  case byInvite
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [DocumentAccess] {
+    [.forEveryone, .byInvite]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "for_everyone": self = .forEveryone
+    case "by_invite": self = .byInvite
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .forEveryone: "for_everyone"
+    case .byInvite: "by_invite"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// Document icon type.
+///
+/// The retrieve endpoints document only `material_icon`, but live responses also
+/// carry `emoji`, which the update endpoint documents as an allowed value.
+/// - SeeAlso: [Kaiten API – Documents](https://developers.kaiten.ru/documents/update-document)
+public enum DocumentIconType: Sendable, Equatable, CaseIterable, Codable {
+  /// An emoji character.
+  case emoji
+  /// A material icon name.
+  case materialIcon
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [DocumentIconType] {
+    [.emoji, .materialIcon]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "emoji": self = .emoji
+    case "material_icon": self = .materialIcon
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .emoji: "emoji"
+    case .materialIcon: "material_icon"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

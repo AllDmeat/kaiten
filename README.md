@@ -784,6 +784,55 @@ let created = try await client.createDocumentGroup(title: "Handbook", key: "HB")
 CLI: `list-document-groups`, `search-document-groups`, `get-document-group`,
 `create-document-group`, `update-document-group`, `delete-document-group`.
 
+### Documents
+
+| Method | Description |
+|--------|-------------|
+| `listDocuments(query:offset:limit:)` | List documents (version=1 response) |
+| `searchDocuments(query:condition:fields:startPosition:includeSearchPreview:offset:limit:)` | Search documents via OpenSearch (version=2 response) |
+| `getDocument(uid:)` | Get a document, including its content |
+| `createDocument(sortOrder:title:parentEntityUid:forEveryoneAccessRoleId:cloneUid:cloneVersion:key:)` | Create a document |
+| `updateDocument(uid:title:sortOrder:publishDate:data:access:parentEntityUid:forEveryoneAccessRoleId:isPublic:redirectUrl:hiddenOnPublicSite:settings:backupVersion:publishedVersion:key:iconType:iconValue:iconColor:notificationPeriodStart:notificationPeriodEnd:slug:)` | Update a document |
+| `deleteDocument(uid:)` | Remove a document |
+
+Documents are addressed by string UID. `GET /documents` answers in two shapes:
+the default (version=1) response is a plain array exposed as a `Page`, while
+`searchDocuments` calls the same endpoint with `version=2` and returns a
+`result` list plus an opaque `position` cursor — pass it back as
+`startPosition` to fetch the next page.
+
+Access and icon type discriminators are exposed as Swift enums
+(`DocumentAccess`, `DocumentIconType`), each with an `unknown(String)` case
+that preserves values the documentation does not list. A document's `data`
+holds the ProseMirror content: live responses return it as a JSON-encoded
+string even though the documentation declares an object, so the SDK accepts
+both shapes.
+
+```swift
+let page = try await client.listDocuments(query: "handbook")
+for document in page.items {
+  print(document.title ?? "")
+}
+
+let document = try await client.getDocument(uid: "doc-uid")
+print(document.data?.value1 ?? "")  // ProseMirror JSON string
+```
+
+CLI: `kaiten list-documents` with `--query`, `--offset`, `--limit`;
+`kaiten search-documents` with `--query`, `--condition`, `--fields`,
+`--start-position`, `--include-search-preview`, `--offset`, `--limit`;
+`kaiten get-document --document-uid <uid>`;
+`kaiten create-document --sort-order <n>` with `--title`,
+`--parent-entity-uid`, `--for-everyone-access-role-id`, `--clone-uid`,
+`--clone-version`, `--key`;
+`kaiten update-document --document-uid <uid>` with `--title`, `--sort-order`,
+`--publish-date`, `--data`, `--access`, `--parent-entity-uid`,
+`--for-everyone-access-role-id`, `--public`, `--redirect-url`,
+`--hidden-on-public-site`, `--settings`, `--backup-version`,
+`--published-version`, `--key`, `--icon-type`, `--icon-value`, `--icon-color`,
+`--notification-period-start`, `--notification-period-end`, `--slug`;
+`kaiten delete-document --document-uid <uid>`.
+
 ### Groups
 
 | Method | Description |

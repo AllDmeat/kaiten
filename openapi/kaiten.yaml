@@ -5610,6 +5610,178 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /documents:
+    get:
+      summary: Retrieve list of documents
+      operationId: list_documents
+      parameters:
+      - name: query
+        in: query
+        schema:
+          type: string
+        description: Search query string
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: 'Number of records to skip for pagination. Default: 0'
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: 'Maximum number of records to return. Default: 100'
+      - name: version
+        in: query
+        schema:
+          type: integer
+        description: 'Search version. Default: 1. Use version=2 to search via OpenSearch and enable the new response format with result and position fields'
+      - name: condition
+        in: query
+        schema:
+          type: integer
+        description: Filter condition. Used with version=2
+      - name: fields
+        in: query
+        schema:
+          type: string
+        description: Comma-separated list of fields to search in. Used with version=2
+      - name: start_position
+        in: query
+        schema:
+          type: string
+        description: Search cursor for version=2 pagination. Pass the position value from the previous version=2 response
+      - name: include_search_preview
+        in: query
+        schema:
+          type: boolean
+        description: 'Include the preview object in each search result. Used with version=2. Default: false'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                description: Array of documents when version is omitted or 1, an object with result and position when version=2
+                anyOf:
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/DocumentListItem'
+                - $ref: '#/components/schemas/DocumentSearchResponse'
+        '401':
+          description: Invalid token
+    post:
+      summary: Create new document
+      operationId: create_document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDocumentRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '409':
+          description: Conflict — the key is already in use in the company
+  /documents/{document_uid}:
+    get:
+      summary: Retrieve document
+      operationId: get_document
+      parameters:
+      - name: document_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Document UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    patch:
+      summary: Update document
+      operationId: update_document
+      parameters:
+      - name: document_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Document UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDocumentRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict — key already in use or has unfinished key operations
+    delete:
+      summary: Remove document
+      operationId: delete_document
+      parameters:
+      - name: document_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Document UID
+      responses:
+        # NOTE: the remove-document response table documents only uid, id, title and archived, but
+        # the 200 example on the same page shows the full document object, so the shared Document
+        # schema (all properties optional) covers both shapes.
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          description: Document has child tree entities — remove or move them first
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 components:
   securitySchemes:
     bearerAuth:
@@ -12348,3 +12520,649 @@ components:
         add_to_cards_and_spaces_enabled:
           type: boolean
           description: Ability to add all users of the group to cards placed in group spaces, and to filter logs by group in Timesheets
+    Document:
+      type: object
+      description: A Kaiten document, as returned by the create, retrieve, update and remove endpoints
+      properties:
+        uid:
+          type: string
+          description: Document uid
+        # DOC_MISMATCH: docs=`integer`, actual=`string` (same value as uid) — https://developers.kaiten.ru/documents/retrieve-document
+        # NOTE: the docs' 200 examples show an integer id, so both shapes are accepted via anyOf.
+        id:
+          anyOf:
+          - type: string
+          - type: integer
+          description: Document id. Live responses return the document uid string; the documentation declares an integer
+        title:
+          type: string
+          description: Document title
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        # DOC_MISMATCH: docs=`boolean`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        archived:
+          type: boolean
+          description: Document archived flag. Always true after removal
+        # DOC_MISMATCH: docs=`integer`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        company_id:
+          type: integer
+          description: Company id
+        author_id:
+          type: integer
+          description: Author user id
+        parent_entity_uid:
+          type:
+          - string
+          - 'null'
+          description: Parent tree entity uid
+        group_id:
+          type:
+          - string
+          - 'null'
+          description: 'Deprecated alias for parent_entity_uid'
+        entity_type:
+          type: string
+          description: Entity type. Always "document"
+        sort_order:
+          type: number
+          description: Document sort order
+        # DOC_MISMATCH: docs=`enum` (for_everyone, by_invite), actual=`string` — declared as a plain string so undocumented values do not fail decoding — https://developers.kaiten.ru/documents/retrieve-document
+        access:
+          type: string
+          description: 'Document access type. Documented values: for_everyone (accessible to all company members), by_invite (only invited members). Map to the DocumentAccess Swift enum, which preserves unknown values.'
+        for_everyone_access_role_id:
+          type:
+          - string
+          - 'null'
+          description: Role id for everyone access
+        # DOC_MISMATCH: docs=`object` (ProseMirror JSON), actual=`string` (JSON-encoded ProseMirror document) — https://developers.kaiten.ru/documents/retrieve-document
+        data:
+          anyOf:
+          - type: string
+          - type: object
+            additionalProperties: true
+          description: Document content in ProseMirror format. Live responses carry a JSON-encoded string; the documentation and its examples show an object, so both shapes decode
+        # DOC_MISMATCH: docs=`integer`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        version:
+          type: integer
+          description: Current document version number
+        published_version:
+          type:
+          - integer
+          - 'null'
+          description: Published version number
+        publish_date:
+          type:
+          - string
+          - 'null'
+          description: Publication date
+        public:
+          type: boolean
+          description: Is document publicly available (legacy field)
+        hidden_on_public_site:
+          type: boolean
+          description: Document is hidden on public site
+        settings:
+          $ref: '#/components/schemas/DocumentSettings'
+          description: Document appearance settings
+        key:
+          type:
+          - string
+          - 'null'
+          description: Unique document key within company
+        redirect_url:
+          type:
+          - string
+          - 'null'
+          description: Redirect URL
+        # DOC_MISMATCH: docs=`"material_icon" or null`, actual also returns `emoji` — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        icon_type:
+          type:
+          - string
+          - 'null'
+          description: 'Icon type. Observed values: material_icon, emoji. Map to the DocumentIconType Swift enum, which preserves unknown values.'
+        icon_value:
+          type:
+          - string
+          - 'null'
+          description: Icon value (icon name for material_icon type)
+        icon_color:
+          type:
+          - integer
+          - 'null'
+          description: Icon color
+        path:
+          type: string
+          description: Inner path to entity in tree
+        # DOC_MISMATCH: docs=`integer`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        schema_version:
+          type: integer
+          description: ProseMirror schema version
+        notification_period_start:
+          type:
+          - string
+          - 'null'
+          description: Notification period start date
+        notification_period_end:
+          type:
+          - string
+          - 'null'
+          description: Notification period end date
+        access_record:
+          $ref: '#/components/schemas/DocumentAccessRecord'
+          description: Current user access record to this document
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        public_id:
+          type: string
+          description: Public document id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        updater_id:
+          type: integer
+          description: Last updater user id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        slug:
+          type:
+          - string
+          - 'null'
+          description: Human-readable URL slug
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        author:
+          $ref: '#/components/schemas/DocumentUserSummary'
+          description: Document author
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        updater:
+          $ref: '#/components/schemas/DocumentUserSummary'
+          description: Last updater
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        documentGroup:
+          type: object
+          additionalProperties: true
+          description: Parent document group. Not described in the Kaiten documentation, so the shape stays free-form
+    DocumentListItem:
+      type: object
+      description: A document row returned by the version=1 list response. Differs from Document — the list carries no content or author objects
+      properties:
+        uid:
+          type: string
+          description: Document uid
+        # DOC_MISMATCH: docs=`integer`, actual=`string` (same value as uid) — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        id:
+          anyOf:
+          - type: string
+          - type: integer
+          description: Document id. Live responses return the document uid string; the documentation declares an integer
+        title:
+          type: string
+          description: Document title
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        archived:
+          type: boolean
+          description: Document archived flag
+        company_id:
+          type: integer
+          description: Company id
+        author_id:
+          type: integer
+          description: Author user id
+        parent_entity_uid:
+          type:
+          - string
+          - 'null'
+          description: Parent tree entity uid
+        group_id:
+          type:
+          - string
+          - 'null'
+          description: 'Deprecated alias for parent_entity_uid'
+        entity_type:
+          type: string
+          description: Entity type. Always "document"
+        sort_order:
+          type: number
+          description: Document sort order
+        # DOC_MISMATCH: docs=`enum` (for_everyone, by_invite), actual=`string` — declared as a plain string so undocumented values do not fail decoding — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        access:
+          type: string
+          description: 'Document access type. Documented values: for_everyone, by_invite. Map to the DocumentAccess Swift enum, which preserves unknown values.'
+        for_everyone_access_role_id:
+          type:
+          - string
+          - 'null'
+          description: Role id for everyone access
+        # DOC_MISMATCH: docs=`integer`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        version:
+          type: integer
+          description: Current document version number
+        # DOC_MISMATCH: docs=`null | integer`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        published_version:
+          type:
+          - integer
+          - 'null'
+          description: Published version number
+        publish_date:
+          type:
+          - string
+          - 'null'
+          description: Publication date
+        public:
+          type: boolean
+          description: Is document publicly available (legacy field)
+        # DOC_MISMATCH: docs=`boolean`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        hidden_on_public_site:
+          type: boolean
+          description: Document is hidden on public site
+        settings:
+          $ref: '#/components/schemas/DocumentSettings'
+          description: Document appearance settings
+        key:
+          type:
+          - string
+          - 'null'
+          description: Unique document key within company
+        # DOC_MISMATCH: docs=`null | string`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        redirect_url:
+          type:
+          - string
+          - 'null'
+          description: Redirect URL
+        # DOC_MISMATCH: docs=`"material_icon" or null`, actual also returns `emoji` — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        icon_type:
+          type:
+          - string
+          - 'null'
+          description: 'Icon type. Observed values: material_icon, emoji. Map to the DocumentIconType Swift enum, which preserves unknown values.'
+        icon_value:
+          type:
+          - string
+          - 'null'
+          description: Icon value
+        icon_color:
+          type:
+          - integer
+          - 'null'
+          description: Icon color
+        path:
+          type: string
+          description: Inner path to entity in tree
+        # DOC_MISMATCH: docs=`integer`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        schema_version:
+          type: integer
+          description: ProseMirror schema version
+        # DOC_MISMATCH: docs=`null | string`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        notification_period_start:
+          type:
+          - string
+          - 'null'
+          description: Notification period start date
+        # DOC_MISMATCH: docs=`null | string`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        notification_period_end:
+          type:
+          - string
+          - 'null'
+          description: Notification period end date
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        public_id:
+          type: string
+          description: Public document id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        updater_id:
+          type: integer
+          description: Last updater user id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        access_record:
+          $ref: '#/components/schemas/DocumentAccessRecord'
+          description: Current user access record to this document
+    DocumentSearchResponse:
+      type: object
+      description: The version=2 list response envelope
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentSearchResult'
+          description: Search results
+        position:
+          type: string
+          description: Opaque cursor for pagination. Pass this value as start_position in the next request
+    DocumentSearchResult:
+      type: object
+      description: A document row returned by the version=2 list response. Same shape as DocumentListItem plus search-specific fields
+      properties:
+        uid:
+          type: string
+          description: Document uid
+        # DOC_MISMATCH: docs=`integer`, actual=`string` (same value as uid) — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        id:
+          anyOf:
+          - type: string
+          - type: integer
+          description: Document id. Live responses return the document uid string; the documentation declares an integer
+        title:
+          type: string
+          description: Document title
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        archived:
+          type: boolean
+          description: Document archived flag
+        company_id:
+          type: integer
+          description: Company id
+        author_id:
+          type: integer
+          description: Author user id
+        parent_entity_uid:
+          type:
+          - string
+          - 'null'
+          description: Parent tree entity uid
+        group_id:
+          type:
+          - string
+          - 'null'
+          description: 'Deprecated alias for parent_entity_uid'
+        entity_type:
+          type: string
+          description: Entity type. Always "document"
+        sort_order:
+          type: number
+          description: Document sort order
+        # DOC_MISMATCH: docs=`enum` (for_everyone, by_invite), actual=`string` — declared as a plain string so undocumented values do not fail decoding — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        access:
+          type: string
+          description: 'Document access type. Documented values: for_everyone, by_invite. Map to the DocumentAccess Swift enum, which preserves unknown values.'
+        for_everyone_access_role_id:
+          type:
+          - string
+          - 'null'
+          description: Role id for everyone access
+        # DOC_MISMATCH: docs=`integer`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        version:
+          type: integer
+          description: Current document version number
+        # DOC_MISMATCH: docs=`null | integer`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        published_version:
+          type:
+          - integer
+          - 'null'
+          description: Published version number
+        publish_date:
+          type:
+          - string
+          - 'null'
+          description: Publication date
+        public:
+          type: boolean
+          description: Is document publicly available (legacy field)
+        # DOC_MISMATCH: docs=`boolean`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        hidden_on_public_site:
+          type: boolean
+          description: Document is hidden on public site
+        settings:
+          $ref: '#/components/schemas/DocumentSettings'
+          description: Document appearance settings
+        key:
+          type:
+          - string
+          - 'null'
+          description: Unique document key within company
+        # DOC_MISMATCH: docs=`null | string`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        redirect_url:
+          type:
+          - string
+          - 'null'
+          description: Redirect URL
+        # DOC_MISMATCH: docs=`"material_icon" or null`, actual also returns `emoji` — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        icon_type:
+          type:
+          - string
+          - 'null'
+          description: 'Icon type. Observed values: material_icon, emoji. Map to the DocumentIconType Swift enum, which preserves unknown values.'
+        icon_value:
+          type:
+          - string
+          - 'null'
+          description: Icon value
+        icon_color:
+          type:
+          - integer
+          - 'null'
+          description: Icon color
+        path:
+          type: string
+          description: Inner path to entity in tree
+        # DOC_MISMATCH: docs=`integer`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        schema_version:
+          type: integer
+          description: ProseMirror schema version
+        # DOC_MISMATCH: docs=`null | string`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        notification_period_start:
+          type:
+          - string
+          - 'null'
+          description: Notification period start date
+        # DOC_MISMATCH: docs=`null | string`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        notification_period_end:
+          type:
+          - string
+          - 'null'
+          description: Notification period end date
+        preview:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Search preview snippet. Present only when fields=data and include_search_preview=true. The shape is not described in the Kaiten documentation
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        public_id:
+          type: string
+          description: Public document id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        updater_id:
+          type: integer
+          description: Last updater user id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        access_record:
+          $ref: '#/components/schemas/DocumentAccessRecord'
+          description: Current user access record to this document
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        ftsVersion:
+          type: string
+          description: Full-text search index version
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
+        mQueries:
+          type: array
+          items:
+            type: string
+          description: Matched search sub-queries
+    DocumentSettings:
+      type: object
+      description: Document appearance settings
+      properties:
+        content_width:
+          type: string
+          description: 'Document content width mode: default (700px) or wide (1008px). Setting wide is only available for companies enrolled in the feature rollout; other companies receive a 403 error (code doc_2)'
+    DocumentAccessRecord:
+      type: object
+      description: Current user access record to a document. The documentation describes only role and role_permissions; live responses carry further undocumented fields, of which only the ones with an observable type are declared
+      properties:
+        role:
+          type: integer
+          description: User role id
+        role_permissions:
+          type: object
+          additionalProperties: true
+          description: User permissions for this document. The nested shape is not described in the Kaiten documentation
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        access_mod:
+          type: string
+          description: Access modifier
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        entity_uid:
+          type: string
+          description: Uid of the entity this record grants access to
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        user_id:
+          type: integer
+          description: User id this record belongs to
+    DocumentUserSummary:
+      type: object
+      description: Short user data embedded in a document. Not described in the Kaiten documentation; the shape is taken from live responses
+      properties:
+        id:
+          type: integer
+          description: User id
+        full_name:
+          type: string
+          description: User full name
+        username:
+          type: string
+          description: Username for mentions and login
+        email:
+          type: string
+          description: User email
+    CreateDocumentRequest:
+      type: object
+      required:
+      - sort_order
+      properties:
+        title:
+          type: string
+          maxLength: 256
+          description: Title of the document
+        sort_order:
+          type: number
+          exclusiveMinimum: 0
+          description: Document sort order. Must be greater than 0
+        parent_entity_uid:
+          type:
+          - string
+          - 'null'
+          description: Parent tree entity uid
+        for_everyone_access_role_id:
+          type: string
+          description: Role id for everyone access
+        clone_uid:
+          type: string
+          description: Document uid to copy
+        clone_version:
+          type: number
+          description: Document version to copy
+        key:
+          type:
+          - string
+          - 'null'
+          minLength: 2
+          maxLength: 10
+          pattern: '^[A-Z][A-Z0-9_]{1,9}$'
+          description: Unique key for document, used in API and web interface. Must be unique across entire company
+    UpdateDocumentRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 256
+          description: Title of the document
+        sort_order:
+          type: number
+          exclusiveMinimum: 0
+          description: Document sort order. Must be greater than 0
+        publish_date:
+          type:
+          - string
+          - 'null'
+          description: Publication date. ISO 8601 format
+        data:
+          type: object
+          additionalProperties: true
+          description: Document content in ProseMirror JSON format. See document-schemas api to retrieve a schema
+        access:
+          type: string
+          description: 'Document access type. Documented values: for_everyone, by_invite.'
+        parent_entity_uid:
+          type:
+          - string
+          - 'null'
+          description: Parent tree entity uid
+        for_everyone_access_role_id:
+          type: string
+          description: Role id for everyone access
+        public:
+          type: boolean
+          description: Is document publicly available (legacy field)
+        redirect_url:
+          type:
+          - string
+          - 'null'
+          description: Redirect URL
+        hidden_on_public_site:
+          type: boolean
+          description: Document is hidden on public site
+        settings:
+          $ref: '#/components/schemas/DocumentSettings'
+          description: 'Document appearance settings. Server-side shallow merge: only the keys sent are changed, other existing settings are preserved'
+        backup_version:
+          type: number
+          description: Document version to restore
+        published_version:
+          anyOf:
+          - type: number
+          - type: string
+          description: Version to publish on public site, or the string "current" to publish the current version
+        key:
+          type:
+          - string
+          - 'null'
+          minLength: 2
+          maxLength: 10
+          pattern: '^[A-Z][A-Z0-9_]{1,9}$'
+          description: Unique key for document, used in API and web interface. Must be unique across entire company
+        icon_type:
+          type:
+          - string
+          - 'null'
+          description: 'Icon type. Documented values: emoji, material_icon.'
+        icon_value:
+          type:
+          - string
+          - 'null'
+          maxLength: 100
+          description: Icon value (emoji character or material icon name)
+        icon_color:
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+          maximum: 17
+          description: Icon color index (1-17)
+        notification_period_start:
+          type:
+          - string
+          - 'null'
+          description: Notification period start date
+        notification_period_end:
+          type:
+          - string
+          - 'null'
+          description: Notification period end date
+        slug:
+          type:
+          - string
+          - 'null'
+          minLength: 3
+          maxLength: 128
+          pattern: '^[a-z0-9-]+$'
+          description: Human-readable URL slug. Lowercase latin letters, digits and hyphens only. Must be unique within the public site subtree

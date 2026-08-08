@@ -416,6 +416,18 @@ let sections: [Section] = [
       errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
     Operation(name: "remove_group", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
+  Section(mark: "Documents", operations: [
+    Operation(name: "list_documents", errors: [.unauthorized]),
+    Operation(
+      name: "create_document",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .conflict]),
+    Operation(name: "get_document", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "update_document",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound, .conflict]),
+    Operation(
+      name: "delete_document", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

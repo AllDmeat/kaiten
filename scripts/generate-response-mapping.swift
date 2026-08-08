@@ -392,6 +392,19 @@ let sections: [Section] = [
       name: "remove_user_from_group",
       errors: [.unauthorized, .paymentRequired, .forbidden, .notFound]),
   ]),
+  Section(mark: "Document Groups", operations: [
+    Operation(name: "list_document_groups", errors: [.unauthorized]),
+    Operation(
+      name: "create_document_group",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .conflict]),
+    Operation(name: "get_document_group", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "update_document_group",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound, .conflict]),
+    Operation(
+      name: "delete_document_group",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

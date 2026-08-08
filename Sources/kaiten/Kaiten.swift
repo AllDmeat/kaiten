@@ -167,6 +167,12 @@ struct Kaiten: AsyncParsableCommand {
       ListGroupUsers.self,
       AddGroupUser.self,
       RemoveGroupUser.self,
+      ListDocumentGroups.self,
+      SearchDocumentGroups.self,
+      GetDocumentGroup.self,
+      CreateDocumentGroup.self,
+      UpdateDocumentGroup.self,
+      DeleteDocumentGroup.self,
     ]
   )
 }

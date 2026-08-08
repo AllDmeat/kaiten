@@ -2005,3 +2005,49 @@ public enum GroupEntityType: Sendable, Equatable, CaseIterable, Codable {
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Document Groups
+
+/// Document group access type.
+///
+/// Used in the ``KaitenClient`` document group methods, and exposed on decoded
+/// document groups through the `documentGroupAccess` accessor.
+/// - SeeAlso: [Kaiten API – Document groups](https://developers.kaiten.ru/document-groups/retrieve-document-group)
+public enum DocumentGroupAccess: Sendable, Equatable, CaseIterable, Codable {
+  /// Accessible to all company members.
+  case forEveryone
+  /// Accessible only to invited members.
+  case byInvite
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [DocumentGroupAccess] {
+    [.forEveryone, .byInvite]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "for_everyone": self = .forEveryone
+    case "by_invite": self = .byInvite
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .forEveryone: "for_everyone"
+    case .byInvite: "by_invite"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

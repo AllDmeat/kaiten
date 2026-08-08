@@ -5281,6 +5281,171 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /document-groups:
+    get:
+      summary: Retrieve list of document groups
+      operationId: list_document_groups
+      parameters:
+      - name: query
+        in: query
+        schema:
+          type: string
+        description: Search query string
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: 'Number of records to skip for pagination. Default: 0'
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: 'Maximum number of records to return. Default: 100'
+      - name: version
+        in: query
+        schema:
+          type: integer
+        description: 'Search version. Default: 1. Use version=2 to search via OpenSearch and enable the response format with result and position fields'
+      - name: condition
+        in: query
+        schema:
+          type: integer
+        description: Filter condition. Used with version=2
+      - name: start_position
+        in: query
+        schema:
+          type: string
+        description: Search cursor for version=2 pagination. Pass the position value from the previous version=2 response
+      - name: role
+        in: query
+        schema:
+          type: integer
+        description: 'Filter by minimum user role: 1 - reader, 2 - writer, 3 - admin'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentGroupListResponse'
+        '401':
+          description: Invalid token
+    post:
+      summary: Create new document group
+      operationId: create_document_group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDocumentGroupRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentGroup'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '409':
+          description: Conflict - the key is already in use in the company
+  /document-groups/{document_group_uid}:
+    get:
+      summary: Retrieve document group
+      operationId: get_document_group
+      parameters:
+      - name: document_group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Document group UID
+      # DOC_MISMATCH: not in docs, accepted by actual API; the documented response fields documents/groups/parent/author are described as included "when relations contains" the matching name — https://developers.kaiten.ru/document-groups/retrieve-document-group
+      - name: relations
+        in: query
+        schema:
+          type: string
+        description: 'Comma-separated relations to include in the response: documents, groups, parent, author'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentGroup'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    patch:
+      summary: Update document group
+      operationId: update_document_group
+      parameters:
+      - name: document_group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Document group UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDocumentGroupRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentGroup'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict - key already in use, hostname already in use, or unfinished key operations
+    delete:
+      summary: Remove document group
+      operationId: delete_document_group
+      parameters:
+      - name: document_group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Document group UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemovedDocumentGroupResponse'
+        '400':
+          description: Document group has child tree entities - remove or move them first
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 components:
   securitySchemes:
     bearerAuth:
@@ -11578,3 +11743,389 @@ components:
           minLength: 1
           maxLength: 1024
           description: Operator's comment if addition to the group is an answer to an access request
+    DocumentGroup:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Document group uid
+        # DOC_MISMATCH: docs=`integer`, actual=`string` (same value as `uid`) — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        id:
+          type: string
+          description: Document group id
+        title:
+          type: string
+          description: Document group title
+        # DOC_MISMATCH: docs=`string` in the list response, absent from actual list responses (present when retrieving a single group) — https://developers.kaiten.ru/document-groups/retrieve-list-of-document-groups
+        created:
+          type: string
+          description: Create date
+        # DOC_MISMATCH: docs=`string` in the list response, absent from actual list responses (present when retrieving a single group) — https://developers.kaiten.ru/document-groups/retrieve-list-of-document-groups
+        updated:
+          type: string
+          description: Last update timestamp
+        archived:
+          type: boolean
+          description: Document group archived flag
+        company_id:
+          type: integer
+          description: Company id
+        author_id:
+          type: integer
+          description: Author user id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/document-groups/retrieve-list-of-document-groups
+        updater_id:
+          type: integer
+          description: Last updater user id
+        parent_entity_uid:
+          type:
+          - string
+          - 'null'
+          description: Parent tree entity uid
+        parent_group_id:
+          type:
+          - string
+          - 'null'
+          description: Deprecated alias for parent_entity_uid
+        entity_type:
+          type: string
+          description: Entity type. Always "document_group"
+        sort_order:
+          type: number
+          description: Document group sort order
+        # DOC_MISMATCH: docs=`enum` (for_everyone, by_invite), actual=`string` — modelled as a plain string so undocumented values cannot break decoding — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        access:
+          type: string
+          description: 'Document group access type. Documented values: for_everyone (accessible to all company members), by_invite (only invited members). Map to the DocumentGroupAccess Swift enum, which preserves unknown values.'
+        for_everyone_access_role_id:
+          type:
+          - string
+          - 'null'
+          description: Role id for everyone access
+        hostname:
+          type:
+          - string
+          - 'null'
+          description: Custom hostname for public site
+        # DOC_MISMATCH: docs=`null | string` in the list response, absent from actual list responses (present when retrieving a single group) — https://developers.kaiten.ru/document-groups/retrieve-list-of-document-groups
+        redirect_url:
+          type:
+          - string
+          - 'null'
+          description: Redirect URL
+        key:
+          type:
+          - string
+          - 'null'
+          description: Unique document group key within company
+        # DOC_MISMATCH: docs=`"material_icon" or null`, actual includes other values; observed: "emoji" — https://developers.kaiten.ru/document-groups/retrieve-list-of-document-groups
+        icon_type:
+          type:
+          - string
+          - 'null'
+          description: Icon type
+        icon_value:
+          type:
+          - string
+          - 'null'
+          description: Icon value (icon name for material_icon type)
+        icon_color:
+          type:
+          - integer
+          - 'null'
+          description: Icon color
+        public:
+          type: boolean
+          description: Is document group publicly available (legacy field)
+        news_feed:
+          type: boolean
+          description: Is document group marked as news feed
+        # DOC_MISMATCH: docs=`boolean` in the list response, absent from actual list responses (present when retrieving a single group) — https://developers.kaiten.ru/document-groups/retrieve-list-of-document-groups
+        hidden_on_public_site:
+          type: boolean
+          description: Document group is hidden on public site
+        path:
+          type: string
+          description: Inner path to entity in tree
+        index_document_uid:
+          type:
+          - string
+          - 'null'
+          description: UID of the document used as the home page for this folder
+        documents:
+          type:
+          - array
+          - 'null'
+          items:
+            type: object
+            additionalProperties: true
+          description: Child documents. Included when relations contains "documents". Item shape is not described in the Kaiten documentation
+        groups:
+          type:
+          - array
+          - 'null'
+          items:
+            type: object
+            additionalProperties: true
+          description: Child document groups. Included when relations contains "groups". Item shape is not described in the Kaiten documentation
+        parent:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Parent document group. Included when relations contains "parent". Shape is not described in the Kaiten documentation
+        author:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Author user object. Included when relations contains "author". Shape is not described in the Kaiten documentation
+        # DOC_MISMATCH: not in docs for the list response, present in actual list responses — https://developers.kaiten.ru/document-groups/retrieve-list-of-document-groups
+        access_record:
+          $ref: '#/components/schemas/DocumentGroupAccessRecord'
+          description: Current user access record to this document group
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        description:
+          type:
+          - string
+          - 'null'
+          description: Document group description
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        protected:
+          type: boolean
+          description: Document group protected flag
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        import_uid:
+          type:
+          - string
+          - 'null'
+          description: Import uid
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        public_id:
+          type: string
+          description: Public id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        fts_version:
+          type: string
+          description: Full-text search index version
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        slug:
+          type:
+          - string
+          - 'null'
+          description: Public site slug
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, so no type is imposed — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        branding:
+          description: Public site branding. Shape is not described in the Kaiten documentation
+        # DOC_MISMATCH: not in docs, present in actual version=2 search results — https://developers.kaiten.ru/document-groups/retrieve-list-of-document-groups
+        mQueries:
+          type: array
+          items:
+            type: string
+          description: Matched search sub-queries in version=2 search results
+        # DOC_MISMATCH: not in docs, present in actual version=2 search results — https://developers.kaiten.ru/document-groups/retrieve-list-of-document-groups
+        ftsVersion:
+          type: string
+          description: Full-text search index version in version=2 search results
+    DocumentGroupAccessRecord:
+      type: object
+      description: Current user access record to a document group
+      properties:
+        role:
+          type: integer
+          description: User role id
+        role_permissions:
+          type: object
+          additionalProperties: true
+          description: User permissions for this document group. Shape is not described in the Kaiten documentation
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        access_mod:
+          type: string
+          description: Access mode
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        entity_uid:
+          type: string
+          description: Uid of the entity the record belongs to
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        user_id:
+          type: integer
+          description: User id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: Role ids granted to the user
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `role` — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        own_role:
+          type:
+          - integer
+          - 'null'
+          description: Role id granted to the user directly
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `role_ids` — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        own_role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: Role ids granted to the user directly
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `role_ids` — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        groups_role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: Role ids granted via user groups
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `role_ids` — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        own_groups_role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: Role ids granted via user groups directly
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `access_mod` — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        own_access_mod:
+          type:
+          - string
+          - 'null'
+          description: Access mode granted to the user directly
+    DocumentGroupSearchResponse:
+      type: object
+      description: Response of the document group list endpoint when version=2 is passed
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentGroup'
+          description: Search results
+        position:
+          type: string
+          description: Opaque cursor for pagination. Pass this value as start_position in the next request
+    # The list endpoint returns two shapes keyed off the `version` query parameter: a plain array
+    # (version omitted or 1) or an object with `result` and `position` (version=2). Modelled as
+    # `anyOf` — OpenAPI cannot select a response schema by query parameter, and the shapes are
+    # unambiguous (array vs object), so a payload decodes as exactly one of them.
+    DocumentGroupListResponse:
+      anyOf:
+      - type: array
+        items:
+          $ref: '#/components/schemas/DocumentGroup'
+      - $ref: '#/components/schemas/DocumentGroupSearchResponse'
+      description: Document group list - a plain array (version 1) or a version=2 search response
+    RemovedDocumentGroupResponse:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Document group uid
+        # DOC_MISMATCH: docs=`integer`, actual=`string` (same value as `uid`) on the live GET document-group endpoints for the same field — https://developers.kaiten.ru/document-groups/remove-document-group
+        id:
+          type: string
+          description: Document group id
+        title:
+          type: string
+          description: Document group title
+        archived:
+          type: boolean
+          description: Document group archived flag. Always true after removal
+    CreateDocumentGroupRequest:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Document group title
+        parent_entity_uid:
+          type:
+          - string
+          - 'null'
+          description: Parent tree entity uid
+        for_everyone_access_role_id:
+          type:
+          - string
+          - 'null'
+          description: Role id for everyone access
+        sort_order:
+          type: number
+          exclusiveMinimum: 0
+          description: Sort order
+        key:
+          type:
+          - string
+          - 'null'
+          maxLength: 256
+          description: Unique document group key within company
+    UpdateDocumentGroupRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Document group title
+        parent_entity_uid:
+          type:
+          - string
+          - 'null'
+          description: Parent tree entity uid. Used to move document group in the tree
+        sort_order:
+          type: number
+          exclusiveMinimum: 0
+          description: Sort order
+        access:
+          type: string
+          description: 'Document group access type. Documented values: for_everyone, by_invite. Map to the DocumentGroupAccess Swift enum, which preserves unknown values.'
+        for_everyone_access_role_id:
+          type:
+          - string
+          - 'null'
+          description: Role id for everyone access
+        hostname:
+          type:
+          - string
+          - 'null'
+          description: Custom hostname for public site. Can contain only letters, numbers and "-", length 2-30 symbols, cannot end with "-"
+        redirect_url:
+          type:
+          - string
+          - 'null'
+          description: Redirect URL
+        key:
+          type:
+          - string
+          - 'null'
+          description: Unique document group key within company. Cannot be changed once set
+        icon_type:
+          type:
+          - string
+          - 'null'
+          description: Icon type
+        icon_value:
+          type:
+          - string
+          - 'null'
+          description: Icon value (icon name for material_icon type)
+        icon_color:
+          type:
+          - integer
+          - 'null'
+          description: Icon color
+        hidden_on_public_site:
+          type: boolean
+          description: Hide document group on public site
+        news_feed:
+          type: boolean
+          description: Mark document group as news feed. Requires hostname to be set on this folder or one of its parent folders
+        index_document_uid:
+          type:
+          - string
+          - 'null'
+          description: UID of the document to use as the home page for this folder. Requires hostname to be set on this folder. Document must be within the document group tree, not archived and not hidden on public site

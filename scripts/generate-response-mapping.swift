@@ -504,6 +504,9 @@ let sections: [Section] = [
     Operation(name: "get_custom_property_file", errors: [.unauthorized, .forbidden, .notFound]),
     Operation(name: "delete_custom_property_file", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
+  Section(mark: "Timesheet", operations: [
+    Operation(name: "list_time_logs", errors: [.badRequest, .unauthorized, .forbidden]),
+  ]),
 ]
 
 // MARK: - Generator

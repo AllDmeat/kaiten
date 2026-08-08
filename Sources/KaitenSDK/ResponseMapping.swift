@@ -848,6 +848,46 @@ extension Operations.get_card_sla_measurements.Output {
   }
 }
 
+// MARK: - Card Files
+
+extension Operations.attach_file_to_card.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.attach_file_to_card.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .serviceUnavailable: .undocumented(statusCode: 503)
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_card_file.Output {
+  func toCase() -> KaitenClient.ResponseCase<Void> {
+    switch self {
+    case .ok: .ok(())
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.detach_file_from_card.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.detach_file_from_card.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 // MARK: - Automations
 
 extension Operations.list_automations.Output {

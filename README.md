@@ -209,6 +209,25 @@ Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
 | `addServiceDeskExternalRecipient(cardId:email:)` | Add an external recipient to a card's service desk request |
 | `removeServiceDeskExternalRecipient(cardId:email:)` | Remove an external recipient from a card's service desk request |
 
+### Card Files
+
+| Method | Description |
+|--------|-------------|
+| `attachFile(cardId:fileData:filename:)` | Attach a file to a card (multipart upload) |
+| `updateFile(cardId:fileId:cardCover:)` | Update a file attached to a card |
+| `detachFile(cardId:fileId:)` | Detach a file from a card |
+
+The attach response is one of two shapes — a legacy attachment (integer `id`) or a
+private file (UUID string `id`) — the same pair a card's `files` array carries.
+
+From the CLI:
+
+```bash
+kaiten attach-card-file --card-id 123 --file ./diagram.png
+kaiten update-card-file --card-id 123 --file-id 7 --card-cover true
+kaiten detach-card-file --card-id 123 --file-id 7
+```
+
 ### Spaces
 
 | Method | Description |

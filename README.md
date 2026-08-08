@@ -180,6 +180,10 @@ Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
 | `getCardLocationHistory(...)` | Get card location history |
 | `getCardBaselines(...)` | Get card baselines |
 | `listCardAllowedUsers(cardId:...)` | List users with access to a card |
+| `getCardTimeLogs(cardId:forDate:personal:)` | List time logs on a card |
+| `createCardTimeLog(cardId:roleId:timeSpent:forDate:comment:)` | Add a time log to a card |
+| `updateCardTimeLog(cardId:timeLogId:...)` | Update a time log |
+| `deleteCardTimeLog(cardId:timeLogId:)` | Remove a time log |
 
 ### Checklists
 

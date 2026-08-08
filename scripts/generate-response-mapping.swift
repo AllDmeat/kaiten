@@ -202,6 +202,18 @@ let sections: [Section] = [
   Section(mark: "Card Allowed Users", operations: [
     Operation(name: "retrieve_card_allowed_users", errors: [.unauthorized, .forbidden, .notFound])
   ]),
+  Section(mark: "Card Time Logs", operations: [
+    Operation(name: "get_card_time_logs", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "create_card_time_log",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "update_card_time_log",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "delete_card_time_log",
+      errors: [.unauthorized, .paymentRequired, .forbidden, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

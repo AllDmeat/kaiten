@@ -170,6 +170,7 @@ Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
 | `getCard(id:)` | Fetch a single card by ID |
 | `createCard(...)` | Create a new card |
 | `updateCard(...)` | Update a card |
+| `batchUpdateCards(...)` | Update multiple cards by criteria (background job) |
 | `deleteCard(...)` | Delete a card |
 | `listCardChildren(...)` | List child cards |
 | `addCardChild(...)` | Add a child card |
@@ -493,6 +494,34 @@ var opts = CardUpdateOptions()
 opts.title = "Updated Title"
 opts.columnId = 42
 let card = try await client.updateCard(id: 123, opts)
+```
+
+### Batch update
+
+`batchUpdateCards` updates every card matching the given criteria in one call. It runs in the
+background and returns the job's UUID rather than the updated cards. Provide at least one
+criteria parameter together with `attributes`, or `columnId` + `laneId` together with `orderBy`
+to reposition cards inside a cell:
+
+```swift
+let job = try await client.batchUpdateCards(
+  boardId: 1,
+  condition: .onBoard,
+  attributes: .init(asap: true)
+)
+print(job.id)  // UUID of the background job
+```
+
+The `orderBy` field and direction are exposed as Swift enums (`BatchUpdateOrderField`,
+`SortDirection`), each with an `unknown(String)` case preserving values the documentation
+does not list.
+
+From the CLI, criteria are plain options and the nested payloads are JSON objects:
+
+```bash
+kaiten batch-update-cards --board-id 1 --condition 1 --attributes '{"asap": true}'
+kaiten batch-update-cards --column-id 2 --lane-id 3 \
+  --order-by '{"field_type": "title", "direction": "asc"}'
 ```
 
 ### Custom properties

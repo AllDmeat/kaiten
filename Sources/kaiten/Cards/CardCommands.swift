@@ -501,6 +501,72 @@ struct UpdateCard: AsyncParsableCommand {
   }
 }
 
+struct BatchUpdateCards: AsyncParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "batch-update-cards",
+    abstract: "Update multiple cards by criteria",
+    discussion: """
+      Runs in the background and prints the job ID, not the updated cards. Requires at least one \
+      criteria option together with --attributes, or --column-id and --lane-id together with \
+      --order-by.
+      """
+  )
+
+  @OptionGroup var global: GlobalOptions
+
+  @Option(name: .long, help: "Criteria board ID")
+  var boardId: Int?
+
+  @Option(name: .long, help: "Criteria column ID")
+  var columnId: Int?
+
+  @Option(name: .long, help: "Criteria lane ID")
+  var laneId: Int?
+
+  @Option(name: .long, help: "Criteria owner ID")
+  var ownerId: Int?
+
+  @Option(name: .long, help: "Criteria card type ID")
+  var typeId: Int?
+
+  @Option(name: .long, help: "Criteria condition: 1 = live, 2 = archived")
+  var condition: Int?
+
+  @Option(
+    name: .long,
+    help: "Attributes to change as a JSON object, e.g. '{\"asap\": true, \"owner_id\": 42}'"
+  )
+  var attributes: String?
+
+  @Option(
+    name: .long,
+    help:
+      "Sorting parameters as a JSON object, e.g. '{\"field_type\": \"title\", \"direction\": \"asc\"}'"
+  )
+  var orderBy: String?
+
+  func run() async throws {
+    let parsedCondition = try parseCardCondition(condition)
+    let parsedAttributes = try parseAutomationJSON(
+      attributes, as: Components.Schemas.BatchUpdateCardsAttributes.self, fieldName: "attributes")
+    let parsedOrderBy = try parseAutomationJSON(
+      orderBy, as: Components.Schemas.BatchUpdateCardsOrderBy.self, fieldName: "order-by")
+
+    let client = try await global.makeClient()
+    let job = try await client.batchUpdateCards(
+      boardId: boardId,
+      columnId: columnId,
+      laneId: laneId,
+      ownerId: ownerId,
+      typeId: typeId,
+      condition: parsedCondition,
+      attributes: parsedAttributes,
+      orderBy: parsedOrderBy
+    )
+    try printJSON(job, expand: global.expandedFields)
+  }
+}
+
 struct GetCardComments: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "get-card-comments",

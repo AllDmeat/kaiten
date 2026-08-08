@@ -135,6 +135,7 @@ A developer requests all spaces and boards — for navigation.
 - **FR-021**: For resources addressed by a string UID rather than an integer id (currently automations), a HTTP 404 MUST surface as `unexpectedResponse(statusCode: 404)`. `notFound(resource:id:)` carries an `Int` id and MUST NOT be populated with an unrelated identifier (for example the parent space id) to fake specificity.
 - **FR-022**: Endpoints documented as returning HTTP 200 with no response body (currently `delete_automation`) MUST map to a `Void`-returning SDK method. The SDK MUST NOT invent a response payload for them.
 - **FR-023**: SDK MUST expose card blocker categories: list company categories (`GET /categories`), add a category to a blocker (`POST /blockers/{blocker_id}/categories`), and remove a category from a blocker (`DELETE /blockers/{blocker_id}/categories/{category_uuid}`). Removal returns only the removed category UID, per documentation.
+- **FR-024**: SDK MUST expose batch card updates (`PATCH /cards`). The endpoint answers HTTP 202 with only the UUID of a background job, so the SDK returns that job payload and MUST NOT pretend to return updated cards. A 404 surfaces as `unexpectedResponse(404)` per the FR-021 rationale — cards are selected by criteria, and no single integer id identifies what was missing. The `order_by` discriminators (`field_type`, `direction`) follow the FR-020a rule: plain `string` in the spec, hand-written enums with an `unknown(String)` case in `Enums.swift`.
 
 ### Non-Functional Requirements
 

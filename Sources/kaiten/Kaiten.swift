@@ -20,6 +20,7 @@ struct Kaiten: AsyncParsableCommand {
       CreateCard.self,
       GetCard.self,
       UpdateCard.self,
+      BatchUpdateCards.self,
       GetCardComments.self,
       AddComment.self,
       UpdateComment.self,

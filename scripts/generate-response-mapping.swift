@@ -23,17 +23,30 @@ enum ErrorCase: String {
   case serviceUnavailable
 }
 
+/// The documented success case of an Output enum. Most operations answer
+/// `200 OK`; background jobs answer `202 Accepted`.
+enum SuccessCase: String {
+  case ok = "Ok"
+  case accepted = "Accepted"
+
+  /// The generated enum case name (`.ok` / `.accepted`).
+  var caseName: String { rawValue.lowercased() }
+}
+
 struct Operation {
   let name: String
   let errors: [ErrorCase]
-  /// Whether the `200` response carries a body. Operations documented as
+  /// Whether the success response carries a body. Operations documented as
   /// returning no content map to `ResponseCase<Void>`.
   let hasBody: Bool
+  /// The documented success status of the operation.
+  let success: SuccessCase
 
-  init(name: String, errors: [ErrorCase], hasBody: Bool = true) {
+  init(name: String, errors: [ErrorCase], hasBody: Bool = true, success: SuccessCase = .ok) {
     self.name = name
     self.errors = errors
     self.hasBody = hasBody
+    self.success = success
   }
 }
 
@@ -48,6 +61,10 @@ let sections: [Section] = [
     Operation(name: "create_card", errors: [.badRequest, .unauthorized, .forbidden]),
     Operation(name: "get_card", errors: [.unauthorized, .notFound]),
     Operation(name: "update_card", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "batch_update_cards",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound],
+      success: .accepted),
   ]),
   Section(mark: "Card Members & Comments", operations: [
     Operation(name: "retrieve_list_of_card_members", errors: [.unauthorized, .forbidden]),
@@ -231,11 +248,16 @@ let sections: [Section] = [
 
 func generateExtension(_ op: Operation) -> String {
   let typeName = "Operations.\(op.name).Output"
-  let returnType = "KaitenClient.ResponseCase<\(op.hasBody ? "\(typeName).Ok.Body" : "Void")>"
+  let returnType =
+    "KaitenClient.ResponseCase<\(op.hasBody ? "\(typeName).\(op.success.rawValue).Body" : "Void")>"
 
   // Build switch cases
   var cases: [String] = []
-  cases.append(op.hasBody ? "    case .ok(let ok): .ok(ok.body)" : "    case .ok: .ok(())")
+  let successCase = op.success.caseName
+  cases.append(
+    op.hasBody
+      ? "    case .\(successCase)(let \(successCase)): .ok(\(successCase).body)"
+      : "    case .\(successCase): .ok(())")
 
   for error in op.errors {
     switch error {

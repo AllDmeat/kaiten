@@ -1949,3 +1949,59 @@ public enum DocumentSchemaFormat: Sendable, Equatable, CaseIterable, Codable {
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Group Entities
+//
+// The group entity type discriminator is declared as a plain string in the
+// OpenAPI spec because Kaiten may return values that its documentation does
+// not list. The typed surface lives here instead — with an `unknown(String)`
+// case that preserves anything new the API adds.
+
+/// Type of an entity attached to a company group.
+/// - SeeAlso: [Kaiten API – Group Entities](https://developers.kaiten.ru/group-entities/get-list-of-group-entities)
+public enum GroupEntityType: Sendable, Equatable, CaseIterable, Codable {
+  /// A space.
+  case space
+  /// A document.
+  case document
+  /// A folder of documents.
+  case documentGroup
+  /// A story map.
+  case storyMap
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [GroupEntityType] {
+    [.space, .document, .documentGroup, .storyMap]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "space": self = .space
+    case "document": self = .document
+    case "document_group": self = .documentGroup
+    case "story_map": self = .storyMap
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .space: "space"
+    case .document: "document"
+    case .documentGroup: "document_group"
+    case .storyMap: "story_map"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

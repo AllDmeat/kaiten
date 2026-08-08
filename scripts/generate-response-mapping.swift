@@ -335,6 +335,19 @@ let sections: [Section] = [
       name: "remove_group_admin",
       errors: [.unauthorized, .paymentRequired, .forbidden, .notFound]),
   ]),
+  Section(mark: "Document Schemas", operations: [
+    Operation(name: "get_document_schema", errors: [.badRequest, .notFound])
+  ]),
+  Section(mark: "Group Entities", operations: [
+    Operation(name: "list_group_entities", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "add_group_entity",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "update_group_entity",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(name: "remove_group_entity", errors: [.unauthorized, .forbidden, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

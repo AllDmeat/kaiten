@@ -4608,6 +4608,134 @@ paths:
           description: Unsupported schema format
         '404':
           description: Schema version not found
+  /company/groups/{group_uid}/entities:
+    get:
+      summary: Get list of group entities
+      operationId: list_group_entities
+      parameters:
+      - name: group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEntityListItem'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    post:
+      summary: Add entity to group
+      operationId: add_group_entity
+      parameters:
+      - name: group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddGroupEntityRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEntity'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /company/groups/{group_uid}/entities/{uid}:
+    patch:
+      summary: Update group entity
+      operationId: update_group_entity
+      parameters:
+      - name: group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      - name: uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Entity UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroupEntityRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEntity'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Remove entity from group
+      operationId: remove_group_entity
+      parameters:
+      - name: group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      - name: uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Entity UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEntity'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 components:
   securitySchemes:
     bearerAuth:
@@ -10060,3 +10188,91 @@ components:
           type: object
           additionalProperties: true
           description: Map of sanitized ProseMirror mark specs. Runtime-only fields such as parseDOM and toDOM are omitted
+    # Group entities. Schemas built from documentation only: listing groups requires a
+    # company-admin token, and the verification token gets HTTP 403 from /company/groups,
+    # so no group UID was available for a live GET.
+    GroupEntityListItem:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Entity UID
+        path:
+          type: string
+          description: Inner path to the entity
+        title:
+          type: string
+          description: Entity title
+        own_role_ids:
+          type: array
+          items:
+            type: string
+          description: Entity role UIDs
+        entity_type:
+          type: string
+          description: 'Entity type. Documented values: space, document, document_group, story_map. Map to the GroupEntityType Swift enum, which preserves unknown values.'
+    GroupEntity:
+      type: object
+      properties:
+        group_id:
+          type: integer
+          description: Group ID
+        entity_uid:
+          type: string
+          description: Entity UID
+        access_mod:
+          type:
+          - string
+          - 'null'
+          description: Access modifier with inheritable access modifiers
+        own_access_mod:
+          type:
+          - string
+          - 'null'
+          description: Own access modifier
+        role_ids:
+          type: array
+          items:
+            type: string
+          description: Entity role UIDs with inherited roles
+        # NOTE: nullable because the remove-entity documentation declares `array of strings | null`
+        # and its example returns null; add-entity and update-group-entity declare a plain array.
+        own_role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: Entity role UIDs
+        # NOTE: nullable because the remove-entity documentation declares `null`; add-entity and
+        # update-group-entity declare a non-nullable object.
+        role_permissions:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Group entity permissions keyed by entity type (root, space, document, document_group, story_map). The nested permission objects are not described in the Kaiten documentation
+    AddGroupEntityRequest:
+      type: object
+      required:
+      - entity_uid
+      - role_ids
+      properties:
+        entity_uid:
+          type: string
+          description: UID of the entity to add to the group
+        role_ids:
+          type: array
+          minItems: 1
+          items:
+            type: string
+          description: Role UIDs for the entity in the group
+    UpdateGroupEntityRequest:
+      type: object
+      properties:
+        role_ids:
+          type: array
+          minItems: 1
+          items:
+            type: string
+          description: Entity role UIDs for the group

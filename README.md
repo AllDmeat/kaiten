@@ -658,6 +658,39 @@ print(specs.proseMirror?.topNode ?? "")
 CLI: `kaiten get-document-schema --id latest` with optional `--format`
 (`draft-06` or `prosemirror`).
 
+### Group Entities
+
+| Method | Description |
+|--------|-------------|
+| `listGroupEntities(groupUid:)` | List entities of a company group |
+| `addGroupEntity(groupUid:entityUid:roleIds:)` | Add an entity to a company group |
+| `updateGroupEntity(groupUid:uid:roleIds:)` | Update the roles of an entity in a company group |
+| `removeGroupEntity(groupUid:uid:)` | Remove an entity from a company group |
+
+Group entities attach spaces, documents, folders and story maps to a company
+group. The entity type discriminator is exposed as the `GroupEntityType` Swift
+enum with an `unknown(String)` case that preserves values the documentation
+does not list. The `role_permissions` payload stays free-form JSON — its
+nested permission objects are not described in the documentation.
+
+```swift
+let entities = try await client.listGroupEntities(groupUid: "grp-1")
+for entity in entities where entity.groupEntityType == .space {
+  print(entity.title ?? "")
+}
+
+let added = try await client.addGroupEntity(
+  groupUid: "grp-1",
+  entityUid: "ent-1",
+  roleIds: ["role-1"]
+)
+```
+
+CLI: `list-group-entities --group-uid <uid>`,
+`add-group-entity --group-uid <uid> --entity-uid <uid> --role-ids <uids>`,
+`update-group-entity --group-uid <uid> --uid <uid> --role-ids <uids>`,
+`remove-group-entity --group-uid <uid> --uid <uid>`.
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

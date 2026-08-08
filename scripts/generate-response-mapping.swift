@@ -284,6 +284,14 @@ let sections: [Section] = [
       errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
     Operation(name: "remove_virtual_user", errors: [.forbidden, .notFound]),
   ]),
+  Section(mark: "Custom Directory Fields", operations: [
+    Operation(name: "list_custom_directory_fields", errors: [.unauthorized, .notFound]),
+    Operation(
+      name: "create_custom_directory_field", errors: [.badRequest, .unauthorized, .notFound]),
+    Operation(name: "get_custom_directory_field", errors: [.unauthorized, .notFound]),
+    Operation(name: "update_custom_directory_field", errors: [.unauthorized, .notFound]),
+    Operation(name: "delete_custom_directory_field", errors: [.unauthorized, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

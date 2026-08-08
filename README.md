@@ -515,6 +515,41 @@ CLI: `list-custom-directories` with `--include-fields`, `--include-author`,
 `--clear-description`, `--condition`, `--multi-select`, `--allow-editing`,
 `--fields <json>`; `delete-custom-directory --directory-id <id>`.
 
+### Custom Directory Fields
+
+| Method | Description |
+|--------|-------------|
+| `listCustomDirectoryFields(directoryId:includeAuthor:conditions:)` | List fields of a custom directory |
+| `createCustomDirectoryField(directoryId:name:type:sortOrder:required:isDisplay:)` | Create a field in a custom directory |
+| `getCustomDirectoryField(directoryId:fieldId:)` | Get a field of a custom directory |
+| `updateCustomDirectoryField(directoryId:fieldId:name:condition:sortOrder:required:isDisplay:)` | Update a field of a custom directory |
+| `deleteCustomDirectoryField(directoryId:fieldId:)` | Soft-delete a field of a custom directory |
+
+The custom directories API is documented as beta and may change. Directories and
+fields are addressed by string UUIDs. Type and condition discriminators are
+exposed as Swift enums (`CustomDirectoryFieldType`,
+`CustomDirectoryCondition`), each with an `unknown(String)` case that
+preserves values the documentation does not list. Deleting a field soft-deletes
+it: the API answers with the removed field, its condition set to `.removed`.
+
+```swift
+let field = try await client.createCustomDirectoryField(
+  directoryId: "dir-uid-1",
+  name: "Email",
+  type: .email
+)
+
+let fields = try await client.listCustomDirectoryFields(
+  directoryId: "dir-uid-1",
+  conditions: [.active]
+)
+```
+
+CLI: `list-custom-directory-fields`, `create-custom-directory-field`,
+`get-custom-directory-field`, `update-custom-directory-field`,
+`delete-custom-directory-field`, each taking `--directory-id` (and `--field-id`
+where a single field is addressed).
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

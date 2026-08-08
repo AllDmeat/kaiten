@@ -1434,3 +1434,68 @@ extension Operations.remove_virtual_user.Output {
     }
   }
 }
+
+// MARK: - Custom Directory Fields
+
+extension Operations.list_custom_directory_fields.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_custom_directory_fields.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.create_custom_directory_field.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.create_custom_directory_field.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.get_custom_directory_field.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_custom_directory_field.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_custom_directory_field.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.update_custom_directory_field.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.delete_custom_directory_field.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.delete_custom_directory_field.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

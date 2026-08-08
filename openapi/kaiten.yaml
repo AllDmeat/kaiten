@@ -1806,6 +1806,72 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /cards/{card_id}/sd-external-recipients:
+    post:
+      summary: Add new service desk external recipient
+      operationId: add_sd_external_recipient
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddServiceDeskExternalRecipientRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceDeskExternalRecipient'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /cards/{card_id}/sd-external-recipients/{email}:
+    delete:
+      summary: Remove service desk external recipient
+      operationId: remove_sd_external_recipient
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: email
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Email
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceDeskExternalRecipient'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /card-types:
     get:
       summary: List card types
@@ -4526,6 +4592,45 @@ components:
         id:
           type: integer
           description: Deleted external link ID
+    ServiceDeskExternalRecipient:
+      type: object
+      properties:
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        card_id:
+          type: integer
+          description: Card id
+        user_id:
+          type:
+          - integer
+          - 'null'
+          description: Recipient id
+        email:
+          type: string
+          description: Recipient email
+        unsubscribed:
+          type: boolean
+          description: Is unsubscribed from service desk request
+        updater_id:
+          type: integer
+          description: Updater id
+        company_id:
+          type: integer
+          description: Company id. Documented only in the remove-recipient response.
+    AddServiceDeskExternalRecipientRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          description: Recipient email
+          minLength: 1
+          maxLength: 128
     CardBlocker:
       type: object
       properties:

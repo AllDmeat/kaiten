@@ -201,6 +201,13 @@ Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
 | `updateExternalLink(...)` | Update an external link |
 | `removeExternalLink(...)` | Remove an external link |
 
+### Service Desk External Recipients
+
+| Method | Description |
+|--------|-------------|
+| `addServiceDeskExternalRecipient(cardId:email:)` | Add an external recipient to a card's service desk request |
+| `removeServiceDeskExternalRecipient(cardId:email:)` | Remove an external recipient from a card's service desk request |
+
 ### Spaces
 
 | Method | Description |

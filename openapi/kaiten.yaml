@@ -5008,6 +5008,97 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /groups/{group_uid}/users:
+    get:
+      summary: Get list of group users
+      operationId: list_group_users
+      parameters:
+      - name: group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupUser'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    post:
+      summary: Add user to group
+      operationId: add_user_to_group
+      parameters:
+      - name: group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddGroupUserRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupUser'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /groups/{group_uid}/users/{user_id}:
+    delete:
+      summary: Remove user from group
+      operationId: remove_user_from_group
+      parameters:
+      - name: group_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: User ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupUser'
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 components:
   securitySchemes:
     bearerAuth:
@@ -10677,3 +10768,102 @@ components:
           items:
             type: string
           description: Entity role UIDs for the group
+    GroupUser:
+      type: object
+      description: A user that belongs to a company group. The Kaiten documentation marks the group-users endpoints as under active development, so fields may change
+      properties:
+        id:
+          type: integer
+          description: User id
+        full_name:
+          type: string
+          description: User full name
+        email:
+          type: string
+          description: User email
+        username:
+          type: string
+          description: Username for mentions and login
+        avatar_initials_url:
+          type: string
+          description: Default user avatar
+        avatar_uploaded_url:
+          type:
+          - string
+          - 'null'
+          description: User uploaded avatar url
+        initials:
+          type: string
+          description: User initials
+        avatar_type:
+          type: integer
+          description: 1 - gravatar, 2 - initials, 3 - uploaded
+        lng:
+          type: string
+          description: Language
+        timezone:
+          type: string
+          description: Time zone
+        theme:
+          type: string
+          description: light - light color theme, dark - dark color theme, auto - color theme based on OS settings
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        activated:
+          type: boolean
+          description: User activated flag
+        ui_version:
+          type: integer
+          description: 1 - old ui, 2 - new ui
+        virtual:
+          type: boolean
+          description: Is user virtual
+        email_blocked:
+          type:
+          - string
+          - 'null'
+          description: Email blocked timestamp
+        email_blocked_reason:
+          type:
+          - string
+          - 'null'
+          description: Email blocked reason
+        delete_requested_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp of delete request
+        # NOTE: documented only in the GET response; the POST and DELETE response docs omit it — https://developers.kaiten.ru/group-users/get-list-of-group-users
+        delete_confirmation_sent_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp of sending confirmation of deletion
+        # NOTE: documented only in the GET response; the POST and DELETE response docs omit it — https://developers.kaiten.ru/group-users/get-list-of-group-users
+        sd_telegram_id:
+          type: integer
+          description: Service desk telegram id
+        # NOTE: documented only in the GET response; the POST and DELETE response docs omit it — https://developers.kaiten.ru/group-users/get-list-of-group-users
+        news_subscription:
+          type: boolean
+          description: News subscription flag
+    AddGroupUserRequest:
+      type: object
+      required:
+      - user_id
+      properties:
+        user_id:
+          type: integer
+          description: User id
+        request_id:
+          type: string
+          description: Request id if addition to the group is an answer to an access request
+        operator_comment:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: Operator's comment if addition to the group is an answer to an access request

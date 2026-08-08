@@ -1976,6 +1976,23 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /service-desk/services:
+    get:
+      summary: Retrieve services list
+      operationId: list_service_desk_services
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceDeskService'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
   /cards/{card_id}/files:
     put:
       summary: Attach file to card
@@ -5669,6 +5686,177 @@ components:
           description: Recipient email
           minLength: 1
           maxLength: 128
+    ServiceDeskService:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Service id
+        name:
+          type: string
+          description: Service name
+        fields_settings:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: 'Service fields. Documented keys: commentDescription, size, dueDate and id_{custom_property_id}; each value is a field setting object whose fields the documentation does not describe.'
+        archived:
+          type: boolean
+          description: Archived flag
+        lng:
+          type: string
+          description: Language
+        email_settings:
+          type: integer
+          description: Bitmap of email settings
+        type_id:
+          type:
+          - integer
+          - 'null'
+          description: Request (card) type ID
+        email_key:
+          type: integer
+          description: Email key
+        board_id:
+          type: integer
+          description: Board id
+        column_id:
+          type: integer
+          description: Column id
+        lane_id:
+          type: integer
+          description: Lane id
+        display_status:
+          type: string
+          description: Request's status display type
+        template_description:
+          type: string
+          description: Template request description
+        settings:
+          $ref: '#/components/schemas/ServiceDeskServiceSettings'
+          description: Service settings
+        allow_to_add_external_recipients:
+          type: boolean
+          description: Allow to add external recipients
+        column:
+          $ref: '#/components/schemas/ServiceDeskServiceColumn'
+          description: Column info
+        board:
+          $ref: '#/components/schemas/ServiceDeskServiceBoard'
+          description: Board info
+        lane:
+          $ref: '#/components/schemas/ServiceDeskServiceLane'
+          description: Lane info
+        voteCustomProperty:
+          $ref: '#/components/schemas/ServiceDeskServiceVoteCustomProperty'
+          description: Vote custom property info
+    ServiceDeskServiceSettings:
+      type: object
+      properties:
+        allowed_email_masks:
+          type: array
+          items: {}
+          description: Allowed email masks. The documentation does not state the item type.
+    ServiceDeskServiceColumn:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Column id
+        title:
+          type: string
+          description: Column title
+        sort_order:
+          type: number
+          description: Position
+        col_count:
+          type: integer
+          description: Width
+        type:
+          type: integer
+          description: 1 - queue, 2 – in progress, 3 – done
+        board_id:
+          type: integer
+          description: Board id
+        # NOTE: the service docs list the type as bare `null`; declared nullable integer to match the Column schema documented for /boards/{board_id}/columns.
+        column_id:
+          type:
+          - integer
+          - 'null'
+          description: Parent column id
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: External id
+        rules:
+          type: integer
+          description: 'Bit mask for column rules. Rules: 1 - checklists must be checked, 2 - display FIFO order'
+    ServiceDeskServiceBoard:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Board id
+        title:
+          type: string
+          description: Board title
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: External id
+        card_properties:
+          type:
+          - array
+          - 'null'
+          items:
+            type:
+            - object
+            - 'null'
+          description: Properties of the board cards suggested for filling
+    ServiceDeskServiceLane:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Lane id
+        title:
+          type: string
+          description: Lane title
+        sort_order:
+          type: number
+          description: Position
+        board_id:
+          type: integer
+          description: Board id
+        condition:
+          type: integer
+          description: 1 - live, 2 - archived, 3 - deleted
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: External id
+    ServiceDeskServiceVoteCustomProperty:
+      type: object
+      properties:
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        service_id:
+          type: integer
+          description: Service id
+        custom_property_id:
+          type: integer
+          description: Custom property id
+        author_id:
+          type: integer
+          description: Author id
     UpdateCardFileRequest:
       type: object
       properties:

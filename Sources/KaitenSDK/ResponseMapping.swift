@@ -1024,6 +1024,19 @@ extension Operations.remove_sd_external_recipient.Output {
   }
 }
 
+// MARK: - Service Desk Services
+
+extension Operations.list_service_desk_services.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_service_desk_services.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 // MARK: - Blocker Categories
 
 extension Operations.list_blocker_categories.Output {

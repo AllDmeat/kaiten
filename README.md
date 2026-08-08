@@ -236,6 +236,16 @@ CLI: `add-item-to-checklist --checklist-id <id> --text <text>`,
 | `addServiceDeskExternalRecipient(cardId:email:)` | Add an external recipient to a card's service desk request |
 | `removeServiceDeskExternalRecipient(cardId:email:)` | Remove an external recipient from a card's service desk request |
 
+### Service Desk Services
+
+| Method | Description |
+|--------|-------------|
+| `listServiceDeskServices()` | List service desk services in the company |
+
+The API answers HTTP 403 for tokens without access to the service desk.
+
+CLI: `list-service-desk-services`.
+
 ### Card Files
 
 | Method | Description |

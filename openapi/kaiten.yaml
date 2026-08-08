@@ -4581,6 +4581,33 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /document-schemas/{id}:
+    get:
+      summary: Get document data schema
+      operationId: get_document_schema
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Document schema version. Use `latest` for the latest available schema, or a version in `v{number}` format, for example `v25`. When `latest` is used, the response `version` field contains the resolved `v{number}` version
+      - name: format
+        in: query
+        schema:
+          type: string
+        description: 'Response format. Documented values: draft-06 (default), prosemirror. Map to the DocumentSchemaFormat Swift enum, which preserves unknown values'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentSchema'
+        '400':
+          description: Unsupported schema format
+        '404':
+          description: Schema version not found
 components:
   securitySchemes:
     bearerAuth:
@@ -9947,3 +9974,89 @@ components:
         user_id:
           type: integer
           description: User Id
+    # GET /document-schemas/{id} returns one of two structurally different objects, selected by
+    # the request's `format` query parameter: JSON Schema draft-06 (the default) or sanitized
+    # ProseMirror specs. Modelled as `anyOf` like CardFileEntry: an OpenAPI discriminator cannot
+    # key off a field that exists in only one variant. The variants are unambiguous regardless —
+    # `$schema` is required in one and `type` in the other (both always present in live
+    # responses) — so a payload decodes as exactly one of them.
+    #
+    # Guarded by Tests/KaitenSDKTests/DocumentSchemasTests.swift.
+    DocumentSchema:
+      anyOf:
+        - $ref: '#/components/schemas/DocumentSchemaDraft06'
+        - $ref: '#/components/schemas/DocumentSchemaProseMirror'
+      description: Document data schema - a JSON Schema draft-06 document or sanitized ProseMirror specs, depending on the requested format
+    DocumentSchemaDraft06:
+      type: object
+      description: JSON Schema draft-06 representation of the Kaiten document data schema
+      # NOTE: `$schema` is listed as required so the DocumentSchema `anyOf` stays unambiguous —
+      # the ProseMirror variant never carries it. Confirmed always present in live responses.
+      required:
+      - $schema
+      properties:
+        $schema:
+          type: string
+          description: JSON Schema dialect URI. Always http://json-schema.org/draft-06/schema for this format
+        $id:
+          type: string
+          description: Schema identifier in kaiten://document-schemas/{version} format
+        title:
+          type: string
+          description: Schema title
+        description:
+          type: string
+          description: Schema description
+        allOf:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: Root schema references. Points to the top ProseMirror node definition
+        version:
+          type: string
+          description: Resolved document schema version. If latest was requested, this field contains the actual v{number} version
+        definitions:
+          $ref: '#/components/schemas/DocumentSchemaDefinitions'
+          description: JSON Schema definitions for document nodes and marks
+    DocumentSchemaDefinitions:
+      type: object
+      description: JSON Schema definitions for document nodes and marks
+      properties:
+        nodes:
+          type: object
+          additionalProperties: true
+          description: Map of ProseMirror node names to JSON Schema definitions
+        marks:
+          type: object
+          additionalProperties: true
+          description: Map of ProseMirror mark names to JSON Schema definitions
+    DocumentSchemaProseMirror:
+      type: object
+      description: Sanitized ProseMirror node and mark specs of the Kaiten document data schema
+      # NOTE: `type` is listed as required so the DocumentSchema `anyOf` stays unambiguous —
+      # the draft-06 variant never carries it. Confirmed always present in live responses.
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          description: Schema response type. Always prosemirror-document-data-schema
+        version:
+          type: string
+          description: Resolved document schema version. If latest was requested, this field contains the actual v{number} version
+        topNode:
+          type: string
+          description: Name of the top ProseMirror node
+        data:
+          type: object
+          additionalProperties: true
+          description: Top-level document data descriptor
+        nodes:
+          type: object
+          additionalProperties: true
+          description: Map of sanitized ProseMirror node specs. Runtime-only fields such as parseDOM and toDOM are omitted
+        marks:
+          type: object
+          additionalProperties: true
+          description: Map of sanitized ProseMirror mark specs. Runtime-only fields such as parseDOM and toDOM are omitted

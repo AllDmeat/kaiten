@@ -631,6 +631,33 @@ CLI: `list-group-admins --group-uid <uid>`,
 `add-group-admin --group-uid <uid> --user-id <id>`,
 `remove-group-admin --group-uid <uid> --user-id <id>`.
 
+### Document Schemas
+
+| Method | Description |
+|--------|-------------|
+| `getDocumentSchema(id:format:)` | Get the document data schema |
+
+Returns the schema used to validate and describe document data in ProseMirror
+JSON format. Pass `latest` as the `id` for the latest available schema, or a
+concrete version such as `v25`; the response `version` field always carries the
+resolved `v{number}` version.
+
+The response shape follows the requested `DocumentSchemaFormat`: `.draft06`
+(the API default) returns a JSON Schema draft-06 document, `.proseMirror`
+returns sanitized ProseMirror node and mark specs. Exactly one of the
+`draft06` and `proseMirror` accessors on the result is populated:
+
+```swift
+let schema = try await client.getDocumentSchema(id: "latest")
+print(schema.draft06?.version ?? "")
+
+let specs = try await client.getDocumentSchema(id: "latest", format: .proseMirror)
+print(specs.proseMirror?.topNode ?? "")
+```
+
+CLI: `kaiten get-document-schema --id latest` with optional `--format`
+(`draft-06` or `prosemirror`).
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

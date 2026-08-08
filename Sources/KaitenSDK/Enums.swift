@@ -1904,3 +1904,48 @@ public enum CustomPropertySelectValueCondition: Sendable, Equatable, CaseIterabl
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Document Schemas
+
+/// Document data schema response format.
+///
+/// Used in ``KaitenClient/getDocumentSchema(id:format:)``.
+/// - SeeAlso: [Kaiten API – Document schemas](https://developers.kaiten.ru/document-schemas/get-document-data-schema)
+public enum DocumentSchemaFormat: Sendable, Equatable, CaseIterable, Codable {
+  /// JSON Schema draft-06 representation (the API default).
+  case draft06
+  /// Sanitized ProseMirror node and mark specs.
+  case proseMirror
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [DocumentSchemaFormat] {
+    [.draft06, .proseMirror]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "draft-06": self = .draft06
+    case "prosemirror": self = .proseMirror
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .draft06: "draft-06"
+    case .proseMirror: "prosemirror"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

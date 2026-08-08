@@ -1756,3 +1756,16 @@ extension Operations.remove_group_admin.Output {
     }
   }
 }
+
+// MARK: - Document Schemas
+
+extension Operations.get_document_schema.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_document_schema.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

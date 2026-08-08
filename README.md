@@ -310,6 +310,7 @@ kaiten detach-card-file --card-id 123 --file-id 7
 |--------|-------------|
 | `listUsers()` | List all users |
 | `getCurrentUser()` | Get the current user |
+| `getCurrentUserBlockers()` | Get cards blocked on the current user (see [Card Blocker Users](#card-blocker-users)) |
 
 ### Card Types & Sprints
 
@@ -369,6 +370,25 @@ let created = try await client.createAutomation(
 
 CLI: `list-blocker-categories`, `add-blocker-category --blocker-id <id> --name <name>`,
 `remove-blocker-category --blocker-id <id> --category-uid <uid>`.
+
+### Card Blocker Users
+
+| Method | Description |
+|--------|-------------|
+| `listCardBlockerUsers(blockerId:)` | List users assigned to a card blocker |
+| `addCardBlockerUser(blockerId:userId:)` | Add a user to a card blocker |
+| `removeCardBlockerUser(blockerId:userId:)` | Remove a user from a card blocker |
+| `getCurrentUserBlockers()` | Get cards blocked on the current user |
+
+The current-user blockers endpoint is documented as returning an object, but a
+live instance answers with an empty JSON array when the user has no blockers.
+The SDK maps that shape to an empty result: `blocked_cards` is an empty array
+and `summary` is `nil`.
+
+CLI: `list-card-blocker-users --blocker-id <id>`,
+`add-card-blocker-user --blocker-id <id> --user-id <id>`,
+`remove-card-blocker-user --blocker-id <id> --user-id <id>`,
+`get-current-user-blockers`.
 
 ### Card SLA
 

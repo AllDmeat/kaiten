@@ -214,6 +214,10 @@ let sections: [Section] = [
       name: "delete_card_time_log",
       errors: [.unauthorized, .paymentRequired, .forbidden, .notFound]),
   ]),
+  Section(mark: "Audit Logs", operations: [
+    Operation(
+      name: "retrieve_audit_log_events", errors: [.badRequest, .unauthorized, .forbidden]),
+  ]),
 ]
 
 // MARK: - Generator

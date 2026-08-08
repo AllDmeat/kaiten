@@ -840,3 +840,287 @@ public enum AutomationConditionClause: Sendable, Equatable, CaseIterable, Codabl
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Audit Logs
+
+/// Audit log event category.
+///
+/// Used in ``KaitenClient/listAuditLogs(from:to:authorId:authorUid:categories:actions:id:offset:limit:)``.
+/// - SeeAlso: [Kaiten API – Audit logs](https://developers.kaiten.ru/audit-logs/retrieve-audit-log-events)
+public enum AuditLogCategory: Sendable, Equatable, CaseIterable, Codable {
+  /// Application lifecycle events.
+  case app
+  /// Authentication events.
+  case auth
+  /// User profile events.
+  case userProfile
+  /// User management events.
+  case userManagement
+  /// Group management events.
+  case groupManagement
+  /// Service desk events.
+  case serviceDesk
+  /// Publication events.
+  case publication
+  /// Import events.
+  case `import`
+  /// Company profile events.
+  case companyProfile
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [AuditLogCategory] {
+    [
+      .app, .auth, .userProfile, .userManagement, .groupManagement, .serviceDesk, .publication,
+      .import, .companyProfile,
+    ]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "app": self = .app
+    case "auth": self = .auth
+    case "user_profile": self = .userProfile
+    case "user_management": self = .userManagement
+    case "group_management": self = .groupManagement
+    case "service_desk": self = .serviceDesk
+    case "publication": self = .publication
+    case "import": self = .import
+    case "company_profile": self = .companyProfile
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .app: "app"
+    case .auth: "auth"
+    case .userProfile: "user_profile"
+    case .userManagement: "user_management"
+    case .groupManagement: "group_management"
+    case .serviceDesk: "service_desk"
+    case .publication: "publication"
+    case .import: "import"
+    case .companyProfile: "company_profile"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// Audit log event action.
+///
+/// Used in ``KaitenClient/listAuditLogs(from:to:authorId:authorUid:categories:actions:id:offset:limit:)``.
+/// - SeeAlso: [Kaiten API – Audit logs](https://developers.kaiten.ru/audit-logs/retrieve-audit-log-events)
+public enum AuditLogAction: Sendable, Equatable, CaseIterable, Codable {
+  /// Application started.
+  case start
+  /// Application stopped.
+  case stop
+  /// Successful sign-in.
+  case signIn
+  /// Failed sign-in attempt.
+  case signInFail
+  /// Sign-out.
+  case signOut
+  /// Authentication PIN requested.
+  case requestAuthPin
+  /// Password changed.
+  case changePassword
+  /// Email change requested.
+  case requestChangeEmail
+  /// Email changed.
+  case changeEmail
+  /// User invited.
+  case invite
+  /// User invitation failed.
+  case inviteFail
+  /// User deactivated.
+  case deactivate
+  /// User activated.
+  case activate
+  /// Permissions changed.
+  case changePermissions
+  /// Application permissions changed.
+  case changeAppsPermissions
+  /// Access granted.
+  case grantAccess
+  /// Access revoked.
+  case revokeAccess
+  /// Ownership transferred.
+  case transferOwnership
+  /// User data depersonalized.
+  case depersonalization
+  /// Entity created.
+  case create
+  /// Entity deleted.
+  case delete
+  /// Group activated.
+  case groupActivate
+  /// Group deactivated.
+  case groupDeactivate
+  /// User added.
+  case addUser
+  /// Admin added.
+  case addAdmin
+  /// User added by an admin.
+  case adminAddUser
+  /// User deleted.
+  case deleteUser
+  /// User deleted by an admin.
+  case adminDeleteUser
+  /// Admin deleted.
+  case deleteAdmin
+  /// Service desk password set.
+  case setSdPassword
+  /// Temporary service desk password changed.
+  case changeTemporarySdPassword
+  /// Document published.
+  case publishDocument
+  /// Document group published.
+  case publishDocumentGroup
+  /// Card published.
+  case publishCard
+  /// Document unpublished.
+  case unpublishDocument
+  /// Document group unpublished.
+  case unpublishDocumentGroup
+  /// Card unpublished.
+  case unpublishCard
+  /// Entity shared.
+  case shareEntity
+  /// Entity unshared.
+  case unshareEntity
+  /// Public link created.
+  case publicLink
+  /// Trial extended.
+  case extendTrial
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [AuditLogAction] {
+    [
+      .start, .stop, .signIn, .signInFail, .signOut, .requestAuthPin, .changePassword,
+      .requestChangeEmail, .changeEmail, .invite, .inviteFail, .deactivate, .activate,
+      .changePermissions, .changeAppsPermissions, .grantAccess, .revokeAccess, .transferOwnership,
+      .depersonalization, .create, .delete, .groupActivate, .groupDeactivate, .addUser, .addAdmin,
+      .adminAddUser, .deleteUser, .adminDeleteUser, .deleteAdmin, .setSdPassword,
+      .changeTemporarySdPassword, .publishDocument, .publishDocumentGroup, .publishCard,
+      .unpublishDocument, .unpublishDocumentGroup, .unpublishCard, .shareEntity, .unshareEntity,
+      .publicLink, .extendTrial,
+    ]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "start": self = .start
+    case "stop": self = .stop
+    case "sign_in": self = .signIn
+    case "sign_in_fail": self = .signInFail
+    case "sign_out": self = .signOut
+    case "request_auth_pin": self = .requestAuthPin
+    case "change_password": self = .changePassword
+    case "request_change_email": self = .requestChangeEmail
+    case "change_email": self = .changeEmail
+    case "invite": self = .invite
+    case "invite_fail": self = .inviteFail
+    case "deactivate": self = .deactivate
+    case "activate": self = .activate
+    case "change_permissions": self = .changePermissions
+    case "change_apps_permissions": self = .changeAppsPermissions
+    case "grant_access": self = .grantAccess
+    case "revoke_access": self = .revokeAccess
+    case "transfer_ownership": self = .transferOwnership
+    case "depersonalization": self = .depersonalization
+    case "create": self = .create
+    case "delete": self = .delete
+    case "group_activate": self = .groupActivate
+    case "group_deactivate": self = .groupDeactivate
+    case "add_user": self = .addUser
+    case "add_admin": self = .addAdmin
+    case "admin_add_user": self = .adminAddUser
+    case "delete_user": self = .deleteUser
+    case "admin_delete_user": self = .adminDeleteUser
+    case "delete_admin": self = .deleteAdmin
+    case "set_sd_password": self = .setSdPassword
+    case "change_temporary_sd_password": self = .changeTemporarySdPassword
+    case "publish_document": self = .publishDocument
+    case "publish_document_group": self = .publishDocumentGroup
+    case "publish_card": self = .publishCard
+    case "unpublish_document": self = .unpublishDocument
+    case "unpublish_document_group": self = .unpublishDocumentGroup
+    case "unpublish_card": self = .unpublishCard
+    case "share_entity": self = .shareEntity
+    case "unshare_entity": self = .unshareEntity
+    case "public_link": self = .publicLink
+    case "extend_trial": self = .extendTrial
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .start: "start"
+    case .stop: "stop"
+    case .signIn: "sign_in"
+    case .signInFail: "sign_in_fail"
+    case .signOut: "sign_out"
+    case .requestAuthPin: "request_auth_pin"
+    case .changePassword: "change_password"
+    case .requestChangeEmail: "request_change_email"
+    case .changeEmail: "change_email"
+    case .invite: "invite"
+    case .inviteFail: "invite_fail"
+    case .deactivate: "deactivate"
+    case .activate: "activate"
+    case .changePermissions: "change_permissions"
+    case .changeAppsPermissions: "change_apps_permissions"
+    case .grantAccess: "grant_access"
+    case .revokeAccess: "revoke_access"
+    case .transferOwnership: "transfer_ownership"
+    case .depersonalization: "depersonalization"
+    case .create: "create"
+    case .delete: "delete"
+    case .groupActivate: "group_activate"
+    case .groupDeactivate: "group_deactivate"
+    case .addUser: "add_user"
+    case .addAdmin: "add_admin"
+    case .adminAddUser: "admin_add_user"
+    case .deleteUser: "delete_user"
+    case .adminDeleteUser: "admin_delete_user"
+    case .deleteAdmin: "delete_admin"
+    case .setSdPassword: "set_sd_password"
+    case .changeTemporarySdPassword: "change_temporary_sd_password"
+    case .publishDocument: "publish_document"
+    case .publishDocumentGroup: "publish_document_group"
+    case .publishCard: "publish_card"
+    case .unpublishDocument: "unpublish_document"
+    case .unpublishDocumentGroup: "unpublish_document_group"
+    case .unpublishCard: "unpublish_card"
+    case .shareEntity: "share_entity"
+    case .unshareEntity: "unshare_entity"
+    case .publicLink: "public_link"
+    case .extendTrial: "extend_trial"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

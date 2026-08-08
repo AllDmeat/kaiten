@@ -1119,3 +1119,17 @@ extension Operations.delete_card_time_log.Output {
     }
   }
 }
+
+// MARK: - Audit Logs
+
+extension Operations.retrieve_audit_log_events.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.retrieve_audit_log_events.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

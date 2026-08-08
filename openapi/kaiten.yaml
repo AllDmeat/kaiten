@@ -2436,6 +2436,83 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /categories:
+    get:
+      summary: Retrieve list of categories
+      operationId: list_blocker_categories
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BlockerCategory'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+  /blockers/{blocker_id}/categories:
+    post:
+      summary: Add blocker category
+      operationId: add_blocker_category
+      parameters:
+      - name: blocker_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Blocker ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddBlockerCategoryRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockerCategory'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /blockers/{blocker_id}/categories/{category_uuid}:
+    delete:
+      summary: Remove category
+      operationId: remove_blocker_category
+      parameters:
+      - name: blocker_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Blocker ID
+      - name: category_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Blocker category UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemovedBlockerCategoryResponse'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 components:
   securitySchemes:
     bearerAuth:
@@ -5317,3 +5394,43 @@ components:
           items:
             $ref: '#/components/schemas/AutomationAction'
           description: Automation actions
+    BlockerCategory:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Blocker category UID
+        name:
+          type: string
+          description: Blocker category name
+        color:
+          type: integer
+          description: Blocker category color
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-blocker-categories/retrieve-list-of-categories
+        company_uid:
+          type: string
+          description: Company UID
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-blocker-categories/retrieve-list-of-categories
+        created:
+          type: string
+          description: Create timestamp. ISO 8601 format
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-blocker-categories/retrieve-list-of-categories
+        count:
+          type: integer
+          description: Number of blockers using the category
+    AddBlockerCategoryRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Blocker category name
+    RemovedBlockerCategoryResponse:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Blocker category UID

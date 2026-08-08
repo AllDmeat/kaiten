@@ -1269,3 +1269,20 @@ extension Operations.retrieve_current_user_blockers.Output {
     }
   }
 }
+
+// MARK: - Checklist Cards
+
+extension Operations.retrieve_cards_with_checklist.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.retrieve_cards_with_checklist.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

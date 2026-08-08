@@ -109,6 +109,7 @@ struct Kaiten: AsyncParsableCommand {
       AddCardBlockerUser.self,
       RemoveCardBlockerUser.self,
       GetCurrentUserBlockers.self,
+      ListChecklistCards.self,
     ]
   )
 }

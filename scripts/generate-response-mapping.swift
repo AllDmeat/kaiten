@@ -70,6 +70,13 @@ let sections: [Section] = [
     Operation(name: "create_checklist_item", errors: [.unauthorized, .forbidden, .notFound]),
     Operation(name: "remove_checklist_item", errors: [.unauthorized, .forbidden, .notFound]),
     Operation(name: "update_checklist_item", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "add_item_to_checklist",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "update_item_in_checklist",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(name: "remove_item_from_checklist", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
   Section(mark: "Custom Properties", operations: [
     Operation(name: "get_list_of_properties", errors: [.unauthorized, .forbidden]),

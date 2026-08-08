@@ -257,6 +257,44 @@ extension Operations.update_checklist_item.Output {
   }
 }
 
+extension Operations.add_item_to_checklist.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.add_item_to_checklist.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_item_in_checklist.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.update_item_in_checklist.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.remove_item_from_checklist.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.remove_item_from_checklist.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 // MARK: - Custom Properties
 
 extension Operations.get_list_of_properties.Output {

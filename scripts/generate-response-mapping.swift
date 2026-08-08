@@ -111,6 +111,15 @@ let sections: [Section] = [
       name: "create_select_value", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
     Operation(name: "get_select_value", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
+  Section(mark: "Custom Property Catalog Values", operations: [
+    Operation(name: "get_list_of_catalog_values", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "create_catalog_value", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(name: "get_catalog_value", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "update_catalog_value", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(name: "remove_catalog_value", errors: [.unauthorized, .forbidden, .notFound]),
+  ]),
   Section(mark: "Boards", operations: [
     Operation(name: "get_board", errors: [.unauthorized, .forbidden, .notFound]),
     Operation(name: "get_list_of_columns", errors: [.unauthorized, .forbidden, .notFound]),

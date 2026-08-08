@@ -313,6 +313,11 @@ kaiten detach-card-file --card-id 123 --file-id 7
 | `listCustomPropertyTreeEntities(propertyId:)` | List tree entities of a custom property |
 | `addCustomPropertyTreeEntity(propertyId:treeEntityUid:)` | Add a tree entity to a custom property |
 | `deleteCustomPropertyTreeEntity(propertyId:uid:)` | Delete a tree entity from a custom property |
+| `listCustomPropertyCatalogValues(propertyId:query:conditions:offset:limit:)` | List catalog values for a custom property |
+| `getCustomPropertyCatalogValue(propertyId:id:)` | Get a single catalog value |
+| `createCustomPropertyCatalogValue(propertyId:value:)` | Create a catalog value for a custom property |
+| `updateCustomPropertyCatalogValue(propertyId:id:condition:value:deleted:)` | Update a catalog value |
+| `removeCustomPropertyCatalogValue(propertyId:id:)` | Remove a catalog value |
 
 Property discriminators are exposed as Swift enums (`CustomPropertyType`,
 `CustomPropertyCondition`, `CustomPropertyVoteVariant`,
@@ -323,6 +328,16 @@ payloads stay free-form JSON — their shape depends on the property type.
 CLI: `create-custom-property --name <name> [--type <type>] ...`,
 `update-custom-property --id <id> [--name <name>] [--condition <condition>] ...`,
 `remove-custom-property --id <id>`.
+
+Catalog values belong to catalog-type custom properties. Their `value` payload
+is a free-form object of catalog field UID to field value pairs. The condition
+discriminator is exposed as the Swift enum `CatalogValueCondition`
+(`.active` / `.inactive`) with an `unknown(String)` case that preserves values
+the documentation does not list.
+
+CLI: `list-custom-property-catalog-values`, `get-custom-property-catalog-value`,
+`create-custom-property-catalog-value --property-id <id> --value '<JSON object>'`,
+`update-custom-property-catalog-value`, `remove-custom-property-catalog-value`.
 
 ### Users
 

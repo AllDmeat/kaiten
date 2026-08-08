@@ -14,6 +14,7 @@ struct Kaiten: AsyncParsableCommand {
       ListSpaces.self,
       ListBoards.self,
       GetBoard.self,
+      GetSpaceBoard.self,
       GetBoardColumns.self,
       GetBoardLanes.self,
       ListCards.self,

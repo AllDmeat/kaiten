@@ -133,6 +133,7 @@ let sections: [Section] = [
   ]),
   Section(mark: "Boards", operations: [
     Operation(name: "get_board", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(name: "get_space_board", errors: [.unauthorized, .forbidden, .notFound]),
     Operation(name: "get_list_of_columns", errors: [.unauthorized, .forbidden, .notFound]),
     Operation(name: "get_list_of_lanes", errors: [.unauthorized, .forbidden, .notFound]),
   ]),

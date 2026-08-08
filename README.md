@@ -179,6 +179,7 @@ Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
 | `deleteCardBlocker(...)` | Delete a card blocker |
 | `getCardLocationHistory(...)` | Get card location history |
 | `getCardBaselines(...)` | Get card baselines |
+| `listCardAllowedUsers(cardId:...)` | List users with access to a card |
 
 ### Checklists
 

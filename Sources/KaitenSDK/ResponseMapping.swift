@@ -1009,3 +1009,18 @@ extension Operations.delete_card_type_tree_entity.Output {
     }
   }
 }
+
+// MARK: - Card Allowed Users
+
+extension Operations.retrieve_card_allowed_users.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.retrieve_card_allowed_users.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

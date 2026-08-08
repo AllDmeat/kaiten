@@ -1222,3 +1222,241 @@ public enum SortDirection: Sendable, Equatable, CaseIterable, Codable {
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Custom Properties
+//
+// Custom property discriminators are declared as plain strings in the OpenAPI
+// spec so that values the documentation does not list survive decoding. The
+// typed surface lives here instead — with an `unknown(String)` case that
+// preserves anything new the API adds.
+
+/// Custom property value type.
+///
+/// Used in ``KaitenClient/createCustomProperty(name:type:showOnFacade:multiline:voteVariant:valuesType:colorful:multiSelect:valuesCreatableByUsers:data:color:fieldsSettings:)``.
+/// - SeeAlso: [Kaiten API – Custom properties](https://developers.kaiten.ru/custom-properties/create-new-property)
+public enum CustomPropertyType: Sendable, Equatable, CaseIterable, Codable {
+  /// Free-form text value.
+  case string
+  /// Numeric value.
+  case number
+  /// Date value.
+  case date
+  /// Email address value.
+  case email
+  /// Phone number value.
+  case phone
+  /// Boolean checkbox value.
+  case checkbox
+  /// Value picked from predefined select values.
+  case select
+  /// Value calculated by a formula.
+  case formula
+  /// URL value.
+  case url
+  /// Collective score value.
+  case collectiveScore
+  /// Vote value.
+  case vote
+  /// Collective vote value.
+  case collectiveVote
+  /// Catalog (directory) value.
+  case catalog
+  /// User reference value.
+  case user
+  /// File attachment value.
+  case attachment
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CustomPropertyType] {
+    [
+      .string, .number, .date, .email, .phone, .checkbox, .select, .formula, .url,
+      .collectiveScore, .vote, .collectiveVote, .catalog, .user, .attachment,
+    ]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "string": self = .string
+    case "number": self = .number
+    case "date": self = .date
+    case "email": self = .email
+    case "phone": self = .phone
+    case "checkbox": self = .checkbox
+    case "select": self = .select
+    case "formula": self = .formula
+    case "url": self = .url
+    case "collective_score": self = .collectiveScore
+    case "vote": self = .vote
+    case "collective_vote": self = .collectiveVote
+    case "catalog": self = .catalog
+    case "user": self = .user
+    case "attachment": self = .attachment
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .string: "string"
+    case .number: "number"
+    case .date: "date"
+    case .email: "email"
+    case .phone: "phone"
+    case .checkbox: "checkbox"
+    case .select: "select"
+    case .formula: "formula"
+    case .url: "url"
+    case .collectiveScore: "collective_score"
+    case .vote: "vote"
+    case .collectiveVote: "collective_vote"
+    case .catalog: "catalog"
+    case .user: "user"
+    case .attachment: "attachment"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// Custom property condition.
+///
+/// Used in ``KaitenClient/updateCustomProperty(id:name:showOnFacade:multiline:condition:colorful:multiSelect:valuesCreatableByUsers:data:color:fieldsSettings:isUsedAsProgress:)``.
+/// - SeeAlso: [Kaiten API – Custom properties](https://developers.kaiten.ru/custom-properties/update-property)
+public enum CustomPropertyCondition: Sendable, Equatable, CaseIterable, Codable {
+  /// Property is active.
+  case active
+  /// Property is inactive.
+  case inactive
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CustomPropertyCondition] {
+    [.active, .inactive]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "active": self = .active
+    case "inactive": self = .inactive
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .active: "active"
+    case .inactive: "inactive"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// Vote variant of vote and collective vote custom properties.
+///
+/// Used in ``KaitenClient/createCustomProperty(name:type:showOnFacade:multiline:voteVariant:valuesType:colorful:multiSelect:valuesCreatableByUsers:data:color:fieldsSettings:)``.
+/// - SeeAlso: [Kaiten API – Custom properties](https://developers.kaiten.ru/custom-properties/create-new-property)
+public enum CustomPropertyVoteVariant: Sendable, Equatable, CaseIterable, Codable {
+  /// Rating vote.
+  case rating
+  /// Scale vote.
+  case scale
+  /// Emoji set vote.
+  case emojiSet
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CustomPropertyVoteVariant] {
+    [.rating, .scale, .emojiSet]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "rating": self = .rating
+    case "scale": self = .scale
+    case "emoji_set": self = .emojiSet
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .rating: "rating"
+    case .scale: "scale"
+    case .emojiSet: "emoji_set"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
+/// Type of values of collective value custom properties.
+///
+/// Used in ``KaitenClient/createCustomProperty(name:type:showOnFacade:multiline:voteVariant:valuesType:colorful:multiSelect:valuesCreatableByUsers:data:color:fieldsSettings:)``.
+/// - SeeAlso: [Kaiten API – Custom properties](https://developers.kaiten.ru/custom-properties/create-new-property)
+public enum CustomPropertyValuesType: Sendable, Equatable, CaseIterable, Codable {
+  /// Numeric values.
+  case number
+  /// Text values.
+  case text
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CustomPropertyValuesType] {
+    [.number, .text]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "number": self = .number
+    case "text": self = .text
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .number: "number"
+    case .text: "text"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

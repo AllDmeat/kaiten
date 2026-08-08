@@ -1448,6 +1448,30 @@ paths:
           description: Invalid token
         '403':
           description: Forbiden
+    post:
+      summary: Create new property
+      operationId: create_property
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomPropertyRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomProperty'
+        '400':
+          description: Bad request
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
   /company/custom-properties/{id}:
     get:
       summary: Get property
@@ -1470,6 +1494,64 @@ paths:
           description: Invalid token
         '403':
           description: Forbiden
+        '404':
+          description: Not found
+    patch:
+      summary: Update property
+      operationId: update_property
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomPropertyRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomProperty'
+        '400':
+          description: Bad request
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Remove property
+      operationId: remove_property
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomProperty'
+        '400':
+          description: Bad request
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
         '404':
           description: Not found
   /company/custom-properties/{property_id}/select-values:
@@ -4135,6 +4217,113 @@ components:
           - integer
           - 'null'
           description: Color of custom property select value, null for no color
+    CreateCustomPropertyRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Custom property name
+        type:
+          type: string
+          description: 'Validation for value by provided type. Documented values: string, number, date, email, phone, checkbox, select, formula, url, collective_score, vote, collective_vote, catalog, user, attachment. Defaults to string. Map to the CustomPropertyType Swift enum, which preserves unknown values.'
+        show_on_facade:
+          type: boolean
+          description: Should show property on card's facade
+        multiline:
+          type: boolean
+          description: Should render multiline text field
+        vote_variant:
+          type:
+          - string
+          - 'null'
+          description: 'Type of vote or collective vote custom properties, null for other property types. Documented values: rating, scale, emoji_set. Map to the CustomPropertyVoteVariant Swift enum, which preserves unknown values.'
+        values_type:
+          type:
+          - string
+          - 'null'
+          description: 'Type of values, null for any type except collective value. Documented values: number, text. Map to the CustomPropertyValuesType Swift enum, which preserves unknown values.'
+        colorful:
+          type:
+          - boolean
+          - 'null'
+          description: Used for select properties. Determines should select color when creating new select value.
+        multi_select:
+          type:
+          - boolean
+          - 'null'
+          description: Used for select properties. Determines is select property used as multi select
+        values_creatable_by_users:
+          type:
+          - boolean
+          - 'null'
+          description: Used for select properties. Determines if users with writer role are able to create new select property values.
+        data:
+          type: object
+          additionalProperties: true
+          description: Additional custom property data. Shape depends on the property type and is described only through examples in the Kaiten documentation
+        color:
+          type:
+          - integer
+          - 'null'
+          description: Color of catalog custom property, null for no color
+        fields_settings:
+          type: object
+          additionalProperties: true
+          description: Field settings for catalog type. Keys are field UIDs
+    UpdateCustomPropertyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Custom property name
+        show_on_facade:
+          type: boolean
+          description: Should show property on card's facade
+        multiline:
+          type: boolean
+          description: Should render multiline text field
+        condition:
+          type: string
+          description: 'Custom property condition. Documented values: active, inactive. Map to the CustomPropertyCondition Swift enum, which preserves unknown values.'
+        colorful:
+          type:
+          - boolean
+          - 'null'
+          description: Used for select properties. Determines should select color when creating new select value.
+        multi_select:
+          type:
+          - boolean
+          - 'null'
+          description: Used for select properties. Determines is select property used as multi select
+        values_creatable_by_users:
+          type:
+          - boolean
+          - 'null'
+          description: Used for select properties. Determines if users with writer roles are able to create new select property values.
+        data:
+          type: object
+          additionalProperties: true
+          description: Additional custom property data. Shape depends on the property type and is described only through examples in the Kaiten documentation
+        color:
+          type:
+          - integer
+          - 'null'
+          description: Color of catalog custom property, null for no color
+        fields_settings:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Field settings for catalog type. Keys are field UIDs
+        is_used_as_progress:
+          type: boolean
+          description: Whether to use this property value as a progress
     CreateCommentRequest:
       type: object
       required:

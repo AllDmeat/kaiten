@@ -2572,3 +2572,45 @@ extension Operations.remove_space_template_checklist_item.Output {
     }
   }
 }
+
+// MARK: - Private Custom Property Files
+
+extension Operations.attach_file_to_custom_property.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.attach_file_to_custom_property.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.get_custom_property_file.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_custom_property_file.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.delete_custom_property_file.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.delete_custom_property_file.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

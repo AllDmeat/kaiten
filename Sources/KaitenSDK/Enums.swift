@@ -2344,3 +2344,52 @@ public enum IterationStatus: Sendable, Equatable, CaseIterable, Codable {
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Private Custom Property Files
+
+/// Response type for retrieving a custom property file.
+///
+/// Used in ``KaitenClient/getCustomPropertyFileUrl(cardUid:propertyUid:fileId:responseType:)``.
+/// - SeeAlso: [Kaiten API – Private Custom Property Files](https://developers.kaiten.ru/private-custom-property-files/get-custom-property-file)
+public enum CustomPropertyFileResponseType: Sendable, Equatable, CaseIterable, Codable {
+  /// The API returns the signed file URL as JSON.
+  case json
+  /// The API redirects (302) to the file with an inline content disposition.
+  case inline
+  /// The API redirects (302) to the file with an attachment content disposition.
+  case attachment
+  /// Unknown value (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CustomPropertyFileResponseType] {
+    [.json, .inline, .attachment]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "json": self = .json
+    case "inline": self = .inline
+    case "attachment": self = .attachment
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .json: "json"
+    case .inline: "inline"
+    case .attachment: "attachment"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

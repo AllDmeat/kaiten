@@ -310,6 +310,32 @@ kaiten get-comment-file --card-uid CARD-UID --comment-uid COMMENT-UID --file-id 
 kaiten delete-comment-file --card-uid CARD-UID --comment-uid COMMENT-UID --file-id FILE-ID
 ```
 
+### Private Custom Property Files
+
+| Method | Description |
+|--------|-------------|
+| `attachFileToCustomProperty(cardUid:propertyUid:fileData:filename:)` | Attach a file to a card custom property (multipart upload) |
+| `getCustomPropertyFileUrl(cardUid:propertyUid:fileId:responseType:)` | Get the signed URL of a custom property file |
+| `deleteCustomPropertyFile(cardUid:propertyUid:fileId:)` | Delete a custom property file |
+
+These endpoints require the "Restricted file access" company setting and are
+marked by Kaiten as under active development. Resources are addressed by string
+UIDs, so a 404 surfaces as `unexpectedResponse(statusCode: 404)`.
+
+The documented `response_type` query parameter is exposed as the
+`CustomPropertyFileResponseType` enum. With `.json` (the default) the API
+returns the signed URL; with `.inline` or `.attachment` it redirects (302) to
+the file itself, which the SDK's transport follows, so only `.json` produces a
+decodable response.
+
+From the CLI:
+
+```bash
+kaiten attach-custom-property-file --card-uid c1a2 --property-uid p3b4 --file ./report.pdf
+kaiten get-custom-property-file --card-uid c1a2 --property-uid p3b4 --file-id f5c6
+kaiten delete-custom-property-file --card-uid c1a2 --property-uid p3b4 --file-id f5c6
+```
+
 ### Spaces
 
 | Method | Description |

@@ -497,6 +497,13 @@ let sections: [Section] = [
     Operation(name: "update_space_template_checklist_item", errors: [.unauthorized]),
     Operation(name: "remove_space_template_checklist_item", errors: [.unauthorized]),
   ]),
+  Section(mark: "Private Custom Property Files", operations: [
+    Operation(
+      name: "attach_file_to_custom_property",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(name: "get_custom_property_file", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(name: "delete_custom_property_file", errors: [.unauthorized, .forbidden, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

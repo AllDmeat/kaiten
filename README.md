@@ -320,6 +320,15 @@ let created = try await client.createAutomation(
 CLI: `list-blocker-categories`, `add-blocker-category --blocker-id <id> --name <name>`,
 `remove-blocker-category --blocker-id <id> --category-uid <uid>`.
 
+### Card SLA
+
+| Method | Description |
+|--------|-------------|
+| `getCardSlaMeasurements(cardId:)` | Get card SLA measurements |
+
+SLA measurements exist only for service desk request cards; for any other card,
+and for archived cards, the API answers HTTP 400.
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

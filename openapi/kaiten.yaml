@@ -2585,7 +2585,7 @@ components:
         files:
           type: array
           items:
-            $ref: '#/components/schemas/File'
+            $ref: '#/components/schemas/CardFileEntry'
           description: Card files
         external_links:
           type: array
@@ -3621,8 +3621,27 @@ components:
         updated:
           type: string
           description: Last update timestamp
+    # A card's `files` array holds two structurally different objects, distinguished by `type`.
+    # Legacy attachments (`type` 1-10) carry an integer `id`; private files (`type` 11) carry a
+    # UUID string `id` and a different field set entirely. Kaiten creates private files for every
+    # new upload, so both shapes appear on live cards, sometimes within one array.
+    #
+    # Modelled as `anyOf`, not `oneOf` + discriminator: an OpenAPI discriminator can only key off
+    # a string property and `type` is an integer. The variants are unambiguous regardless — `id` is
+    # an integer in one and a string in the other, so a payload decodes as exactly one of them.
+    # The trailing free-form branch stops an unrecognised third shape from failing the whole
+    # response, which is precisely how `type: 11` broke `getCard`.
+    #
+    # Guarded by Tests/KaitenSDKTests/CardFilesTests.swift.
+    CardFileEntry:
+      anyOf:
+        - $ref: '#/components/schemas/File'
+        - $ref: '#/components/schemas/PrivateFile'
+        - type: object
+      description: File attached to a card - a legacy attachment, a private file, or an unrecognised shape
     File:
       type: object
+      description: Legacy card attachment, `type` 1-10. Private files (`type` 11) use PrivateFile.
       properties:
         id:
           type: integer
@@ -3630,12 +3649,14 @@ components:
         name:
           type: string
           description: File name
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/cards/retrieve-card
         size:
           type: integer
           description: File size
+        # DOC_MISMATCH: docs=`enum` without 10, actual includes 10 (voice recording) — https://developers.kaiten.ru/cards/retrieve-card
         type:
           type: integer
-          description: 1-attachment, 2-googleDrive, 3-dropBox, 4-box, 5-oneDrive, 6-yandex disc, 7-comment email, 8-commentAttachment
+          description: 1-attachment, 2-googleDrive, 3-dropBox, 4-box, 5-oneDrive, 6-yandex disc, 7-comment email, 8-commentAttachment, 10-voice recording. Type 11 (private file) uses the PrivateFile shape instead.
         url:
           type: string
           description: Uploaded url
@@ -3648,6 +3669,7 @@ components:
         card_id:
           type: integer
           description: Card id
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/cards/retrieve-card
         comment_id:
           type: integer
           description: Comment id
@@ -3657,9 +3679,11 @@ components:
         external:
           type: boolean
           description: External flag
+        # DOC_MISMATCH: docs=`string`, absent from actual API responses — https://developers.kaiten.ru/cards/retrieve-card
         mh_markup_id:
           type: string
           description: Markup id
+        # DOC_MISMATCH: docs=`string`, absent from actual API responses — https://developers.kaiten.ru/cards/retrieve-card
         mh_secret:
           type: string
           description: Markup secret
@@ -3674,6 +3698,107 @@ components:
         updated:
           type: string
           description: Last update timestamp
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/cards/retrieve-card
+        uid:
+          type: string
+          description: File uid
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/cards/retrieve-card
+        mime_type:
+          type: string
+          description: MIME type
+        # DOC_MISMATCH: not in docs, present in actual API responses (`integer | null`) — https://developers.kaiten.ru/cards/retrieve-card
+        custom_property_id:
+          type: integer
+          description: Id of the custom property the file is attached to
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/cards/retrieve-card
+        thumbnail_url:
+          type: string
+          description: Thumbnail url
+    # DOC_MISMATCH: not in docs — the docs list `11 - private file` in the `type` enum but never
+    # describe the object it produces; every field below is taken from live API responses.
+    # https://developers.kaiten.ru/cards/retrieve-card
+    PrivateFile:
+      type: object
+      description: >-
+        Private card file, `type` 11 - Kaiten's current attachment storage. Absent from the
+        `GET /cards` list projection: private files are only returned by `GET /cards/{id}`.
+        Retrieving the content requires an API token, so `url` is a relative API path rather
+        than a public link.
+      properties:
+        id:
+          type: string
+          description: File uid
+        name:
+          type: string
+          description: File name
+        size:
+          type: string
+          description: File size in bytes, serialised as a string
+        mime_type:
+          type: string
+          description: MIME type
+        author_uid:
+          type: string
+          description: Uid of the user who uploaded the file
+        card_uid:
+          type: string
+          description: Uid of the card the file belongs to
+        card_id:
+          type: integer
+          description: Id of the card the file belongs to
+        company_uid:
+          type: string
+          description: Company uid
+        comment_id:
+          type: integer
+          description: Id of the comment the file is attached to
+        comment_uid:
+          type: string
+          description: Uid of the comment the file is attached to
+        entity_type:
+          type: string
+          description: 'What the file hangs off. Observed values: card, comment.'
+        type:
+          type: integer
+          description: Always 11 for private files
+        url:
+          type: string
+          description: Relative API path to the file, requires an API token
+        card_cover:
+          type: boolean
+          description: Flag indicating that image used as card cover
+        deleted:
+          type: boolean
+          description: Deleted flag
+        resizes:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileResize'
+          description: Generated thumbnails
+        author:
+          $ref: '#/components/schemas/User'
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+    FileResize:
+      type: object
+      description: A generated thumbnail of a private file
+      properties:
+        size:
+          type: integer
+          description: Thumbnail size in bytes
+        resize:
+          type: string
+          description: 'Thumbnail dimensions. Observed values: 224x.'
+        storage_key:
+          type: string
+          description: Object storage key of the thumbnail
+        created:
+          type: string
+          description: Create date
     SLARule:
       type: object
       properties:

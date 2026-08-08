@@ -458,6 +458,46 @@ for event in page.items {
 CLI: `kaiten list-audit-logs` with `--from`, `--to`, `--author-id`,
 `--author-uid`, `--categories`, `--actions`, `--id`, `--offset`, `--limit`.
 
+### Custom Directories
+
+| Method | Description |
+|--------|-------------|
+| `listCustomDirectories(includeFields:includeAuthor:includeRecordsCount:query:conditions:offset:limit:)` | List custom directories in the company |
+| `createCustomDirectory(name:description:multiSelect:allowEditing:displayFieldIndex:fields:)` | Create a custom directory |
+| `getCustomDirectory(directoryId:)` | Get a custom directory |
+| `updateCustomDirectory(directoryId:name:description:condition:multiSelect:allowEditing:fields:)` | Update a custom directory |
+| `deleteCustomDirectory(directoryId:)` | Delete a custom directory (soft delete, condition becomes `removed`) |
+
+The custom-directories API is documented as beta: parameters, attributes and
+response formats are subject to change. Directory and field conditions and
+field types are exposed as Swift enums (`CustomDirectoryCondition`,
+`CustomDirectoryFieldType`), each with an `unknown(String)` case that preserves
+values the documentation does not list.
+
+```swift
+let directory = try await client.createCustomDirectory(
+  name: "Contacts",
+  fields: [
+    .init(fieldType: .string, name: "Name", required: true),
+    .init(fieldType: .email, name: "Email"),
+  ]
+)
+
+let page = try await client.listCustomDirectories(conditions: [.active, .inactive])
+for directory in page.items {
+  print(directory.name ?? "")
+}
+```
+
+CLI: `list-custom-directories` with `--include-fields`, `--include-author`,
+`--include-records-count`, `--query`, `--conditions`, `--offset`, `--limit`;
+`create-custom-directory --name <name>` with `--description`, `--multi-select`,
+`--allow-editing`, `--display-field-index`, `--fields <json>`;
+`get-custom-directory --directory-id <id>`;
+`update-custom-directory --directory-id <id>` with `--name`, `--description`,
+`--clear-description`, `--condition`, `--multi-select`, `--allow-editing`,
+`--fields <json>`; `delete-custom-directory --directory-id <id>`.
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

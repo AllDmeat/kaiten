@@ -114,6 +114,11 @@ struct Kaiten: AsyncParsableCommand {
       RemoveCardBlockerUser.self,
       GetCurrentUserBlockers.self,
       ListChecklistCards.self,
+      ListCustomDirectories.self,
+      CreateCustomDirectory.self,
+      GetCustomDirectory.self,
+      UpdateCustomDirectory.self,
+      DeleteCustomDirectory.self,
     ]
   )
 }

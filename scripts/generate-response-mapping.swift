@@ -267,6 +267,16 @@ let sections: [Section] = [
       name: "retrieve_cards_with_checklist",
       errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
   ]),
+  Section(mark: "Custom Directories", operations: [
+    Operation(name: "list_custom_directories", errors: [.unauthorized, .forbidden]),
+    Operation(
+      name: "create_custom_directory", errors: [.badRequest, .unauthorized, .forbidden]),
+    Operation(name: "get_custom_directory", errors: [.unauthorized, .notFound]),
+    Operation(
+      name: "update_custom_directory", errors: [.badRequest, .unauthorized, .notFound]),
+    Operation(
+      name: "delete_custom_directory", errors: [.badRequest, .unauthorized, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

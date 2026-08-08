@@ -303,6 +303,17 @@ let sections: [Section] = [
     Operation(
       name: "list_custom_directory_record_cards", errors: [.badRequest, .unauthorized, .notFound]),
   ]),
+  Section(mark: "Custom Property Tree Entities", operations: [
+    Operation(
+      name: "list_custom_property_tree_entities",
+      errors: [.unauthorized, .paymentRequired, .forbidden]),
+    Operation(
+      name: "add_custom_property_tree_entity",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden]),
+    Operation(
+      name: "delete_custom_property_tree_entity",
+      errors: [.unauthorized, .paymentRequired, .forbidden]),
+  ]),
 ]
 
 // MARK: - Generator

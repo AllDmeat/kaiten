@@ -2159,6 +2159,161 @@ paths:
           description: Feature is not supported by tariff
         '403':
           description: Forbidden
+  /cards/{card_id}/custom-properties/{property_id}/collective-vote-values:
+    get:
+      summary: Get list of vote values
+      operationId: get_list_of_vote_values
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CollectiveVoteValue'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    post:
+      summary: Create new vote value
+      operationId: create_vote_value
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVoteValueRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectiveVoteValue'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /cards/{card_id}/custom-properties/{property_id}/collective-vote-values/{id}:
+    patch:
+      summary: Update vote value
+      operationId: update_vote_value
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: VoteValue ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVoteValueRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectiveVoteValue'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Remove vote value
+      operationId: delete_vote_value
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: VoteValue ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveVoteValueRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectiveVoteValue'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /spaces:
     post:
       summary: Create new space
@@ -7149,6 +7304,15 @@ components:
       type:
         - string
         - 'null'
+    NullableNumber:
+      description: >
+        A number that supports three distinct states when used in a PATCH request body:
+        absent (field omitted — leave unchanged), null (field cleared), or a numeric value (field set).
+        The generated Swift property is NullableNumber? — the outer optional handles absent vs present,
+        while the enum itself distinguishes null from a numeric value.
+      type:
+        - number
+        - 'null'
     CardBoardSummary:
       type: object
       required:
@@ -7509,6 +7673,72 @@ components:
         id:
           type: integer
           description: Removed user ID
+    CollectiveVoteValue:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Collective score id
+        custom_property_id:
+          type: integer
+          description: Custom property id
+        # Docs type the field as non-nullable `integer`, but the docs' own response examples return null when the vote is an emoji vote — https://developers.kaiten.ru/custom-property-collective-vote-values/get-list-of-vote-values
+        number_vote:
+          type:
+          - integer
+          - 'null'
+          description: Value of card collective vote of type scale or rating
+        # Docs type the field as non-nullable `string`, but the docs' own response examples return null when the vote is a scale or rating vote — https://developers.kaiten.ru/custom-property-collective-vote-values/get-list-of-vote-values
+        emoji_vote:
+          type:
+          - string
+          - 'null'
+          description: Value of card collective vote of type emoji_set
+        card_id:
+          type: integer
+          description: Card id
+        author_id:
+          type: integer
+          description: Author id
+        # `company_id`, `created` and `updated` are documented only on the create, update and
+        # remove responses; `author` only on the list response. All fields stay optional so one
+        # schema covers every response shape.
+        company_id:
+          type: integer
+          description: Company id
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        author:
+          $ref: '#/components/schemas/User'
+    CreateVoteValueRequest:
+      type: object
+      properties:
+        emoji_vote:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: Value of card collective vote of type emoji_set
+        number_vote:
+          type: integer
+          description: Value of card collective vote of type scale or rating
+    UpdateVoteValueRequest:
+      type: object
+      properties:
+        number_vote:
+          $ref: '#/components/schemas/NullableNumber'
+          description: Value of card collective vote of type scale or rating (null to clear, absent to leave unchanged)
+    RemoveVoteValueRequest:
+      type: object
+      properties:
+        emoji_vote:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: Removed emoji vote
     CardTag:
       type: object
       properties:

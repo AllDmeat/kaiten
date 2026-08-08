@@ -12,3 +12,4 @@ additionalImports: []
 typeOverrides:
   schemas:
     NullableString: ExplicitNullString
+    NullableNumber: ExplicitNullNumber

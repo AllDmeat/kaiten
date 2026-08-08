@@ -248,6 +248,7 @@ Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
 | `getCustomProperty(id:)` | Get a single custom property definition |
 | `listCustomPropertySelectValues(propertyId:)` | List select values for a custom property |
 | `getCustomPropertySelectValue(propertyId:id:)` | Get a single select value |
+| `createCustomPropertySelectValue(propertyId:value:color:)` | Create a select value for a custom property |
 
 ### Users
 

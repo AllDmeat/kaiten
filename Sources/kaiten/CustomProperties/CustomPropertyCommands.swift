@@ -151,3 +151,28 @@ struct GetCustomPropertySelectValue: AsyncParsableCommand {
     try printJSON(value, expand: global.expandedFields)
   }
 }
+
+struct CreateCustomPropertySelectValue: AsyncParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "create-custom-property-select-value",
+    abstract: "Create a select value for a custom property"
+  )
+
+  @OptionGroup var global: GlobalOptions
+
+  @Option(name: .long, help: "Custom property ID")
+  var propertyId: Int
+
+  @Option(name: .long, help: "Value text, 1 to 128 characters")
+  var value: String
+
+  @Option(name: .long, help: "Colour number; omit for no colour")
+  var color: Int?
+
+  func run() async throws {
+    let client = try await global.makeClient()
+    let created = try await client.createCustomPropertySelectValue(
+      propertyId: propertyId, value: value, color: color)
+    try printJSON(created, expand: global.expandedFields)
+  }
+}

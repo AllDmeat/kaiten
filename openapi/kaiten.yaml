@@ -1446,6 +1446,37 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+    post:
+      summary: Create new select value
+      operationId: create_select_value
+      parameters:
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: CustomProperty ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSelectValueRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPropertySelectValue'
+        '400':
+          description: Bad request
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /company/custom-properties/{property_id}/select-values/{id}:
     get:
       summary: Get select value
@@ -3198,6 +3229,10 @@ components:
         color:
           type: integer
           description: Color number
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/custom-property-select-values/get-list-of-select-values
+        deleted:
+          type: boolean
+          description: Whether the select value has been deleted
         condition:
           type: string
           description: Custom property select value condition
@@ -3236,6 +3271,21 @@ components:
         card_id:
           type: integer
           description: Move checklist to another card
+    CreateSelectValueRequest:
+      type: object
+      required:
+      - value
+      properties:
+        value:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Custom property select value
+        color:
+          type:
+          - integer
+          - 'null'
+          description: Color of custom property select value, null for no color
     CreateCommentRequest:
       type: object
       required:

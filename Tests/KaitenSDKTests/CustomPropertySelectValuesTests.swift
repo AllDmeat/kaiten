@@ -62,4 +62,49 @@ struct CustomPropertySelectValuesTests {
       _ = try await client.getCustomPropertySelectValue(propertyId: 100, id: 999)
     }
   }
+
+  @Test("createCustomPropertySelectValue 200 returns created value")
+  func createSuccess() async throws {
+    let json = """
+      {"id": 3, "custom_property_id": 100, "value": "Kazakhstan", "color": null, "deleted": false, "condition": "active", "sort_order": 3.0}
+      """
+    let transport = MockClientTransport.returning(statusCode: 200, body: json)
+    let client = try KaitenClient(
+      baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+    let value = try await client.createCustomPropertySelectValue(
+      propertyId: 100, value: "Kazakhstan")
+    #expect(value.id == 3)
+    #expect(value.value == "Kazakhstan")
+    #expect(value.custom_property_id == 100)
+    #expect(value.deleted == false)
+  }
+
+  @Test("createCustomPropertySelectValue 404 throws notFound")
+  func createNotFound() async throws {
+    let transport = MockClientTransport.returning(statusCode: 404)
+    let client = try KaitenClient(
+      baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+    await #expect(throws: KaitenError.self) {
+      _ = try await client.createCustomPropertySelectValue(propertyId: 999, value: "Kazakhstan")
+    }
+  }
+
+  @Test("listCustomPropertySelectValues surfaces deleted values")
+  func listExposesDeleted() async throws {
+    let json = """
+      [
+        {"id": 1, "custom_property_id": 100, "value": "UAE", "color": null, "deleted": true, "condition": "active", "sort_order": 0.0},
+        {"id": 2, "custom_property_id": 100, "value": "Serbia", "color": null, "deleted": false, "condition": "active", "sort_order": 1.0}
+      ]
+      """
+    let transport = MockClientTransport.returning(statusCode: 200, body: json)
+    let client = try KaitenClient(
+      baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+    let page = try await client.listCustomPropertySelectValues(propertyId: 100)
+    #expect(page.items[0].deleted == true)
+    #expect(page.items[1].deleted == false)
+  }
 }

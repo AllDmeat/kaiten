@@ -755,6 +755,35 @@ CLI: `list-group-entities --group-uid <uid>`,
 `update-group-entity --group-uid <uid> --uid <uid> --role-ids <uids>`,
 `remove-group-entity --group-uid <uid> --uid <uid>`.
 
+### Document Groups
+
+| Method | Description |
+|--------|-------------|
+| `listDocumentGroups(query:role:offset:limit:)` | List document groups |
+| `searchDocumentGroups(query:condition:startPosition:role:offset:limit:)` | Search document groups via OpenSearch (`version=2`), with a cursor for pagination |
+| `getDocumentGroup(uid:relations:)` | Get a document group |
+| `createDocumentGroup(title:parentEntityUid:forEveryoneAccessRoleId:sortOrder:key:)` | Create a document group |
+| `updateDocumentGroup(uid:title:parentEntityUid:sortOrder:access:...)` | Update a document group |
+| `deleteDocumentGroup(uid:)` | Remove a document group |
+
+The access discriminator is exposed as the `DocumentGroupAccess` Swift enum
+(`.forEveryone`, `.byInvite`) with an `unknown(String)` case that preserves
+values the documentation does not list. `deleteDocumentGroup` returns the
+removed group stub with `archived` set to `true`, and answers HTTP 400 while
+the group still has child tree entities.
+
+```swift
+let groups = try await client.listDocumentGroups(query: "handbook")
+for group in groups where group.documentGroupAccess == .forEveryone {
+  print(group.title ?? "")
+}
+
+let created = try await client.createDocumentGroup(title: "Handbook", key: "HB")
+```
+
+CLI: `list-document-groups`, `search-document-groups`, `get-document-group`,
+`create-document-group`, `update-document-group`, `delete-document-group`.
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

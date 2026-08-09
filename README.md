@@ -481,6 +481,27 @@ let created = try await client.createAutomation(
 )
 ```
 
+### Space Users
+
+| Method | Description |
+|--------|-------------|
+| `listSpaceUsers(spaceId:includeInheritedAccess:inactive:)` | List users of a space |
+| `inviteUserToSpace(spaceId:email:roleId:guest:operatorComment:sendEmail:)` | Invite a user to a space |
+| `getSpaceUser(spaceId:userId:)` | Get a user of a space |
+| `updateSpaceUser(spaceId:userId:roleId:notificationsEnabled:spaceGroupId:settings:)` | Change a space user's role and notification settings |
+| `removeSpaceUser(spaceId:userId:)` | Remove a user from a space |
+
+Role ids are string UIDs. Preset roles: reader
+`06ccb31f-426b-4fa3-b7e5-861daee95696`, writer
+`a431ed00-1b32-4cc7-92b6-85e4bc7de40e`, admin
+`07ea3efc-a004-4d31-8683-4bb2084e209b`.
+
+CLI: `list-space-users --space-id <id>`,
+`invite-space-user --space-id <id> --email <email>`,
+`get-space-user --space-id <id> --user-id <id>`,
+`update-space-user --space-id <id> --user-id <id>`,
+`remove-space-user --space-id <id> --user-id <id>`.
+
 ### Blocker Categories
 
 | Method | Description |

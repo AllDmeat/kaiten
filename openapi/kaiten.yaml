@@ -3774,6 +3774,171 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /spaces/{space_id}/users:
+    get:
+      summary: Get list of users
+      operationId: list_space_users
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Space ID
+      - name: include_inherited_access
+        in: query
+        schema:
+          type: boolean
+        description: The result includes users with inherited access
+      - name: inactive
+        in: query
+        schema:
+          type: boolean
+        description: The result includes only inactive in company members
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SpaceUser'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    post:
+      summary: Invite user to space
+      operationId: invite_user_to_space
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Space ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteSpaceUserRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteSpaceUserResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /spaces/{space_id}/users/{id}:
+    get:
+      summary: Get user
+      operationId: get_space_user
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Space ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: User ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceUserDetails'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    patch:
+      summary: Change user role and notification settings
+      operationId: update_space_user
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Space ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: User ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSpaceUserRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateSpaceUserResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Remove user from space
+      operationId: remove_space_user
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Space ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: User ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoveSpaceUserResponse'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
   /categories:
     get:
       summary: Retrieve list of categories
@@ -9007,6 +9172,364 @@ components:
           items:
             $ref: '#/components/schemas/AutomationAction'
           description: Automation actions
+    SpaceUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-list-of-users
+        uid:
+          type: string
+          description: User uid
+        full_name:
+          type: string
+          description: User full name
+        email:
+          type: string
+          description: User email
+        username:
+          type: string
+          description: Username for mentions and login
+        avatar_initials_url:
+          type: string
+          description: Default user avatar
+        avatar_uploaded_url:
+          type:
+          - string
+          - 'null'
+          description: User uploaded avatar url
+        initials:
+          type: string
+          description: User initials
+        avatar_type:
+          type: integer
+          description: 1 - gravatar, 2 - initials, 3 - uploaded
+        lng:
+          type: string
+          description: Language
+        timezone:
+          type: string
+          description: Time zone
+        theme:
+          type: string
+          description: light - light color theme, dark - dark color theme, auto - color theme based on OS settings
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        activated:
+          type: boolean
+          description: User activated flag
+        ui_version:
+          type: integer
+          description: 1 - old ui, 2 - new ui
+        virtual:
+          type: boolean
+          description: Is user virtual
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-list-of-users
+        email_blocked:
+          type:
+          - string
+          - 'null'
+          description: Email blocked status
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-list-of-users
+        email_blocked_reason:
+          type:
+          - string
+          - 'null'
+          description: Email blocked reason
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-list-of-users
+        delete_requested_at:
+          type:
+          - string
+          - 'null'
+          description: Delete request timestamp
+        # DOC_MISMATCH: docs=`string`, actual=`integer` — https://developers.kaiten.ru/space-users/get-list-of-users
+        apps_permissions:
+          type: integer
+          description: 0 - no access, 1 - full access to Kaiten without service desk, 2 - guest access to Kaiten without service desk, 4 - service desk only, 5 - full access to Kaiten and service desk, 6 - guest access to Kaiten and service desk
+        temporarily_inactive:
+          type: boolean
+          description: User is temporarily inactive in the company
+        access_mod:
+          type: string
+          description: Access modifier with inheritable access modifiers
+        # DOC_MISMATCH: docs=non-nullable `string`, actual=`string | null` (null for users with only inherited access) — https://developers.kaiten.ru/space-users/get-list-of-users
+        own_access_mod:
+          type:
+          - string
+          - 'null'
+          description: Own access modifier
+        # DOC_MISMATCH: docs=non-nullable `array`, actual=`array | null` (null for users with only inherited access) — https://developers.kaiten.ru/space-users/get-list-of-users
+        own_role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: User role ids
+        current:
+          type: boolean
+          description: Flag indicating that this is the user on whose behalf the request was made
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-list-of-users
+        role:
+          type: integer
+          description: Effective space role
+        # DOC_MISMATCH: not in docs, present in actual API responses (null for users with only inherited access) — https://developers.kaiten.ru/space-users/get-list-of-users
+        own_role:
+          type:
+          - integer
+          - 'null'
+          description: Own space role
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-list-of-users
+        role_ids:
+          type: array
+          items:
+            type: string
+          description: Effective user role ids
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-list-of-users
+        space_role_id:
+          type: integer
+          description: Space role id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-list-of-users
+        role_permissions:
+          type: object
+          additionalProperties: true
+          description: Role permission flags. Shape is not described in the Kaiten documentation
+        # DOC_MISMATCH: not in docs, present in actual API responses (absent for users without groups) — https://developers.kaiten.ru/space-users/get-list-of-users
+        groups:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: User groups granting access to the space. Shape is not described in the Kaiten documentation
+        # DOC_MISMATCH: not in docs, present in actual API responses (only null observed) — https://developers.kaiten.ru/space-users/get-list-of-users
+        groups_role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: Role ids granted through groups
+        # DOC_MISMATCH: not in docs, present in actual API responses (only null observed) — https://developers.kaiten.ru/space-users/get-list-of-users
+        own_groups_role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: Own role ids granted through groups
+    SpaceUserDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-user
+        uid:
+          type: string
+          description: User uid
+        full_name:
+          type: string
+          description: User full name
+        email:
+          type: string
+          description: User email
+        username:
+          type: string
+          description: Username for mentions and login
+        avatar_initials_url:
+          type: string
+          description: Default user avatar
+        avatar_uploaded_url:
+          type:
+          - string
+          - 'null'
+          description: User uploaded avatar url
+        initials:
+          type: string
+          description: User initials
+        avatar_type:
+          type: integer
+          description: 1 - gravatar, 2 - initials, 3 - uploaded
+        lng:
+          type: string
+          description: Language
+        timezone:
+          type: string
+          description: Time zone
+        theme:
+          type: string
+          description: light - light color theme, dark - dark color theme, auto - color theme based on OS settings
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        activated:
+          type: boolean
+          description: User activated flag
+        ui_version:
+          type: integer
+          description: 1 - old ui, 2 - new ui
+        virtual:
+          type: boolean
+          description: Is user virtual
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-user
+        email_blocked:
+          type:
+          - string
+          - 'null'
+          description: Email blocked status
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-user
+        email_blocked_reason:
+          type:
+          - string
+          - 'null'
+          description: Email blocked reason
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-user
+        delete_requested_at:
+          type:
+          - string
+          - 'null'
+          description: Delete request timestamp
+        entity_uid:
+          type: string
+          description: Entity uid
+        user_id:
+          type: integer
+          description: User id
+        access_mod:
+          type: string
+          description: Access modifier with inheritable access modifiers
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-user
+        role:
+          type: integer
+          description: Effective space role
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-users/get-user
+        space_role_id:
+          type: integer
+          description: Space role id
+    InviteSpaceUserRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          description: User email address
+        role_id:
+          type: string
+          description: 'Role id. Preset roles: reader - 06ccb31f-426b-4fa3-b7e5-861daee95696, writer - a431ed00-1b32-4cc7-92b6-85e4bc7de40e, admin - 07ea3efc-a004-4d31-8683-4bb2084e209b'
+        guest:
+          type: boolean
+          description: Set true to invite the user as a guest
+        operator_comment:
+          type: string
+          description: Operator's comment
+        send_email:
+          type: boolean
+          description: Whether to send email or not
+    InviteSpaceUserResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+          description: User info
+        access_record:
+          $ref: '#/components/schemas/SpaceUserAccessRecord'
+          description: Access record data
+        message:
+          type: string
+          description: Success message
+    SpaceUserAccessRecord:
+      type: object
+      properties:
+        access_mod:
+          type: string
+          description: Access modifier with inheritable access modifiers
+        entity_uid:
+          type: string
+          description: Entity uid
+        user_id:
+          type: integer
+          description: User id
+        own_role_ids:
+          type: array
+          items:
+            type: string
+          description: User role ids
+        own_access_mod:
+          type: string
+          description: Own access modifier
+    UpdateSpaceUserRequest:
+      type: object
+      properties:
+        role_id:
+          type: string
+          description: 'Role id. Preset roles: reader - 06ccb31f-426b-4fa3-b7e5-861daee95696, writer - a431ed00-1b32-4cc7-92b6-85e4bc7de40e, admin - 07ea3efc-a004-4d31-8683-4bb2084e209b'
+        notifications_enabled:
+          type: boolean
+          description: Enable or disable notifications for space events
+        space_group_id:
+          type:
+          - number
+          - 'null'
+          description: Space group id
+        settings:
+          type: object
+          additionalProperties: true
+          description: Space user settings. Shape is not described in the Kaiten documentation
+    UpdateSpaceUserResponse:
+      type: object
+      properties:
+        entity_uid:
+          type: string
+          description: Entity uid
+        access_mod:
+          type: string
+          description: Access modifier with inheritable access modifiers
+        own_access_mod:
+          type: string
+          description: Own access modifier
+        own_role_ids:
+          type: array
+          items:
+            type: string
+          description: User role ids
+        id:
+          type: integer
+          description: User id
+        user_id:
+          type: integer
+          description: User id
+    RemoveSpaceUserResponse:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          description: User id
+        entity_uid:
+          type: string
+          description: Entity uid
+        access_mod:
+          type: string
+          description: Access modifier with inheritable access modifiers
+        own_access_mod:
+          type: string
+          description: Own access modifier
+        # NOTE: the docs declare this field with literal type `null`; expressed as a nullable array of role ids so a non-null value survives decoding
+        own_role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: User role ids
     BlockerCategory:
       type: object
       properties:

@@ -194,6 +194,9 @@ struct Kaiten: AsyncParsableCommand {
       CreateSpaceTemplateChecklist.self,
       UpdateSpaceTemplateChecklist.self,
       RemoveSpaceTemplateChecklist.self,
+      CreateSpaceTemplateChecklistItem.self,
+      UpdateSpaceTemplateChecklistItem.self,
+      RemoveSpaceTemplateChecklistItem.self,
     ]
   )
 }

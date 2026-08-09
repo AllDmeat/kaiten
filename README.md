@@ -558,6 +558,21 @@ CLI: `list-space-template-checklists --space-uid <uid>`,
 `update-space-template-checklist --space-uid <uid> --template-checklist-uid <uid> [--name <name>] [--sort-order <n>] [--new-space-uid <uid>]`,
 `remove-space-template-checklist --space-uid <uid> --template-checklist-uid <uid>`.
 
+### Space Template Checklist Items
+
+| Method | Description |
+|--------|-------------|
+| `createSpaceTemplateChecklistItem(spaceUid:templateChecklistUid:text:sortOrder:)` | Create an item in a space template checklist |
+| `updateSpaceTemplateChecklistItem(spaceUid:templateChecklistUid:itemUid:text:sortOrder:)` | Update an item in a space template checklist |
+| `removeSpaceTemplateChecklistItem(spaceUid:templateChecklistUid:itemUid:)` | Remove an item from a space template checklist |
+
+CLI: `create-space-template-checklist-item --space-uid <uid>
+--template-checklist-uid <uid> --text <text>`,
+`update-space-template-checklist-item --space-uid <uid>
+--template-checklist-uid <uid> --item-uid <uid>`,
+`remove-space-template-checklist-item --space-uid <uid>
+--template-checklist-uid <uid> --item-uid <uid>`.
+
 ### Blocker Categories
 
 | Method | Description |

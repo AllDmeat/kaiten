@@ -4180,6 +4180,110 @@ paths:
           description: Not found
         '409':
           description: Conflict
+  /spaces/{space_uid}/template-checklists:
+    get:
+      summary: Get list of space template checklists
+      operationId: list_space_template_checklists
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SpaceTemplateChecklist'
+        '401':
+          description: Invalid token
+    post:
+      summary: Create new space template checklist
+      operationId: create_space_template_checklist
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSpaceTemplateChecklistRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceTemplateChecklist'
+        '401':
+          description: Invalid token
+  /spaces/{space_uid}/template-checklists/{template_checklist_uid}:
+    patch:
+      summary: Update space template checklist
+      operationId: update_space_template_checklist
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      - name: template_checklist_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Template checklist UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSpaceTemplateChecklistRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceTemplateChecklist'
+        '401':
+          description: Invalid token
+    delete:
+      summary: Remove space template checklist
+      operationId: remove_space_template_checklist
+      parameters:
+      - name: space_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Space UID
+      - name: template_checklist_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Template checklist UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoveSpaceTemplateChecklistResponse'
+        '401':
+          description: Invalid token
   /categories:
     get:
       summary: Retrieve list of categories
@@ -10490,6 +10594,95 @@ components:
           items:
             type: string
           description: User role ids
+    SpaceTemplateChecklist:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Template checklist UID
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-template-checklist/get-list-of-space-template-checklists
+        id:
+          type: integer
+          description: Template checklist id
+        name:
+          type: string
+          description: Template checklist name
+        sort_order:
+          type: number
+          description: Position
+        space_uid:
+          type: string
+          description: Space UID
+        created:
+          type: string
+          description: Create timestamp
+        updated:
+          type: string
+          description: Last update timestamp
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpaceTemplateChecklistItem'
+          description: Template checklist items. Present in list responses; the documented create and update responses do not include it
+    SpaceTemplateChecklistItem:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Template checklist item UID
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/space-template-checklist/get-list-of-space-template-checklists
+        id:
+          type: integer
+          description: Template checklist item id
+        # DOC_MISMATCH: docs=`text`, actual=`string` — https://developers.kaiten.ru/space-template-checklist/get-list-of-space-template-checklists
+        text:
+          type: string
+          description: Template checklist item text
+        sort_order:
+          type: number
+          description: Position
+        user_id:
+          type: integer
+          description: Author id
+        created:
+          type: string
+          description: Create timestamp
+        updated:
+          type: string
+          description: Last update timestamp
+    CreateSpaceTemplateChecklistRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Template checklist name
+        sort_order:
+          type: number
+          exclusiveMinimum: 0
+          description: Position
+    UpdateSpaceTemplateChecklistRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Template checklist name
+        sort_order:
+          type: number
+          exclusiveMinimum: 0
+          description: Position
+        space_uid:
+          type: string
+          description: Space UID
+    RemoveSpaceTemplateChecklistResponse:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Deleted template checklist UID
     BlockerCategory:
       type: object
       properties:

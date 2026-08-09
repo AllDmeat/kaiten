@@ -2480,6 +2480,99 @@ paths:
                 $ref: '#/components/schemas/CurrentUserBlockers'
         '401':
           description: Invalid token
+  /tags:
+    get:
+      summary: Retrieve list of tags
+      operationId: retrieve_list_of_tags
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum amount of tags (default 100, max 100)
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of records to skip
+      - name: space_id
+        in: query
+        schema:
+          type: integer
+        description: Filter by space id
+      - name: ids
+        in: query
+        schema:
+          type: string
+        description: Search by tags ids filter, comma separated
+      - name: query
+        in: query
+        schema:
+          type: string
+        description: Tag name contains text search filter
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+    post:
+      summary: Add tag
+      operationId: add_tag
+      # The docs list the same filter query parameters on the add endpoint as on the list
+      # endpoint; their effect on creation is unverified (mutating calls are not tested).
+      parameters:
+      - name: ids
+        in: query
+        schema:
+          type: string
+        description: List of comma separated ids to sort by
+      - name: query
+        in: query
+        schema:
+          type: string
+        description: Filter by name
+      - name: space_id
+        in: query
+        schema:
+          type: integer
+        description: Filter by space id
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum amount of tags (default 100, max 100)
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of records to skip
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTagRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
   /cards/{card_id}/location-history:
     get:
       summary: Get card location history
@@ -6248,6 +6341,20 @@ components:
         updated:
           type: string
           description: Last update timestamp
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tags/retrieve-list-of-tags
+        uid:
+          type: string
+          description: Tag uid
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only `null`) — https://developers.kaiten.ru/tags/retrieve-list-of-tags
+        locked:
+          type:
+          - string
+          - 'null'
+          description: Lock status
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tags/retrieve-list-of-tags
+        fts_version:
+          type: string
+          description: Full-text search version
     Column:
       type: object
       properties:
@@ -8696,6 +8803,16 @@ components:
         tag_id:
           type: integer
           description: Tag ID
+    AddTagRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Tag's name
     AddCardTagRequest:
       type: object
       required:

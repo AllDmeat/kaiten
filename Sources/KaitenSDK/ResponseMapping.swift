@@ -699,6 +699,31 @@ extension Operations.remove_card_tag.Output {
   }
 }
 
+// MARK: - Tags
+
+extension Operations.retrieve_list_of_tags.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.retrieve_list_of_tags.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.add_tag.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.add_tag.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 // MARK: - Users
 
 extension Operations.retrieve_list_of_users.Output {

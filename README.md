@@ -394,6 +394,22 @@ CLI: `kaiten list-company-users` (with the same filters as the SDK method),
 `kaiten update-company-user` with `--id`, `--apps-permissions`,
 `--temporarily-inactive`, and `kaiten remove-virtual-user` with `--id`.
 
+### Group Users
+
+| Method | Description |
+|--------|-------------|
+| `listGroupUsers(groupUid:)` | List users in a company group |
+| `addUserToGroup(groupUid:userId:requestId:operatorComment:)` | Add a user to a company group |
+| `removeUserFromGroup(groupUid:userId:)` | Remove a user from a company group |
+
+Groups are addressed by string UID. Kaiten marks the group-users endpoints as
+under active development, so their responses may change.
+
+CLI: `list-group-users --group-uid <uid>`,
+`add-group-user --group-uid <uid> --user-id <id>` with optional `--request-id`
+and `--operator-comment`,
+`remove-group-user --group-uid <uid> --user-id <id>`.
+
 ### Card Types & Sprints
 
 | Method | Description |

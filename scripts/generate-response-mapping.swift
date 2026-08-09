@@ -366,6 +366,15 @@ let sections: [Section] = [
       name: "update_collective_score_value",
       errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
   ]),
+  Section(mark: "Group Users", operations: [
+    Operation(name: "list_group_users", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "add_user_to_group",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "remove_user_from_group",
+      errors: [.unauthorized, .paymentRequired, .forbidden, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

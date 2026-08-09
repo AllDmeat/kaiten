@@ -323,6 +323,10 @@ kaiten detach-card-file --card-id 123 --file-id 7
 | `listCollectiveScoreValues(cardId:propertyId:)` | List collective score values of a custom property on a card |
 | `createCollectiveScoreValue(cardId:propertyId:value:)` | Create a collective score value |
 | `updateCollectiveScoreValue(cardId:propertyId:scoreValueId:value:)` | Update a collective score value |
+| `listCollectiveVoteValues(cardId:propertyId:)` | List collective vote values on a card |
+| `createCollectiveVoteValue(cardId:propertyId:numberVote:emojiVote:)` | Create a collective vote value on a card |
+| `updateCollectiveVoteValue(cardId:propertyId:voteValueId:numberVote:)` | Update a collective vote value |
+| `deleteCollectiveVoteValue(cardId:propertyId:voteValueId:emojiVote:)` | Remove a collective vote value |
 
 Property discriminators are exposed as Swift enums (`CustomPropertyType`,
 `CustomPropertyCondition`, `CustomPropertyVoteVariant`,
@@ -354,6 +358,16 @@ CLI: `list-custom-property-select-values --property-id <id>`,
 `create-custom-property-select-value --property-id <id> --value <text>`,
 `update-custom-property-select-value --property-id <id> --id <id>`,
 `remove-custom-property-select-value --property-id <id> --id <id>`.
+
+Collective vote values are votes users cast on a card for a vote-type custom
+property. A scale or rating property carries `number_vote`; an emoji-set
+property carries `emoji_vote`. Updating with `numberVote: .some(nil)` sends an
+explicit JSON `null` and clears the vote.
+
+CLI: `list-collective-vote-values`, `create-collective-vote-value`,
+`update-collective-vote-value`, `remove-collective-vote-value`, each with
+`--card-id` and `--property-id`; the update and remove commands also take
+`--vote-value-id`.
 
 ### Users
 

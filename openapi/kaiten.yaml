@@ -3169,6 +3169,134 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  # Private custom property files. The docs mark these endpoints as under active development
+  # and require "Restricted file access" enabled in company settings to use them.
+  /cards/{card_uid}/custom-properties/{property_uid}/files:
+    post:
+      summary: Attach file to custom property
+      operationId: attach_file_to_custom_property
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      - name: property_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Custom property UID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - file
+              properties:
+                # NOTE: the docs declare the multipart/form-data content type but do not name
+                # the form field; `file` matches the analogous attach-file-to-card endpoint.
+                file:
+                  type: string
+                  contentEncoding: binary
+                  description: File content
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPropertyFile'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /cards/{card_uid}/custom-properties/{property_uid}/files/{id}:
+    get:
+      summary: Get custom property file
+      operationId: get_custom_property_file
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      - name: property_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Custom property UID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: File ID
+      - name: response_type
+        in: query
+        schema:
+          type: string
+        description: 'If set to json, returns a signed URL in JSON. If set to inline or attachment, requests the corresponding content disposition. Documented values: json, inline, attachment. Map to the CustomPropertyFileResponseType Swift enum.'
+      responses:
+        # NOTE: the docs also list a 302 redirect, returned when `response_type` is omitted or
+        # set to inline/attachment. It is deliberately not modelled: the URLSession transport
+        # follows redirects transparently, so the generated client never observes the 302.
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPropertyFileUrl'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Delete custom property file
+      operationId: delete_custom_property_file
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      - name: property_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Custom property UID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: File ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedCustomPropertyFileResponse'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /card-types:
     get:
       summary: List card types
@@ -9093,6 +9221,65 @@ components:
     DeletedCommentFileResponse:
       type: object
       description: Response of the private-comment-files delete endpoint
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: Deleted file id
+    # Private custom property files (https://developers.kaiten.ru/private-custom-property-files/attach-file-to-custom-property).
+    # The docs mark these endpoints as under active development. Every field below is taken
+    # from the documentation: attaching a file is a mutating operation, and no existing
+    # custom property file was reachable through read-only requests on the live instance,
+    # so the schemas could not be cross-checked against a live 200 response.
+    CustomPropertyFile:
+      type: object
+      description: File attached to a card custom property (restricted file access)
+      properties:
+        id:
+          type: string
+          description: File id
+        name:
+          type: string
+          description: File name
+        size:
+          type: string
+          description: File size in bytes (bigint serialized as string)
+        mime_type:
+          type: string
+          description: MIME type
+        author_uid:
+          type: string
+          description: Author UID
+        card_uid:
+          type: string
+          description: Card UID
+        custom_property_uid:
+          type: string
+          description: Custom property UID
+        entity_type:
+          type: string
+          description: File entity type
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        card_cover:
+          type: boolean
+          description: Flag indicating that image is used as card cover
+    CustomPropertyFileUrl:
+      type: object
+      description: Signed URL of a custom property file
+      required:
+      - url
+      properties:
+        url:
+          type: string
+          description: Signed file URL
+    DeletedCustomPropertyFileResponse:
+      type: object
       required:
       - id
       properties:

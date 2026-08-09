@@ -209,6 +209,9 @@ struct Kaiten: AsyncParsableCommand {
       ListIterationCards.self,
       AddCardToIteration.self,
       RemoveCardFromIteration.self,
+      AttachCustomPropertyFile.self,
+      GetCustomPropertyFile.self,
+      DeleteCustomPropertyFile.self,
     ]
   )
 }

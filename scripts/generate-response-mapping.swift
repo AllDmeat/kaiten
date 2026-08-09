@@ -240,6 +240,9 @@ let sections: [Section] = [
       name: "remove_sd_external_recipient",
       errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
   ]),
+  Section(mark: "Service Desk Services", operations: [
+    Operation(name: "list_service_desk_services", errors: [.unauthorized, .forbidden])
+  ]),
   Section(mark: "Blocker Categories", operations: [
     Operation(name: "list_blocker_categories", errors: [.unauthorized, .forbidden]),
     Operation(name: "add_blocker_category", errors: [.unauthorized, .forbidden, .notFound]),

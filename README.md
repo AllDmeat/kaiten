@@ -505,6 +505,24 @@ is unverified.
 CLI: `list-tags` with `--limit`, `--offset`, `--space-id`, `--ids`, `--query`;
 `add-tag --name <name>`.
 
+### User Roles
+
+| Method | Description |
+|--------|-------------|
+| `listUserRoles()` | List user roles in the company |
+| `getUserRole(id:)` | Get a single user role |
+| `createUserRole(name:)` | Create a user role |
+| `updateUserRole(id:name:)` | Update a user role |
+| `deleteUserRole(id:replaceRoleId:)` | Delete a user role, moving its users to a replacement role |
+
+Deleting a role requires a replacement: users holding the deleted role are
+moved to the role named by `replaceRoleId`, and the API returns the deleted
+role.
+
+CLI: `list-user-roles`, `get-user-role --id <id>`,
+`create-user-role --name <name>`, `update-user-role --id <id> --name <name>`,
+`delete-user-role --id <id> --replace-role-id <id>`.
+
 ### Card Types & Sprints
 
 | Method | Description |

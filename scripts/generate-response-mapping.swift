@@ -507,6 +507,14 @@ let sections: [Section] = [
   Section(mark: "Timesheet", operations: [
     Operation(name: "list_time_logs", errors: [.badRequest, .unauthorized, .forbidden]),
   ]),
+  Section(mark: "User Roles", operations: [
+    Operation(name: "list_user_roles", errors: [.unauthorized, .forbidden]),
+    Operation(name: "create_user_role", errors: [.badRequest, .unauthorized, .forbidden]),
+    Operation(name: "get_user_role", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "update_user_role", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(name: "delete_user_role", errors: [.unauthorized, .forbidden, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

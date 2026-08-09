@@ -213,6 +213,11 @@ struct Kaiten: AsyncParsableCommand {
       AttachCustomPropertyFile.self,
       GetCustomPropertyFile.self,
       DeleteCustomPropertyFile.self,
+      ListUserRoles.self,
+      CreateUserRole.self,
+      GetUserRole.self,
+      UpdateUserRole.self,
+      DeleteUserRole.self,
     ]
   )
 }

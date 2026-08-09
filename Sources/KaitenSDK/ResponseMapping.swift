@@ -1739,6 +1739,19 @@ extension Operations.retrieve_audit_log_events.Output {
   }
 }
 
+// MARK: - Tree Entities
+
+extension Operations.list_tree_entities.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_tree_entities.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 // MARK: - Card Blocker Users
 
 extension Operations.list_card_blocker_users.Output {

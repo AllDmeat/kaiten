@@ -2393,3 +2393,63 @@ public enum CustomPropertyFileResponseType: Sendable, Equatable, CaseIterable, C
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Tree Entities
+//
+// The tree entity type is declared as a plain string in the OpenAPI spec: the
+// Kaiten documentation lists no values for it and marks the endpoint as under
+// active development, so a generated closed enum would fail whole responses
+// when new entity types appear. The typed surface lives here instead, with an
+// `unknown(String)` case that preserves anything the API adds.
+
+/// Tree entity type.
+///
+/// The Kaiten documentation does not list the possible values; the cases below
+/// were observed in live API responses.
+/// - SeeAlso: [Kaiten API – Tree Entities](https://developers.kaiten.ru/tree-entities/get-list-of-entities)
+public enum TreeEntityType: Sendable, Equatable, CaseIterable, Codable {
+  /// A space.
+  case space
+  /// A story map.
+  case storyMap
+  /// A document.
+  case document
+  /// A document group.
+  case documentGroup
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [TreeEntityType] {
+    [.space, .storyMap, .document, .documentGroup]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "space": self = .space
+    case "story_map": self = .storyMap
+    case "document": self = .document
+    case "document_group": self = .documentGroup
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .space: "space"
+    case .storyMap: "story_map"
+    case .document: "document"
+    case .documentGroup: "document_group"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

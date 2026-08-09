@@ -1080,6 +1080,31 @@ CLI: `kaiten list-time-logs` with `--from`, `--to`, `--tag-ids`, `--user-ids`,
 `--time-unit`, `--with-daily-distribution`, `--only-general-sum`, `--offset`,
 `--limit`.
 
+### Tree Entities
+
+| Method | Description |
+|--------|-------------|
+| `listTreeEntities(parentEntityUid:levelsCount:offset:limit:)` | List company tree entities |
+
+Returns nodes of the company entity tree: spaces, documents, document groups
+and story maps. Kaiten documents the endpoint as under active development, so
+parameters, attributes and response formats are subject to change. Each entity
+type carries its own extra fields beyond the common ones.
+
+The entity type discriminator is exposed as the `TreeEntityType` Swift enum
+with an `unknown(String)` case: the documentation lists no values, so anything
+new the API returns is preserved rather than failing the whole response.
+
+```swift
+let page = try await client.listTreeEntities(levelsCount: 2)
+for entity in page.items where entity.treeEntityType == .space {
+  print(entity.title ?? "")
+}
+```
+
+CLI: `kaiten list-tree-entities` with `--parent-entity-uid`, `--levels-count`,
+`--offset`, `--limit`.
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

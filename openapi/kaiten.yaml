@@ -3071,6 +3071,36 @@ paths:
         '404':
           description: Not found
   /spaces/{space_id}/boards/{id}:
+    get:
+      summary: Get board
+      operationId: get_space_board
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Space ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Board ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                # DOC_MISMATCH: docs=`array of objects`, actual=single `object` — https://developers.kaiten.ru/space-boards/get-board
+                $ref: '#/components/schemas/SpaceBoard'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
     patch:
       summary: Update board
       operationId: update_board
@@ -6461,6 +6491,141 @@ components:
           items:
             $ref: '#/components/schemas/Card'
           description: Board cards
+    SpaceBoard:
+      type: object
+      properties:
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        id:
+          type: integer
+          description: Board id
+        title:
+          type: string
+          description: Board title
+        cell_wip_limits:
+          description: JSON containing wip limits rules for cells. Object with "limits" array, not an array itself.
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: External id
+        default_card_type_id:
+          type: integer
+          description: Default card type for new cards on board
+        description:
+          # DOC_MISMATCH: docs=non-nullable `string`, actual=`string | null` — https://developers.kaiten.ru/space-boards/get-board
+          type:
+          - string
+          - 'null'
+          description: Board description
+        email_key:
+          type: string
+          description: Email key
+        move_parents_to_done:
+          type: boolean
+          description: Automatically move parent cards to done when their children cards on this board is done
+        default_tags:
+          type:
+          - string
+          - 'null'
+          description: Default tags
+        first_image_is_cover:
+          type: boolean
+          description: Automatically mark first uploaded card's image as card's cover
+        reset_lane_spent_time:
+          type: boolean
+          description: Reset lane spent time when card changed lane
+        backward_moves_enabled:
+          type: boolean
+          description: Allow automatic backward movement for summary boards
+        hide_done_policies:
+          type: boolean
+          description: Hide done checklist policies
+        hide_done_policies_in_done_column:
+          type: boolean
+          description: Hide done checklist policies only in done column
+        automove_cards:
+          type: boolean
+          description: Automatically move cards depending on their children state
+        auto_assign_enabled:
+          type: boolean
+          description: Automatically assign a user to the card when he/she moves the card if the user is not a member of the
+            card
+        card_properties:
+          type:
+          - array
+          - 'null'
+          items:
+            type:
+            - object
+            - 'null'
+          description: Properties of the board cards suggested for filling
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string`) — https://developers.kaiten.ru/space-boards/get-board
+        uid:
+          type: string
+          description: Board UID
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/space-boards/get-board
+        import_uid:
+          type:
+          - string
+          - 'null'
+          description: Import UID
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/space-boards/get-board
+        locked:
+          type:
+          - string
+          - 'null'
+          description: Lock status
+        # DOC_MISMATCH: not in docs, present in actual API responses (`object | null`) — https://developers.kaiten.ru/space-boards/get-board
+        settings:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Board settings
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/Column'
+          description: Board columns
+        lanes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lane'
+          description: Board lanes
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+          description: Board cards
+        top:
+          type: integer
+          description: Y coordinate of the board on space
+        left:
+          type: integer
+          description: X coordinate of the board on space
+        sort_order:
+          type: number
+          description: Position
+        space_id:
+          type: integer
+          description: Board spaceId
+        # DOC_MISMATCH: not in docs, present in actual API responses (`integer`) — https://developers.kaiten.ru/space-boards/get-board
+        board_id:
+          type: integer
+          description: Board id duplicated by the space binding
+        # DOC_MISMATCH: not in docs, present in actual API responses (`boolean`) — https://developers.kaiten.ru/space-boards/get-board
+        primary_path:
+          type: boolean
+          description: Whether the space is the primary path of the board
     Space:
       type: object
       properties:

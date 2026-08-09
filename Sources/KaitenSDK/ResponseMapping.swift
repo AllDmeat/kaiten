@@ -565,6 +565,18 @@ extension Operations.get_board.Output {
   }
 }
 
+extension Operations.get_space_board.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.get_space_board.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 extension Operations.get_list_of_columns.Output {
   func toCase() -> KaitenClient.ResponseCase<Operations.get_list_of_columns.Output.Ok.Body> {
     switch self {

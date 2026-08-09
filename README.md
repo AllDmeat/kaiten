@@ -284,8 +284,11 @@ kaiten detach-card-file --card-id 123 --file-id 7
 |--------|-------------|
 | `listBoards(spaceId:)` | List boards in a space |
 | `getBoard(id:)` | Fetch a board by ID |
+| `getSpaceBoard(spaceId:id:)` | Fetch a board within a space, with its position on the space |
 | `createBoard(...)` | Create a board |
 | `updateBoard(...)` | Update a board |
+
+CLI: `get-space-board --space-id <id> --id <id>`.
 
 ### Columns
 

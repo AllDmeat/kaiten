@@ -2051,3 +2051,44 @@ public enum DocumentGroupAccess: Sendable, Equatable, CaseIterable, Codable {
     try container.encode(rawValue)
   }
 }
+
+/// Group condition filter.
+///
+/// Used in ``KaitenClient/listGroups(withTreeEntities:withUsersCount:withSyncGroupAttribute:condition:query:limit:offset:)``.
+/// - SeeAlso: [Kaiten API – Groups](https://developers.kaiten.ru/groups/get-list-of-groups)
+public enum GroupCondition: Sendable, Equatable, CaseIterable, Codable {
+  /// Group is active.
+  case active
+  /// Group is inactive.
+  case inactive
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(Int)
+
+  public static var allCases: [GroupCondition] { [.active, .inactive] }
+
+  public init(rawValue: Int) {
+    switch rawValue {
+    case 1: self = .active
+    case 2: self = .inactive
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .active: 1
+    case .inactive: 2
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(Int.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

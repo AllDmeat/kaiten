@@ -784,6 +784,39 @@ let created = try await client.createDocumentGroup(title: "Handbook", key: "HB")
 CLI: `list-document-groups`, `search-document-groups`, `get-document-group`,
 `create-document-group`, `update-document-group`, `delete-document-group`.
 
+### Groups
+
+| Method | Description |
+|--------|-------------|
+| `listGroups(withTreeEntities:withUsersCount:withSyncGroupAttribute:condition:query:limit:offset:)` | List user groups in the company |
+| `createGroup(name:permissions:addToCardsAndSpacesEnabled:)` | Create a user group |
+| `getGroup(uid:)` | Get a user group |
+| `updateGroup(uid:name:permissions:addToCardsAndSpacesEnabled:)` | Update a user group |
+| `removeGroup(uid:)` | Remove a user group; returns the removed group |
+
+Requires an API token of a user with access to the administrative section
+"Members" — other tokens get HTTP 403. Kaiten documents the groups endpoints as
+under active development, so attributes are subject to change. The `condition`
+filter is exposed as the `GroupCondition` enum (`.active`, `.inactive`) with an
+`unknown(Int)` case that preserves undocumented values. The `permissions` field
+is a bit mask; sum the documented values to combine permissions.
+
+```swift
+let groups = try await client.listGroups(condition: .active)
+
+let created = try await client.createGroup(
+  name: "QA engineers",
+  permissions: 3  // administrative sections "Members" + "Billing"
+)
+```
+
+CLI: `list-groups` with `--with-tree-entities`, `--with-users-count`,
+`--with-sync-group-attribute`, `--condition`, `--query`, `--limit`, `--offset`;
+`create-group --name <name>` with `--permissions`,
+`--add-to-cards-and-spaces-enabled`; `get-group --uid <uid>`;
+`update-group --uid <uid>` with `--name`, `--permissions`,
+`--add-to-cards-and-spaces-enabled`; `remove-group --uid <uid>`.
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

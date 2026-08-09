@@ -5062,6 +5062,170 @@ paths:
           description: Unsupported schema format
         '404':
           description: Schema version not found
+  /company/groups:
+    get:
+      summary: Get list of groups
+      operationId: list_groups
+      parameters:
+      - name: with_tree_entities
+        in: query
+        schema:
+          type: boolean
+        description: Add tree entities for each group
+      - name: with_users_count
+        in: query
+        schema:
+          type: boolean
+        description: Add users count for each group
+      - name: with_sync_group_attribute
+        in: query
+        schema:
+          type: boolean
+        description: Add sync attribute for each group
+      - name: condition
+        in: query
+        schema:
+          type: integer
+        description: 'Group condition filter: 1 = active, 2 = inactive'
+      - name: query
+        in: query
+        schema:
+          type: string
+        description: Search query
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: 'Maximum amount of records. Default: 100. The result is paginated only when limit or offset is present and with_tree_entities is false'
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of records to skip
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    post:
+      summary: Create group
+      operationId: create_group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          description: Bad request
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /company/groups/{uid}:
+    get:
+      summary: Get group
+      operationId: get_group
+      parameters:
+      - name: uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                # NOTE: the docs' response-type column says `Array of objects`, but the docs' own
+                # example is a single object; live verification is unavailable (the endpoint answers
+                # 403 to non-admin tokens) — https://developers.kaiten.ru/groups/get-group
+                $ref: '#/components/schemas/Group'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    patch:
+      summary: Update group
+      operationId: update_group
+      parameters:
+      - name: uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroupRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          description: Bad request
+        '401':
+          description: Invalid token
+        '402':
+          description: Feature is not supported by tariff
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      summary: Remove group
+      operationId: remove_group
+      parameters:
+      - name: uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Group UID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /company/groups/{group_uid}/entities:
     get:
       summary: Get list of group entities
@@ -12129,3 +12293,58 @@ components:
           - string
           - 'null'
           description: UID of the document to use as the home page for this folder. Requires hostname to be set on this folder. Document must be within the document group tree, not archived and not hidden on public site
+    Group:
+      type: object
+      description: A company user group. The groups endpoints are documented as under active development, so attributes are subject to change
+      properties:
+        id:
+          type: integer
+          description: Group id
+        uid:
+          type: string
+          description: Group uid
+        name:
+          type: string
+          description: Group name
+        permissions:
+          type: integer
+          description: Group permissions bit mask
+        add_to_cards_and_spaces_enabled:
+          type: boolean
+          description: Ability to add all users of the group to cards placed in group spaces, and to filter logs by group in Timesheets
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+    CreateGroupRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Group name
+        permissions:
+          type: integer
+          description: Group permissions bit mask
+        add_to_cards_and_spaces_enabled:
+          type: boolean
+          description: Ability to add all users of the group to cards placed in group spaces
+    UpdateGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Group name
+        permissions:
+          type: integer
+          description: Group permissions bit mask. To set several permissions, sum their documented values
+        add_to_cards_and_spaces_enabled:
+          type: boolean
+          description: Ability to add all users of the group to cards placed in group spaces, and to filter logs by group in Timesheets

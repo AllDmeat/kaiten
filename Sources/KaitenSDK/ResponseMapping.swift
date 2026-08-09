@@ -2614,3 +2614,17 @@ extension Operations.delete_custom_property_file.Output {
     }
   }
 }
+
+// MARK: - Timesheet
+
+extension Operations.list_time_logs.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.list_time_logs.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

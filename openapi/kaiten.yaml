@@ -6841,6 +6841,122 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /time-logs:
+    get:
+      summary: Get time logs list
+      operationId: list_time_logs
+      description: Get time logs list filtered by query parameters. The result is paginated (offset/limit)
+      parameters:
+      - name: from
+        in: query
+        required: true
+        schema:
+          type: string
+        description: Date from, format YYYY-MM-DD
+      - name: to
+        in: query
+        required: true
+        schema:
+          type: string
+        description: Date to, format YYYY-MM-DD
+      - name: tag_ids
+        in: query
+        schema:
+          type: string
+        description: Tag ids, comma-separated
+      - name: user_ids
+        in: query
+        schema:
+          type: string
+        description: User ids, comma-separated
+      - name: group_ids
+        in: query
+        schema:
+          type: string
+        description: User group ids, comma-separated
+      - name: space_ids
+        in: query
+        schema:
+          type: string
+        description: Space ids, comma-separated
+      - name: board_ids
+        in: query
+        schema:
+          type: string
+        description: Board ids, comma-separated
+      - name: column_ids
+        in: query
+        schema:
+          type: string
+        description: Column ids, comma-separated
+      - name: card_ids
+        in: query
+        schema:
+          type: string
+        description: Card ids, comma-separated
+      - name: visible_column_ids
+        in: query
+        schema:
+          type: string
+        description: Visible column ids, comma-separated
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: 'Maximum number of records; the limit cannot be extended. Default: 100, max: 200'
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of records to skip
+      - name: condition
+        in: query
+        schema:
+          type: integer
+        description: Condition filter. The documentation describes this parameter only as "Number of records to skip", repeating the `offset` description
+      - name: group_by
+        in: query
+        schema:
+          type: integer
+        description: 'Options to group by. 0 - no groups, 1 - by user, 2 - by card'
+      - name: time_precision
+        in: query
+        schema:
+          type: integer
+        description: Time precision for specified time_unit
+      - name: time_unit
+        in: query
+        schema:
+          type: integer
+        description: Time unit
+      - name: with_daily_distribution
+        in: query
+        schema:
+          type: integer
+        description: Returns data daily when grouped by user or card
+      - name: only_general_sum
+        in: query
+        schema:
+          type: integer
+        description: Returns general sum time spent
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                # The docs label the 200 response type "Object", but the documented example is
+                # an array of time log records. The live 200 body could not be verified: the
+                # endpoint answered 403 with an empty body for the verification token.
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimeLog'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
 components:
   securitySchemes:
     bearerAuth:
@@ -12213,6 +12329,61 @@ components:
         value:
           $ref: '#/components/schemas/NullableString'
           description: Value of card collective score custom property, 1 to 512 characters when set (null to clear, absent to leave unchanged)
+    # Time log record returned by GET /time-logs (timesheet). Shares the card time log fields
+    # but additionally embeds `card`, and documents no `author`. Built from the documentation
+    # and its 200 example only: the live response could not be verified — the endpoint answered
+    # 403 with an empty body for the verification token.
+    TimeLog:
+      type: object
+      properties:
+        updated:
+          type: string
+          description: Last update timestamp
+        created:
+          type: string
+          description: Create date
+        id:
+          type: integer
+          description: Card time log id
+        card_id:
+          type: integer
+          description: Card id
+        user_id:
+          type: integer
+          description: User id
+        role_id:
+          type: integer
+          description: 'Role id, predefined role is: -1 - Employee'
+        author_id:
+          type: integer
+          description: Author id
+        # The docs attribute table declares `updater_id` non-nullable `integer`, but the docs'
+        # own 200 example shows `null` for a record that was never updated.
+        updater_id:
+          type:
+          - integer
+          - 'null'
+          description: Last updater id
+        time_spent:
+          type: integer
+          description: Minutes to log
+        for_date:
+          type: string
+          description: Log date
+        comment:
+          type:
+          - string
+          - 'null'
+          description: Time log comment
+        role:
+          $ref: '#/components/schemas/TimeLogRole'
+          description: Company user role info
+        user:
+          $ref: '#/components/schemas/User'
+          description: User info
+        card:
+          $ref: '#/components/schemas/Card'
+          description: Card info
     AuditLogEvent:
       type: object
       properties:

@@ -134,6 +134,7 @@ struct Kaiten: AsyncParsableCommand {
       AddTimeLog.self,
       UpdateTimeLog.self,
       RemoveTimeLog.self,
+      ListTimeLogs.self,
       ListAuditLogs.self,
       ListCardBlockerUsers.self,
       AddCardBlockerUser.self,

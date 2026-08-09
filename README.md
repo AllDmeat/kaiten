@@ -1033,6 +1033,35 @@ CLI: `list-groups` with `--with-tree-entities`, `--with-users-count`,
 `update-group --uid <uid>` with `--name`, `--permissions`,
 `--add-to-cards-and-spaces-enabled`; `remove-group --uid <uid>`.
 
+### Timesheet
+
+| Method | Description |
+|--------|-------------|
+| `listTimeLogs(from:to:tagIds:userIds:groupIds:spaceIds:boardIds:columnIds:cardIds:visibleColumnIds:condition:groupBy:timePrecision:timeUnit:withDailyDistribution:onlyGeneralSum:offset:limit:)` | List time logs for the whole company |
+
+Requires an API token of a user with access to the company timesheet; without
+it the API answers HTTP 403 with an empty body. The SDK models the documented
+(ungrouped) response shape; the grouping parameters are forwarded as
+documented, but the documentation does not describe how they change the
+response.
+
+```swift
+let page = try await client.listTimeLogs(
+  from: "2026-04-01",
+  to: "2026-04-30",
+  userIds: [42]
+)
+for timeLog in page.items {
+  print(timeLog.time_spent ?? 0)
+}
+```
+
+CLI: `kaiten list-time-logs` with `--from`, `--to`, `--tag-ids`, `--user-ids`,
+`--group-ids`, `--space-ids`, `--board-ids`, `--column-ids`, `--card-ids`,
+`--visible-column-ids`, `--condition`, `--group-by`, `--time-precision`,
+`--time-unit`, `--with-daily-distribution`, `--only-general-sum`, `--offset`,
+`--limit`.
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

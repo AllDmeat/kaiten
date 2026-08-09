@@ -18,10 +18,13 @@ enum ErrorCase: String {
   case badRequest
   case unauthorized
   case paymentRequired
+  /// HTTP 302. Documented for get_comment_file, whose default disposition is a redirect
+  /// to the file content. The SDK requests the JSON disposition, so a redirect reaching
+  /// the client is unexpected and maps accordingly.
+  case found
   case forbidden
   case notFound
   case conflict
-  case found
   case unprocessableContent
   case serviceUnavailable
 }
@@ -238,6 +241,15 @@ let sections: [Section] = [
       errors: [.found, .unauthorized, .forbidden, .notFound, .unprocessableContent]),
     Operation(
       name: "delete_private_card_file", errors: [.unauthorized, .forbidden, .notFound]),
+  ]),
+  Section(mark: "Private Comment Files", operations: [
+    Operation(
+      name: "attach_file_to_comment",
+      errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "get_comment_file",
+      errors: [.found, .unauthorized, .forbidden, .notFound, .unprocessableContent]),
+    Operation(name: "delete_comment_file", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
   Section(mark: "Automations", operations: [
     Operation(name: "list_automations", errors: [.unauthorized, .forbidden, .notFound]),
@@ -481,14 +493,14 @@ func generateExtension(_ op: Operation) -> String {
       cases.append("    case .unauthorized: .unauthorized")
     case .paymentRequired:
       cases.append("    case .code402: .undocumented(statusCode: 402)")
+    case .found:
+      cases.append("    case .found: .undocumented(statusCode: 302)")
     case .forbidden:
       cases.append("    case .forbidden: .forbidden")
     case .notFound:
       cases.append("    case .notFound: .notFound")
     case .conflict:
       cases.append("    case .conflict: .undocumented(statusCode: 409)")
-    case .found:
-      cases.append("    case .found: .undocumented(statusCode: 302)")
     case .unprocessableContent:
       cases.append("    case .unprocessableContent: .undocumented(statusCode: 422)")
     case .serviceUnavailable:

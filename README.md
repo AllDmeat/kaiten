@@ -289,6 +289,27 @@ kaiten get-private-card-file --card-uid aaaa-11 --file-id bbbb-22
 kaiten delete-private-card-file --card-uid aaaa-11 --file-id bbbb-22
 ```
 
+### Private Comment Files
+
+| Method | Description |
+|--------|-------------|
+| `attachFileToComment(cardUid:commentUid:fileData:filename:)` | Attach a file to a card comment (multipart upload) |
+| `getCommentFile(cardUid:commentUid:fileId:responseType:)` | Get a signed URL for a comment file |
+| `deleteCommentFile(cardUid:commentUid:fileId:)` | Delete a comment file |
+
+All three endpoints require "Restricted file access" enabled in company settings and
+address the card, the comment and the file by string UID. `getCommentFile` requests the
+`json` disposition by default; `inline` and `attachment` answer with a redirect to the
+file content instead of a JSON body.
+
+From the CLI:
+
+```bash
+kaiten attach-comment-file --card-uid CARD-UID --comment-uid COMMENT-UID --file ./log.txt
+kaiten get-comment-file --card-uid CARD-UID --comment-uid COMMENT-UID --file-id FILE-ID
+kaiten delete-comment-file --card-uid CARD-UID --comment-uid COMMENT-UID --file-id FILE-ID
+```
+
 ### Spaces
 
 | Method | Description |

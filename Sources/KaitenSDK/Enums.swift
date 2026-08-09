@@ -1290,6 +1290,53 @@ public enum CardTypeRegularProperty: Sendable, Equatable, CaseIterable, Codable 
   }
 }
 
+/// Content disposition requested from the get-comment-file endpoint.
+///
+/// Used in ``KaitenClient/getCommentFile(cardUid:commentUid:fileId:responseType:)``.
+/// - SeeAlso: [Kaiten API – Private Comment Files](https://developers.kaiten.ru/private-comment-files/get-comment-file)
+public enum CommentFileResponseType: Sendable, Equatable, CaseIterable, Codable {
+  /// Return a signed URL in a JSON body.
+  case json
+  /// Redirect to the file content with an inline content disposition.
+  case inline
+  /// Redirect to the file content with an attachment content disposition.
+  case attachment
+  /// Unknown value (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [CommentFileResponseType] {
+    [.json, .inline, .attachment]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "json": self = .json
+    case "inline": self = .inline
+    case "attachment": self = .attachment
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .json: "json"
+    case .inline: "inline"
+    case .attachment: "attachment"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}
+
 /// Sorting direction of a batch card update.
 /// - SeeAlso: [Kaiten API – Batch update for cards](https://developers.kaiten.ru/cards/batch-update-for-cards)
 public enum SortDirection: Sendable, Equatable, CaseIterable, Codable {

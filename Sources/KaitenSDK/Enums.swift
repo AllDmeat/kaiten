@@ -2186,3 +2186,54 @@ public enum DocumentIconType: Sendable, Equatable, CaseIterable, Codable {
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Private Card Files
+
+/// Requested delivery of a private card file.
+///
+/// Used in ``KaitenClient/getPrivateFile(cardUid:fileId:responseType:)``. Declared as a
+/// plain `string` in the OpenAPI spec so an undocumented value cannot fail a request;
+/// the ``unknown(_:)`` case preserves anything new the API adds.
+/// - SeeAlso: [Kaiten API – Private card files](https://developers.kaiten.ru/private-card-files/get-card-file)
+public enum PrivateCardFileResponseType: Sendable, Equatable, CaseIterable, Codable {
+  /// Return the signed file URL as JSON.
+  case json
+  /// Redirect to the file with an `inline` content disposition.
+  case inline
+  /// Redirect to the file with an `attachment` content disposition.
+  case attachment
+  /// Unknown value (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [PrivateCardFileResponseType] {
+    [.json, .inline, .attachment]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "json": self = .json
+    case "inline": self = .inline
+    case "attachment": self = .attachment
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .json: "json"
+    case .inline: "inline"
+    case .attachment: "attachment"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

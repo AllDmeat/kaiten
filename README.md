@@ -594,6 +594,55 @@ CLI: `create-space-template-checklist-item --space-uid <uid>
 `remove-space-template-checklist-item --space-uid <uid>
 --template-checklist-uid <uid> --item-uid <uid>`.
 
+### Iterations
+
+| Method | Description |
+|--------|-------------|
+| `getCardIterationsHistory(cardUid:)` | Get the iterations history of a card |
+| `listIterations(spaceUid:status:withData:limit:offset:order:)` | List iterations of a space |
+| `createIteration(spaceUid:title:goal:startDate:finishDate:)` | Create an iteration |
+| `getIteration(spaceUid:id:)` | Get an iteration by ID |
+| `updateIteration(spaceUid:id:title:goal:status:startDate:finishDate:actualFinishDate:newIterationId:)` | Update an iteration |
+| `deleteIteration(spaceUid:id:newIterationId:)` | Delete an iteration |
+| `listIterationCards(spaceUid:iterationId:status:)` | List card records of an iteration |
+| `addCardToIteration(spaceUid:iterationId:cardUid:)` | Add a card to an iteration |
+| `removeCardFromIteration(spaceUid:iterationId:cardUid:)` | Remove a card from an iteration |
+
+The Kaiten iterations API is in beta and may change. Spaces, iterations and
+cards are addressed by string UIDs rather than integer IDs.
+
+The iteration status is exposed as the `IterationStatus` Swift enum (`planned`,
+`active`, `closed`, `removed`) with an `unknown(String)` case that preserves
+values the documentation does not list. Status transitions are limited to
+planned-to-active and active-to-closed; deletion gives the iteration the
+`removed` status. The `committed` and `velocity` statistics stay free-form
+JSON — the documentation does not describe their fields.
+
+```swift
+let iterations = try await client.listIterations(
+  spaceUid: "sp-uid-1",
+  status: [.active],
+  withData: "cards"
+)
+for iteration in iterations {
+  print(iteration.title ?? "", iteration.cards?.count ?? 0)
+}
+```
+
+CLI: `get-card-iterations-history --card-uid <uid>`,
+`list-iterations --space-uid <uid>` with `--status`, `--with-data`, `--limit`,
+`--offset`, `--order`;
+`create-iteration --space-uid <uid> --title <title>` with `--goal`,
+`--start-date`, `--finish-date`;
+`get-iteration --space-uid <uid> --id <id>`,
+`update-iteration --space-uid <uid> --id <id>` with `--title`, `--goal`,
+`--status`, `--start-date`, `--finish-date`, `--actual-finish-date`,
+`--new-iteration-id`;
+`delete-iteration --space-uid <uid> --id <id> [--new-iteration-id <id>]`,
+`list-iteration-cards --space-uid <uid> --iteration-id <id> [--status <status>]`,
+`add-card-to-iteration --space-uid <uid> --iteration-id <id> --card-uid <uid>`,
+`remove-card-from-iteration --space-uid <uid> --iteration-id <id> --card-uid <uid>`.
+
 ### Blocker Categories
 
 | Method | Description |

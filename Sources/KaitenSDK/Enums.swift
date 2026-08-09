@@ -2284,3 +2284,63 @@ public enum PrivateCardFileResponseType: Sendable, Equatable, CaseIterable, Coda
     try container.encode(rawValue)
   }
 }
+
+// MARK: - Iterations
+//
+// The iteration status is declared as a plain string in the OpenAPI spec (see
+// FR-020a): Kaiten may return values its documentation does not list, and a
+// generated closed enum would fail the entire response instead of the single
+// field. The typed surface lives here, with an `unknown(String)` case that
+// preserves anything new the API adds.
+
+/// Iteration status.
+///
+/// Used in ``KaitenClient/listIterations(spaceUid:status:withData:limit:offset:order:)``
+/// and ``KaitenClient/updateIteration(spaceUid:id:title:goal:status:startDate:finishDate:actualFinishDate:newIterationId:)``.
+/// - SeeAlso: [Kaiten API – Iterations](https://developers.kaiten.ru/iterations/retrieve-list-of-iterations)
+public enum IterationStatus: Sendable, Equatable, CaseIterable, Codable {
+  /// Iteration is planned and has not started yet.
+  case planned
+  /// Iteration is in progress.
+  case active
+  /// Iteration has finished.
+  case closed
+  /// Iteration has been deleted.
+  case removed
+  /// Unknown value returned by the API (forward compatibility).
+  case unknown(String)
+
+  public static var allCases: [IterationStatus] {
+    [.planned, .active, .closed, .removed]
+  }
+
+  public init(rawValue: String) {
+    switch rawValue {
+    case "planned": self = .planned
+    case "active": self = .active
+    case "closed": self = .closed
+    case "removed": self = .removed
+    default: self = .unknown(rawValue)
+    }
+  }
+
+  public var rawValue: String {
+    switch self {
+    case .planned: "planned"
+    case .active: "active"
+    case .closed: "closed"
+    case .removed: "removed"
+    case .unknown(let v): v
+    }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let value = try decoder.singleValueContainer().decode(String.self)
+    self.init(rawValue: value)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
+  }
+}

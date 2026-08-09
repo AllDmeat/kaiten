@@ -348,6 +348,17 @@ let sections: [Section] = [
       errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
     Operation(name: "remove_group_entity", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
+  Section(mark: "Custom Property Collective Score Values", operations: [
+    Operation(
+      name: "get_list_of_collective_score_values",
+      errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "create_collective_score_value",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+    Operation(
+      name: "update_collective_score_value",
+      errors: [.badRequest, .unauthorized, .paymentRequired, .forbidden, .notFound]),
+  ]),
 ]
 
 // MARK: - Generator

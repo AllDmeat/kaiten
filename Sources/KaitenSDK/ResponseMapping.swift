@@ -1823,3 +1823,51 @@ extension Operations.remove_group_entity.Output {
     }
   }
 }
+
+// MARK: - Custom Property Collective Score Values
+
+extension Operations.get_list_of_collective_score_values.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.get_list_of_collective_score_values.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.create_collective_score_value.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.create_collective_score_value.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_collective_score_value.Output {
+  func toCase()
+    -> KaitenClient.ResponseCase<Operations.update_collective_score_value.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .code402: .undocumented(statusCode: 402)
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}

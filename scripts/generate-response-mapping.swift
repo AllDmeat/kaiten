@@ -161,6 +161,8 @@ let sections: [Section] = [
   Section(mark: "Users", operations: [
     Operation(name: "retrieve_list_of_users", errors: [.unauthorized]),
     Operation(name: "retrieve_current_user", errors: [.unauthorized]),
+    Operation(
+      name: "update_user", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
   ]),
   Section(mark: "Card Blockers", operations: [
     Operation(name: "list_card_blockers", errors: [.unauthorized, .forbidden, .notFound]),

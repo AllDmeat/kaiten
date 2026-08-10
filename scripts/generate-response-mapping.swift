@@ -518,6 +518,9 @@ let sections: [Section] = [
       name: "update_user_role", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
     Operation(name: "delete_user_role", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
+  Section(mark: "Tree Entity Roles", operations: [
+    Operation(name: "list_tree_entity_roles", errors: [.unauthorized, .forbidden])
+  ]),
 ]
 
 // MARK: - Generator

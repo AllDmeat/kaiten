@@ -1105,6 +1105,20 @@ for entity in page.items where entity.treeEntityType == .space {
 CLI: `kaiten list-tree-entities` with `--parent-entity-uid`, `--levels-count`,
 `--offset`, `--limit`.
 
+### Tree Entity Roles
+
+| Method | Description |
+|--------|-------------|
+| `listTreeEntityRoles()` | List tree entity roles of the company |
+
+Kaiten documents this endpoint as under active development, so its response
+format is subject to change. The response nests per-entity permission objects
+(menu root, spaces, documents, folders, story maps); card custom property
+permissions arrive either as a blanket boolean or as an object keyed by custom
+property id.
+
+CLI: `list-tree-entity-roles`.
+
 ## Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:

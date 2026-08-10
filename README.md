@@ -1,22 +1,154 @@
-# kaiten-sdk
+# kaiten
 
-[![Build](https://github.com/AllDmeat/kaiten-sdk/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/AllDmeat/kaiten-sdk/actions/workflows/build-and-test.yml)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FAllDmeat%2Fkaiten-sdk%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/AllDmeat/kaiten-sdk)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FAllDmeat%2Fkaiten-sdk%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/AllDmeat/kaiten-sdk)
+[![Build](https://github.com/AllDmeat/kaiten/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/AllDmeat/kaiten/actions/workflows/build-and-test.yml)
 
-Swift SDK for the [Kaiten](https://kaiten.ru) project management API. OpenAPI-generated types with typed errors, automatic retry on `429 Too Many Requests`, and Bearer token authentication.
+`kaiten` is a command-line tool for the [Kaiten](https://kaiten.ru) API. It prints compact JSON to stdout, so you can pipe cards, spaces, users, sprints, and the rest of Kaiten into `jq` or scripts.
 
-Full Kaiten API documentation: [developers.kaiten.ru](https://developers.kaiten.ru)
+A Swift SDK powers the CLI and is available as a library too. See [Library bonus](#library-bonus).
 
-## Installation
+## Install
 
-### As a library
+### mise (recommended)
 
-Add KaitenSDK to your `Package.swift`:
+```sh
+mise use github:AllDmeat/kaiten
+kaiten --help
+```
+
+This installs the latest release binary for your platform. Add `-g` for a global install or append a release tag to pin a version.
+
+### Release binary
+
+Download the archive for your platform from [Releases](https://github.com/AllDmeat/kaiten/releases), extract it, and put `kaiten` on your `PATH`.
+
+### From source
+
+```sh
+git clone https://github.com/AllDmeat/kaiten && cd kaiten
+swift build -c release
+```
+
+The binary will be at `.build/release/kaiten`.
+
+## Authenticate
+
+Create an API token at `https://<your-company>.kaiten.ru/profile/api-key`. Then save the URL and token in `~/.config/kaiten/config.json`:
+
+```json
+{
+  "url": "https://<your-company>.kaiten.ru/api/latest",
+  "token": "<your-api-token>"
+}
+```
+
+For CI, keep credentials in environment variables:
+
+```sh
+export KAITEN_URL="https://<your-company>.kaiten.ru/api/latest"
+export KAITEN_TOKEN="<your-api-token>"
+```
+
+Each environment variable overrides the same value from the config file. Pass `--config <path>` to use another config file.
+
+## Usage
+
+```sh
+kaiten --help
+kaiten list-spaces
+kaiten list-boards --space-id 42
+kaiten list-cards --board-id 84 | jq '.[].title'
+kaiten get-card --id 123
+kaiten add-comment --card-id 123 --text "Checked from the CLI"
+```
+
+Every command has its own help. Read it before composing a request:
+
+```sh
+kaiten list-cards --help
+kaiten add-comment --help
+```
+
+The CLI covers cards, spaces, boards, users, groups, sprints, documents, custom properties, checklists, files, automations, and the other Kaiten API resources. `kaiten --help` is the command reference for the installed version.
+
+## Control JSON output size
+
+Kaiten responses embed related entities next to their ids. A card can carry `owner_id` and the whole owner, plus its board, type, lane, members, tags, and children. The CLI drops nested entities by default and keeps scalars and id references:
+
+```sh
+kaiten get-card --id 123
+```
+
+Example output:
+
+```json
+{"board_id":5,"column_id":3,"id":123,"owner_id":7,"title":"Fix login"}
+```
+
+`--expand` brings back the fields you name. Use `all` to return every nested entity:
+
+```sh
+kaiten get-card --id 123 --expand owner,tags
+kaiten get-card --id 123 --expand all
+```
+
+Expansion is one level deep: an expanded value is itself stripped of its own
+nested fields, so `--expand children` returns the children of a card without
+their children. Ask for a deeper level with a second command.
+
+A collection that is not expanded collapses to its ids, keeping its own key, so
+the response never goes silent about a relation it holds:
+
+```sh
+kaiten get-card --id 123
+```
+
+The response keeps collection keys and replaces their entities with ids:
+
+```json
+{"members":[821,904],"external_links":[5512,5513],"tags":[],"owner_id":821}
+```
+
+Expand a collection to return its entities:
+
+```sh
+kaiten get-card --id 123 --expand members
+```
+
+Only entities are trimmed, and an `id` is what marks one. A nested value
+without an `id` is data, not a reference — a card's `properties` holds the
+custom field values, `{"id_714":[1088]}` — so it is passed through whole. There
+is no `properties_id` to stand in for it, and dropping it would lose the values
+rather than a pointer to them.
+
+Id arrays Kaiten sends itself (`tag_ids`, `parents_ids`) are passed through
+untouched, and nothing is ever invented.
+
+> [!WARNING]
+> `children_ids` and `children_count` can undercount. They come straight from
+> Kaiten and can report fewer children than a card has — both have been seen
+> reporting eight for a card that has eleven, and expanding `children` returns
+> the same short list. Use `list-card-children` when the children of a card
+> have to be accurate.
+
+To discover what a command offers, pass a name it does not have:
+
+```sh
+kaiten get-card --id 123 --expand '?'
+```
+
+Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
+
+The error lists every expandable field for that command.
+
+## Library bonus
+
+The same Kaiten API coverage is available as the `KaitenSDK` Swift package for iOS 18+ and macOS 15+.
+
+Add it to `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/AllDmeat/kaiten-sdk.git", from: "0.1.0"),
+    .package(url: "https://github.com/AllDmeat/kaiten.git", from: "0.1.0"),
 ],
 targets: [
     .target(
@@ -28,21 +160,7 @@ targets: [
 ]
 ```
 
-### mise (recommended)
-
-[mise](https://mise.jdx.dev) — a tool version manager. It will install the required version automatically:
-
-```bash
-mise use github:alldmeat/kaiten-sdk
-```
-
-### GitHub Release
-
-Download the binary for your platform from the [releases page](https://github.com/AllDmeat/kaiten-sdk/releases).
-
-## Quick Start
-
-### As a library
+Create a client and make the first request:
 
 ```swift
 import KaitenSDK
@@ -53,114 +171,9 @@ let client = try KaitenClient(
 )
 
 let spaces = try await client.listSpaces()
-let cards = try await client.listCards(boardId: 42)
-let card = try await client.getCard(id: 123)
 ```
 
-### As a CLI
-
-The CLI resolves each credential independently: environment variable → config file.
-
-#### 1. Get a Kaiten API Token
-
-Get your API token at `https://<your-company>.kaiten.ru/profile/api-key`.
-
-#### 2. Configure Credentials
-
-**Option 1 — Config file** (recommended for interactive use):
-
-Create `~/.config/kaiten/config.json`:
-
-```json
-{
-  "url": "https://<your-company>.kaiten.ru/api/latest",
-  "token": "<your-api-token>"
-}
-```
-
-Then run commands:
-
-```bash
-kaiten list-spaces
-kaiten get-card --id 123
-```
-
-**Option 2 — Environment variables** (recommended for CI):
-
-```bash
-export KAITEN_URL="https://<your-company>.kaiten.ru/api/latest"
-export KAITEN_TOKEN="<your-api-token>"
-kaiten list-spaces
-```
-
-No file on disk. An environment variable overrides the same parameter from the
-config file; one set to an empty string counts as unset, so a missing CI secret
-fails resolution instead of sending an empty token.
-
-#### 3. Output Size
-
-Responses embed whole related entities next to the references to them — a card
-carries `owner_id` *and* the entire owner, plus its board, type, lane, members,
-tags and children. Commands drop those by default and keep only scalars and
-`*_id` references:
-
-```bash
-kaiten get-card --id 123
-# {"board_id":5,"column_id":3,"id":123,"owner_id":7,"title":"Fix login",...}
-```
-
-`--expand` brings back the ones you name, or `all` for every one of them:
-
-```bash
-kaiten get-card --id 123 --expand owner,tags
-kaiten get-card --id 123 --expand all
-```
-
-Expansion is one level deep: an expanded value is itself stripped of its own
-nested fields, so `--expand children` returns the children of a card without
-*their* children. Ask for a deeper level with a second command.
-
-A collection that is not expanded collapses to its ids, keeping its own key, so
-the response never goes silent about a relation it holds:
-
-```bash
-kaiten get-card --id 123
-# {"members":[821,904],"external_links":[5512,5513],"tags":[],"owner_id":821,...}
-
-kaiten get-card --id 123 --expand members
-# {"members":[{"id":821,"full_name":"…",…}],…}
-```
-
-The field therefore holds ids by default and entities when expanded. Keeping
-the key is what makes a card with members and a card without report the same
-field — `members: [821]` and `members: []` are both answers.
-
-Only entities are trimmed, and an `id` is what marks one. A nested value
-without an `id` is data, not a reference — a card's `properties` holds the
-custom field values, `{"id_714":[1088]}` — so it is passed through whole. There
-is no `properties_id` to stand in for it, and dropping it would lose the values
-rather than a pointer to them.
-
-Id arrays Kaiten sends itself (`tag_ids`, `parents_ids`) are passed through
-untouched, and nothing is ever invented.
-
-> **`children_ids` and `children_count` undercount.** They come straight from
-> Kaiten and can report fewer children than a card has — both have been seen
-> reporting eight for a card that has eleven, and expanding `children` returns
-> the same short list. Use `list-card-children` when the children of a card
-> have to be accurate.
-
-To discover what a command offers, pass a name it does not have:
-
-```bash
-kaiten get-card --id 123 --expand '?'
-# Error: Unknown --expand field: '?'. Available: board, children, column,
-# external_links, files, lane, members, owner, parents, properties, tags, type, all
-```
-
-Quote the `?` — unquoted it is a shell glob and never reaches the CLI.
-
-## API Reference
+The SDK provides typed errors, retries `429 Too Many Requests` responses automatically, and uses Bearer token authentication. The full Kaiten API documentation lives at [developers.kaiten.ru](https://developers.kaiten.ru).
 
 ### Cards
 
@@ -1131,7 +1144,7 @@ property id.
 
 CLI: `list-tree-entity-roles`.
 
-## Pagination
+### Pagination
 
 Most list endpoints accept `offset` and `limit` parameters and return a `Page<T>`:
 
@@ -1143,7 +1156,7 @@ print(page.hasMore) // true if more pages are available
 
 To fetch the next page, increment `offset` by `limit` and repeat until `hasMore` is `false`.
 
-### Auto-pagination
+#### Auto-pagination
 
 Convenience methods handle pagination automatically and return an `AsyncThrowingStream` so you can iterate all items without managing offsets:
 
@@ -1166,7 +1179,7 @@ Available auto-pagination methods:
 
 Each method accepts an optional `pageSize` parameter (default `100`).
 
-## Filtering Cards
+### Filtering cards
 
 Use `CardFilter` to narrow results when listing cards. All properties are optional — set only the ones you need:
 
@@ -1195,9 +1208,9 @@ for try await card in client.allCards(boardId: 1, filter: filter) {
 
 Commonly used filter properties include `query`, `memberIds`, `states`, `overdue`, `spaceId`, `typeId`, `condition`, and date ranges like `createdAfter`/`createdBefore`. See `CardFilter` source for the full list of 40+ parameters.
 
-## Creating & Updating Cards
+### Creating and updating cards
 
-### CardCreateOptions
+#### CardCreateOptions
 
 Create a card by providing a title and board ID. Set additional properties as needed:
 
@@ -1208,7 +1221,7 @@ opts.description = "Fix the login crash"
 let card = try await client.createCard(opts)
 ```
 
-### CardUpdateOptions
+#### CardUpdateOptions
 
 Update specific fields on an existing card — only the properties you set are sent to the server:
 
@@ -1219,7 +1232,7 @@ opts.columnId = 42
 let card = try await client.updateCard(id: 123, opts)
 ```
 
-### Batch update
+#### Batch update
 
 `batchUpdateCards` updates every card matching the given criteria in one call. It runs in the
 background and returns the job's UUID rather than the updated cards. Provide at least one
@@ -1247,7 +1260,7 @@ kaiten batch-update-cards --column-id 2 --lane-id 3 \
   --order-by '{"field_type": "title", "direction": "asc"}'
 ```
 
-### Custom properties
+#### Custom properties
 
 Both option types carry a `properties` payload for the workspace's custom fields. Keys are
 `id_<property-id>`; a value is an array of value IDs for select properties, a number for numeric
@@ -1262,7 +1275,7 @@ kaiten update-card --id 123 --properties '{"id_299126": [106915]}'
 
 The object is parsed and validated locally, so a malformed payload fails before any request is sent.
 
-### WIP limits
+#### WIP limits
 
 Columns and lanes carry a work-in-progress limit. `--wip-limit` sets the value and `--wip-limit-type`
 selects what it counts — `1` for card count, `2` for card size:
@@ -1271,13 +1284,13 @@ selects what it counts — `1` for card count, `2` for card size:
 kaiten update-column --board-id 42 --id 7 --wip-limit 5 --wip-limit-type 1
 ```
 
-## Configuration
+### SDK configuration
 
-The CLI and MCP server share the same config file at `~/.config/kaiten/config.json` (see [Configure Credentials](#2-configure-credentials) above).
+`KaitenClient` can read the same `~/.config/kaiten/config.json` file as the CLI. See [Authenticate](#authenticate).
 
 Use `--config` to provide a custom config file path when needed.
 
-## Error Handling
+### Error handling
 
 All methods throw `KaitenError`, which provides typed cases for every failure mode:
 
@@ -1320,7 +1333,7 @@ below read it from there.
 ### Claude Code
 
 ```
-/plugin marketplace add AllDmeat/kaiten-sdk
+/plugin marketplace add AllDmeat/kaiten
 /plugin install kaiten@kaiten
 ```
 
@@ -1341,7 +1354,7 @@ Cursor 2.5+ reads plugins from a marketplace repository as well, and this reposi
 
 Add it with the `/add-plugin` command in the editor, or register the repository for a whole team
 under Dashboard → Settings → Plugins → Team Marketplaces, where you paste the GitHub URL
-`https://github.com/AllDmeat/kaiten-sdk` and review the parsed plugins. Installed plugins are
+`https://github.com/AllDmeat/kaiten` and review the parsed plugins. Installed plugins are
 updated from the same marketplace UI.
 
 Cursor reads the skill from `agent/skills/`, so it gets the same guidance as the other two hosts.
@@ -1349,7 +1362,7 @@ Cursor reads the skill from `agent/skills/`, so it gets the same guidance as the
 ### Gemini CLI
 
 ```bash
-gemini extensions install https://github.com/AllDmeat/kaiten-sdk
+gemini extensions install https://github.com/AllDmeat/kaiten
 ```
 
 Gemini installs an extension from that extension's own root directory and cannot install a
@@ -1368,8 +1381,9 @@ the skill when a task looks relevant, rather than loading it into every session.
 
 ## Requirements
 
-- Swift 6.2+
-- macOS 15+ (ARM) / Linux (x86-64, ARM)
+- Running the CLI: no runtime dependencies. Release binaries support macOS 15+ on ARM and Linux on x86-64 or ARM.
+- Building from source or using the library: Swift 6.2+.
+- Using the library: iOS 18+ or macOS 15+.
 
 ## License
 

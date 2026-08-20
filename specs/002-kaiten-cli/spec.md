@@ -125,9 +125,12 @@ stdout confirms it works.
       "token": "your-api-token"
     }
     ```
-  - **`preferences.json`** — user preferences (favorite boards,
-    spaces). Managed by KaitenMCP. The CLI does not read or write
-    this file.
+  - **`reference.<ext>`** — optional, user-maintained reference file of
+    Kaiten entity IDs and metadata, in any format the user chooses (the
+    extension is not fixed). Reserved for AI agent tooling; the config's
+    `reference` key may point to a different location. The CLI does not
+    read or write this file. Replaces the retired `preferences.json`
+    that was managed by KaitenMCP.
 
   The CLI reads only `config.json`.
 - **FR-007**: The CLI MUST use `swift-configuration`

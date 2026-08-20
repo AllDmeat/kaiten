@@ -15,13 +15,13 @@ already exist, exactly as the user set them up, instead of mis-resolving or dupl
 - **Default**: next to the CLI config — `~/.config/kaiten/reference.<ext>`, any extension
   (`reference.md`, `reference.json`, `reference.yaml`, …). Look for it there first.
 - **Override**: an optional `reference` key in the config (`~/.config/kaiten/config.json`, or the
-  file passed via `--config`) points anywhere else:
+  file passed via `--config`). The path can be anything; when suggesting one, suggest the default:
 
 ```json
 {
   "url": "https://<company>.kaiten.ru/api/latest",
   "token": "<api-token>",
-  "reference": "~/notes/kaiten-reference.json"
+  "reference": "~/.config/kaiten/reference.md"
 }
 ```
 

@@ -53,14 +53,14 @@ Each environment variable overrides the same value from the config file. Pass `-
 Next to the config you can keep a reference file — `~/.config/kaiten/reference.<ext>`, any format
 you like (JSON, YAML, Markdown, plain text) — with the entity IDs, metadata, and working
 preferences you actually use: spaces, boards, card types, users, notes on how to work with them —
-whatever you need. To keep it elsewhere, point at it with an optional `reference` key in the
-config:
+whatever you need. An optional `reference` key in the config points at the file — any path works,
+the default is just a convention:
 
 ```json
 {
   "url": "https://<your-company>.kaiten.ru/api/latest",
   "token": "<your-api-token>",
-  "reference": "~/notes/kaiten-reference.md"
+  "reference": "~/.config/kaiten/reference.md"
 }
 ```
 

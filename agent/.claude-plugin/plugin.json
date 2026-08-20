@@ -1,6 +1,6 @@
 {
   "name": "kaiten",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Teaches the agent when and how to reach for the kaiten CLI (cards, boards, spaces, sprints, checklists, comments, members, custom properties) — read the help first, then work from it",
   "author": {
     "name": "Aleksey Berezka"

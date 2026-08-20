@@ -1,0 +1,37 @@
+---
+description: Maintain the user's local Kaiten reference file — a curated file of entity IDs and metadata living next to the kaiten CLI config (~/.config/kaiten/reference.<ext>) or wherever the config's `reference` key points. Apply when that file needs to be read, created, filled, or extended, when a Kaiten ID had to be resolved via the API (the file may be missing it, or may not exist yet and should be offered), or when the user asks to save a Kaiten ID for later.
+alwaysApply: false
+---
+
+# kaiten-reference
+
+Users can keep a local file with the Kaiten entity IDs and metadata they work with (spaces,
+boards, columns, lanes, card types, custom properties, users). Default location:
+`~/.config/kaiten/reference.<ext>` next to the config, any extension. An optional `reference` key
+in `~/.config/kaiten/config.json` points anywhere else. The CLI ignores both — they are for agents.
+
+## Why the file outranks the API
+
+Kaiten instances accumulate same-named spaces, boards, and card types. Resolving by name through
+the API can silently return the wrong duplicate. IDs a human verified and wrote down do not have
+this problem — when the file has the ID, use it and do not re-resolve it.
+
+## No file yet? Offer to start one
+
+The moment a task forces an API lookup and no reference file exists, tell the user what you had to
+look up and offer to start the file with it — default path `~/.config/kaiten/reference.md` unless
+the user prefers another path (then also set the `reference` key) or format. Seed only with IDs
+the user confirms; never bulk-dump the API into it.
+
+## The file belongs to the user
+
+Any format goes — JSON, YAML, Markdown, plain text. Match the existing format when appending.
+Never reformat, restructure, or delete entries unless the user asks for exactly that.
+
+## Keep it growing — with approval
+
+1. Read the file before writing — check the data is not already there.
+2. If the API taught you an ID the file lacks, propose the exact addition — show the lines you
+   intend to write.
+3. Append only after explicit user approval. An unverified ID poisons every future session that
+   trusts the file.

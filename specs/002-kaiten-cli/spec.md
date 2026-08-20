@@ -72,6 +72,12 @@ stdout confirms it works.
   help and exit with a non-zero code.
 - What if the config file exists but contains invalid JSON? The CLI
   MUST output an error describing the configuration problem.
+- What if the config file contains keys the CLI does not read? The CLI
+  MUST ignore them. One such key is documented: `reference` — a path to a
+  user-maintained file of Kaiten entity IDs and metadata, reserved for
+  AI agent tooling (default location when the key is absent:
+  `reference.<ext>` next to the config file). The CLI never reads or
+  validates the key or the file.
 - What if the config file does not exist and no `--config` is passed?
   If the environment supplies the missing parameters, the CLI proceeds;
   otherwise it MUST output an error with instructions: set `KAITEN_URL` /

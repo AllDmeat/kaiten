@@ -72,6 +72,13 @@ stdout confirms it works.
   help and exit with a non-zero code.
 - What if the config file exists but contains invalid JSON? The CLI
   MUST output an error describing the configuration problem.
+- What if the config file contains keys the CLI does not read? The CLI
+  MUST ignore them. One such key is documented: `reference` — a path to a
+  user-maintained file of Kaiten entity IDs, metadata, and working
+  preferences, reserved for AI agent tooling. Agents locate the file
+  only through this key; the conventional path is `reference.<ext>`
+  next to the config file. The CLI never reads or validates the key or
+  the file.
 - What if the config file does not exist and no `--config` is passed?
   If the environment supplies the missing parameters, the CLI proceeds;
   otherwise it MUST output an error with instructions: set `KAITEN_URL` /
@@ -119,9 +126,13 @@ stdout confirms it works.
       "token": "your-api-token"
     }
     ```
-  - **`preferences.json`** — user preferences (favorite boards,
-    spaces). Managed by KaitenMCP. The CLI does not read or write
-    this file.
+  - **`reference.<ext>`** — optional, user-maintained reference file of
+    Kaiten entity IDs, metadata, and working preferences, in any format
+    the user chooses (the extension is not fixed). Reserved for AI agent
+    tooling; agents locate it only through the config's `reference` key,
+    which may point anywhere — next to the config is the conventional
+    place. The CLI does not read or write this file. Replaces the
+    retired `preferences.json` that was managed by KaitenMCP.
 
   The CLI reads only `config.json`.
 - **FR-007**: The CLI MUST use `swift-configuration`

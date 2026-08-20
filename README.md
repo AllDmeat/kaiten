@@ -50,6 +50,25 @@ export KAITEN_TOKEN="<your-api-token>"
 
 Each environment variable overrides the same value from the config file. Pass `--config <path>` to use another config file.
 
+You can also keep a reference file — any format you like (JSON, YAML, Markdown, plain text) —
+with the entity IDs, metadata, and working preferences you actually use: spaces, boards, card
+types, users, notes on how to work with them — whatever you need. An optional `reference` key in
+the config points at it, and that key is the only place agents look. Any path works; the
+suggested one is next to the config:
+
+```json
+{
+  "url": "https://<your-company>.kaiten.ru/api/latest",
+  "token": "<your-api-token>",
+  "reference": "~/.config/kaiten/reference.md"
+}
+```
+
+The CLI ignores both the key and the file — they exist for AI agents. Agents read IDs from that
+file instead of resolving names through the API (Kaiten instances accumulate same-named entities,
+and name search can silently return the wrong one), offer to create the file if you have none, and
+propose additions — but only write to it with your approval.
+
 ## Usage
 
 ```sh

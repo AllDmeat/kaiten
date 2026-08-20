@@ -74,8 +74,9 @@ stdout confirms it works.
   MUST output an error describing the configuration problem.
 - What if the config file contains keys the CLI does not read? The CLI
   MUST ignore them. One such key is documented: `reference` — a path to a
-  user-maintained file of Kaiten entity IDs and metadata, reserved for
-  AI agent tooling (default location when the key is absent:
+  user-maintained file of Kaiten entity IDs, metadata, and working
+  preferences, reserved for AI agent tooling (default location when the
+  key is absent:
   `reference.<ext>` next to the config file). The CLI never reads or
   validates the key or the file.
 - What if the config file does not exist and no `--config` is passed?
@@ -126,8 +127,9 @@ stdout confirms it works.
     }
     ```
   - **`reference.<ext>`** — optional, user-maintained reference file of
-    Kaiten entity IDs and metadata, in any format the user chooses (the
-    extension is not fixed). Reserved for AI agent tooling; the config's
+    Kaiten entity IDs, metadata, and working preferences, in any format
+    the user chooses (the extension is not fixed). Reserved for AI agent
+    tooling; the config's
     `reference` key may point to a different location. The CLI does not
     read or write this file. Replaces the retired `preferences.json`
     that was managed by KaitenMCP.

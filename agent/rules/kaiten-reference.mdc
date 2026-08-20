@@ -5,8 +5,10 @@ alwaysApply: false
 
 # kaiten-reference
 
-Users can keep a local file with the Kaiten entity IDs and metadata they work with (spaces,
-boards, columns, lanes, card types, custom properties, users). Default location:
+Users can keep a local file with the Kaiten entity IDs, metadata, and working preferences they
+work with (spaces, boards, columns, lanes, card types, custom properties, users). Its purpose is
+to make agents work with the entities that already exist, exactly as the user set them up, instead
+of mis-resolving or duplicating them. Default location:
 `~/.config/kaiten/reference.<ext>` next to the config, any extension. An optional `reference` key
 in `~/.config/kaiten/config.json` points anywhere else. The CLI ignores both — they are for agents.
 
@@ -15,6 +17,9 @@ in `~/.config/kaiten/config.json` points anywhere else. The CLI ignores both —
 Kaiten instances accumulate same-named spaces, boards, and card types. Resolving by name through
 the API can silently return the wrong duplicate. IDs a human verified and wrote down do not have
 this problem — when the file has the ID, use it and do not re-resolve it.
+
+Notes, rules, and defaults written in the file are the user's configuration — follow them, and
+work with the entities it names instead of creating parallel ones.
 
 ## No file yet? Offer to start one
 

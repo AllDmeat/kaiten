@@ -5,9 +5,10 @@ description: Maintain the user's local Kaiten reference file — a curated file 
 
 # kaiten-reference
 
-Users of the `kaiten` CLI can keep a local reference file with the entity IDs and metadata they
-actually work with: spaces, boards, columns, lanes, card types, custom properties, users — whatever
-they need.
+Users of the `kaiten` CLI can keep a local reference file with the entity IDs, metadata, and
+working preferences they actually use: spaces, boards, columns, lanes, card types, custom
+properties, users — whatever they need. Its purpose is to make agents work with the entities that
+already exist, exactly as the user set them up, instead of mis-resolving or duplicating them.
 
 ## Where the file lives
 
@@ -33,6 +34,14 @@ Resolving an entity by name through the API can silently return the wrong one of
 entities, and nothing in the response reveals the mistake. IDs a human has verified and written
 down do not have this problem. So when the reference file has the ID, use it and do not re-resolve
 it through the API.
+
+## The file is instructions, not just data
+
+Whatever the user wrote in it — notes, rules, defaults (which board and lane new cards go to,
+title formats, which same-named entity is the wrong one) — is how they configured you to work.
+Follow it. And when an entity the task needs is already in the file, work with that entity;
+creating a parallel one where the file says one exists is exactly the mix-up the file exists to
+prevent.
 
 ## No file yet? Offer to start one
 

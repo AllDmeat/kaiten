@@ -1,5 +1,5 @@
 ---
-description: Maintain the user's local Kaiten reference file — a curated file of entity IDs and metadata (spaces, boards, columns, lanes, card types, custom properties, users) living next to the kaiten CLI config or wherever its `reference` key points. Use whenever that file needs to be read, created, filled, extended, or checked — when any Kaiten entity ID had to be resolved through the API (the file may be missing it, or may not exist yet and should be offered), when the user asks to save or record a Kaiten ID "for next time", or when deciding whether an ID found by name search can be trusted. Applies alongside the kaiten skill, not instead of it.
+description: Maintain the user's local Kaiten reference file — a curated file of entity IDs, metadata, and working preferences (spaces, boards, columns, lanes, card types, custom properties, users) that the `reference` key in the kaiten CLI config points at. Use whenever that file needs to be read, created, filled, extended, or checked — when any Kaiten entity ID had to be resolved through the API (the file may be missing it, or may not exist yet and should be offered), when the user asks to save or record a Kaiten ID "for next time", or when deciding whether an ID found by name search can be trusted. Applies alongside the kaiten skill, not instead of it.
 alwaysApply: false
 ---
 
@@ -12,10 +12,10 @@ already exist, exactly as the user set them up, instead of mis-resolving or dupl
 
 ## Where the file lives
 
-- **Default**: next to the CLI config — `~/.config/kaiten/reference.<ext>`, any extension
-  (`reference.md`, `reference.json`, `reference.yaml`, …). Look for it there first.
-- **Override**: an optional `reference` key in the config (`~/.config/kaiten/config.json`, or the
-  file passed via `--config`). The path can be anything; when suggesting one, suggest the default:
+The `reference` key in the CLI config (`~/.config/kaiten/config.json`, or the file passed via
+`--config`) points at it, and that key is the only place to look — do not go hunting for
+reference-looking files elsewhere. The path can be anything; when suggesting one, suggest the
+default, next to the config:
 
 ```json
 {
@@ -46,12 +46,12 @@ prevent.
 ## No file yet? Offer to start one
 
 The file only helps once it exists, so do not wait to be asked. The moment a task forces you to
-resolve an ID through the API and no reference file exists — neither at the default location nor
-via the `reference` key — tell the user what you had to look up and offer to start the file with
-it. Propose the default location, `~/.config/kaiten/reference.md`, unless the user prefers another
-path (then also add the `reference` key to the config) or another format. Seed it only with IDs
-the user confirms — do not bulk-dump the API into it: a reference full of unverified entries,
-duplicates included, defeats its purpose.
+resolve an ID through the API and the config has no `reference` key, tell the user what you had
+to look up and offer to start the file with it. Propose the default path,
+`~/.config/kaiten/reference.md`, unless the user prefers another path or format, and write the
+`reference` key into the config either way — the key is how every future session finds the file.
+Seed it only with IDs the user confirms — do not bulk-dump the API into it: a reference full of
+unverified entries, duplicates included, defeats its purpose.
 
 ## The file belongs to the user
 

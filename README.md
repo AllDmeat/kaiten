@@ -50,11 +50,11 @@ export KAITEN_TOKEN="<your-api-token>"
 
 Each environment variable overrides the same value from the config file. Pass `--config <path>` to use another config file.
 
-Next to the config you can keep a reference file — `~/.config/kaiten/reference.<ext>`, any format
-you like (JSON, YAML, Markdown, plain text) — with the entity IDs, metadata, and working
-preferences you actually use: spaces, boards, card types, users, notes on how to work with them —
-whatever you need. An optional `reference` key in the config points at the file — any path works,
-the default is just a convention:
+You can also keep a reference file — any format you like (JSON, YAML, Markdown, plain text) —
+with the entity IDs, metadata, and working preferences you actually use: spaces, boards, card
+types, users, notes on how to work with them — whatever you need. An optional `reference` key in
+the config points at it, and that key is the only place agents look. Any path works; the
+suggested one is next to the config:
 
 ```json
 {

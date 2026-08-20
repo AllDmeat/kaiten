@@ -39,11 +39,10 @@ subcommand for the task, say so rather than improvising a raw API call.
 
 ## Resolve IDs, do not guess them
 
-The user may keep a reference file of entity IDs and metadata — by default
-`~/.config/kaiten/reference.<ext>` next to the config, or wherever the config's optional
-`reference` key points. If it exists, read it and take IDs from there first; if not, offer to
-start it (see the kaiten-reference rule). Otherwise, or when the ID is missing from it, walk the
-API:
+The user may keep a reference file of entity IDs, metadata, and working preferences at the path
+the config's optional `reference` key points to — that key is the only place to look for it. If
+the key is set, read the file and take IDs from there first; if not, offer to start it (see the
+kaiten-reference rule). Otherwise, or when the ID is missing from it, walk the API:
 
 ```bash
 kaiten list-spaces                          # → space IDs

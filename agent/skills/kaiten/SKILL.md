@@ -86,16 +86,16 @@ or re-run the same command hoping for a different result. A command that failed 
 will fail the same way the second time, and a config you found by searching the filesystem is not
 one the user asked you to authenticate as. Do not echo the token into the transcript.
 
-The user may keep a reference file of entity IDs, metadata, and working preferences, in whatever format they chose —
-by default next to the config as `~/.config/kaiten/reference.<ext>`, or wherever an optional
-`reference` key in the config points. The CLI ignores both; they exist for you. If the file
-exists, read it and take IDs from it before resolving anything through the API — Kaiten instances
+The user may keep a reference file of entity IDs, metadata, and working preferences, in whatever
+format they chose, at the path the optional `reference` key in the config points to — that key is
+the only place to look for it. The CLI ignores both; they exist for you. If the key is set, read
+the file and take IDs from it before resolving anything through the API — Kaiten instances
 accumulate same-named spaces, boards, and card types, and resolving by name can silently return
 the wrong one. Notes and rules written in the file are the user's configuration — follow them,
-and work with the entities it names instead of creating parallel ones. If it does not exist,
-offer to start it the first time the API has to be searched. The kaiten-reference skill covers
-creating and maintaining that file; the one rule that cannot wait for it: never append to the
-file without explicit user approval.
+and work with the entities it names instead of creating parallel ones. If the key is absent,
+offer to start the file the first time the API has to be searched. The kaiten-reference skill
+covers creating and maintaining that file; the one rule that cannot wait for it: never append to
+the file without explicit user approval.
 
 ## You start with no IDs — walk down to them
 

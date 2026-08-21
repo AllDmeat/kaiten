@@ -7287,6 +7287,12 @@ components:
           - integer
           - 'null'
           description: Sprint ID
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/cards/retrieve-card
+        iteration:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardIteration'
+          description: Iterations the card belongs to. Absent when the card is in no iteration. Returned by the single-card endpoint only — the card list omits it even when iteration is requested through additional_card_fields. Unrelated to sprint_id, which belongs to the board-scoped sprints API
         condition:
           type: integer
           description: Card condition
@@ -12205,6 +12211,39 @@ components:
         updated:
           type: string
           description: Last update timestamp of the target iteration card record
+    # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/cards/retrieve-card
+    # Merges the iteration identity documented at https://developers.kaiten.ru/iterations/get-iteration with
+    # the card link documented at https://developers.kaiten.ru/iterations/add-card-to-iteration, and carries
+    # neither the iteration's dates and statistics nor the link's added_by_uid, removed_at and sort_order.
+    # Every property is optional: the composition itself is undocumented and may gain or lose fields.
+    CardIteration:
+      type: object
+      description: Iteration membership embedded in a card response
+      properties:
+        id:
+          type: string
+          description: Iteration ID (UUID)
+        iteration_id:
+          type: string
+          description: ID of the iteration (UUID), repeating id
+        card_uid:
+          type: string
+          description: UID of the card
+        space_uid:
+          type: string
+          description: UID of the space the iteration belongs to
+        title:
+          type: string
+          description: Iteration title
+        status:
+          type: string
+          description: 'Iteration status. Documented values: planned, active, closed, removed. Map to the IterationStatus Swift enum, which preserves unknown values.'
+        creator_uid:
+          type: string
+          description: UID of the user who created the iteration
+        updater_uid:
+          type: string
+          description: UID of the user who last updated the iteration
     CreateIterationRequest:
       type: object
       required:

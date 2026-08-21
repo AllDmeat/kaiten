@@ -14,6 +14,13 @@ extension Components.Schemas.Iteration {
   }
 }
 
+extension Components.Schemas.CardIteration {
+  /// The iteration status, or `nil` if the API omitted the field.
+  public var iterationStatus: IterationStatus? {
+    status.map(IterationStatus.init(rawValue:))
+  }
+}
+
 // MARK: - Iterations
 
 extension KaitenClient {

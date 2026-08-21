@@ -706,6 +706,25 @@ planned-to-active and active-to-closed; deletion gives the iteration the
 `removed` status. The `committed` and `velocity` statistics stay free-form
 JSON — the documentation does not describe their fields.
 
+A card reports its own iteration membership: `getCard(id:)` fills `iteration`
+with the iterations the card belongs to, and leaves it `nil` when the card is in
+none. The card list omits the field, so membership across a board is read either
+card by card or in one call through `listIterationCards`. Each entry carries the
+same `iterationStatus` accessor as `Iteration`. This is unrelated to a card's
+`sprint_id`, which belongs to the board-scoped sprints API and stays populated on
+cards that have no iteration.
+
+```swift
+let card = try await client.getCard(id: 1)
+for iteration in card.iteration ?? [] {
+  print(iteration.title ?? "", iteration.iterationStatus ?? .unknown(""))
+}
+```
+
+CLI: `get-card --id <id>` reports membership as iteration ids, like every
+other collection; `--expand iteration` swaps them for the objects carrying
+`title` and `status`.
+
 ```swift
 let iterations = try await client.listIterations(
   spaceUid: "sp-uid-1",

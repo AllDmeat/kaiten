@@ -721,6 +721,10 @@ for iteration in card.iteration ?? [] {
 }
 ```
 
+CLI: `get-card --id <id>` reports membership as iteration ids, like every
+other collection; `--expand iteration` swaps them for the objects carrying
+`title` and `status`.
+
 ```swift
 let iterations = try await client.listIterations(
   spaceUid: "sp-uid-1",

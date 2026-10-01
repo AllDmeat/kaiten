@@ -1365,7 +1365,7 @@ not exist. This repository ships a skill that fixes that: it makes the agent rea
 the config file lives, how to walk from spaces to boards to cards when you have no IDs, the two JSON
 output shapes, pagination, and the fact that `429` retry is already built in.
 
-One copy of that guidance lives in [`agent/skills/kaiten/`](agent/skills/kaiten). All three hosts
+One copy of that guidance lives in [`agent/skills/kaiten/`](agent/skills/kaiten). All four hosts
 below read it from there.
 
 ### Claude Code
@@ -1385,6 +1385,22 @@ Then restart or run `/reload-plugins`. To update later:
 The same commands work outside the REPL as `claude plugin marketplace add …`, `claude plugin install
 …`, and `claude plugin update …`.
 
+### Codex
+
+```bash
+codex plugin marketplace add AllDmeat/kaiten
+codex plugin add kaiten@kaiten
+```
+
+To update later:
+
+```bash
+codex plugin marketplace upgrade kaiten
+codex plugin add kaiten@kaiten
+```
+
+Start a new task afterwards — a running task keeps the skills it started with.
+
 ### Cursor
 
 Cursor 2.5+ reads plugins from a marketplace repository as well, and this repository is one — see
@@ -1395,7 +1411,7 @@ under Dashboard → Settings → Plugins → Team Marketplaces, where you paste 
 `https://github.com/AllDmeat/kaiten` and review the parsed plugins. Installed plugins are
 updated from the same marketplace UI.
 
-Cursor reads the skill from `agent/skills/`, so it gets the same guidance as the other two hosts.
+Cursor reads the skill from `agent/skills/`, so it gets the same guidance as the other hosts.
 
 ### Gemini CLI
 

@@ -51,11 +51,12 @@ over all other project practices.
 
 ## Agent Plugin Releases
 
-This repository is a plugin marketplace twice over — `.claude-plugin/marketplace.json`
-for Claude Code and `.cursor-plugin/marketplace.json` for Cursor — and both point
-at [`agent/`](agent), which is simultaneously a Gemini CLI extension. All three
-hosts read the one skill in `agent/skills/kaiten/`: a single copy of the guidance
-with several manifests describing it.
+This repository is a plugin marketplace three times over — `.claude-plugin/marketplace.json`
+for Claude Code, `.cursor-plugin/marketplace.json` for Cursor, and
+`.agents/plugins/marketplace.json` for Codex — and all three point at
+[`agent/`](agent), which is simultaneously a Gemini CLI extension. All four
+hosts read the skills in `agent/skills/`: a single copy of the guidance with
+several manifests describing it.
 
 ### Mandatory Rule
 
@@ -70,9 +71,11 @@ So every change to `agent/` must, in the same PR:
    - `.claude-plugin/marketplace.json` → both `metadata` and the plugin entry
    - `agent/.claude-plugin/plugin.json`
    - `agent/.cursor-plugin/plugin.json`
+   - `agent/.codex-plugin/plugin.json`
    - `agent/gemini-extension.json`
 
-   (`.cursor-plugin/marketplace.json` has no version field — nothing to bump there.)
+   (`.cursor-plugin/marketplace.json` and `.agents/plugins/marketplace.json` have
+   no version field — nothing to bump there.)
 
    Use semver against the previous plugin version. This line is independent of
    the CLI's own version — do not assume the two match. Missing one manifest
@@ -94,7 +97,9 @@ So every change to `agent/` must, in the same PR:
    matching, Gemini falls back to the repository source tarball — which has no
    `gemini-extension.json` at its root — and the install breaks.
 
-Users then pick the change up with `/plugin update kaiten@kaiten`.
+Users then pick the change up with `/plugin update kaiten@kaiten` in Claude Code
+and `codex plugin marketplace upgrade kaiten` plus `codex plugin add kaiten@kaiten`
+in Codex.
 
 ### Validate Before Merging
 

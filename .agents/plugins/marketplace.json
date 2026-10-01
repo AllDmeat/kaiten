@@ -1,0 +1,20 @@
+{
+  "name": "kaiten",
+  "interface": {
+    "displayName": "Kaiten"
+  },
+  "plugins": [
+    {
+      "name": "kaiten",
+      "source": {
+        "source": "local",
+        "path": "./agent"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,6 +1,5 @@
 {
   "name": "kaiten",
-  "displayName": "Kaiten",
   "version": "1.4.0",
   "description": "Teaches the agent when and how to reach for the kaiten CLI (cards, boards, spaces, sprints, checklists, comments, members, custom properties) — read the help first, then work from it",
   "author": {
@@ -15,7 +14,13 @@
     "issue-tracker",
     "cli"
   ],
-  "category": "utilities",
   "skills": "./skills/",
-  "rules": "./rules/"
+  "interface": {
+    "displayName": "Kaiten",
+    "shortDescription": "Work with Kaiten through the kaiten CLI",
+    "longDescription": "Makes the agent read kaiten --help before composing commands, and keeps the user's Kaiten reference file of verified entity IDs.",
+    "developerName": "Aleksey Berezka",
+    "category": "Productivity",
+    "capabilities": []
+  }
 }

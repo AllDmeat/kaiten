@@ -8863,6 +8863,7 @@ components:
           - 'null'
           additionalProperties: true
           description: Slack settings. The documentation does not describe the fields
+        # DOC_MISMATCH: docs=typed `null | object` with fixed keys, actual keys diverge (one documented key misspelled, about half of the live keys undocumented), so kept free-form — https://developers.kaiten.ru/users/retrieve-list-of-users
         notification_settings:
           type:
           - object
@@ -8967,12 +8968,9 @@ components:
           type: array
           items: {}
           description: Profile fields synced from a directory. Returned only by the current user endpoint
-        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `telegram_id` — https://developers.kaiten.ru/users/retrieve-current-user
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, so no type is imposed — https://developers.kaiten.ru/users/retrieve-current-user
         max_messenger_id:
-          type:
-          - integer
-          - 'null'
-          description: MAX messenger id. Returned only by the current user endpoint
+          description: MAX messenger id. Returned only by the current user endpoint. Type is not described in the Kaiten documentation
         # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-current-user
         max_messenger_settings:
           type: object

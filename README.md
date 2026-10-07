@@ -638,7 +638,7 @@ rather than failing the whole response. Nested `data` payloads stay free-form
 JSON — the documentation does not describe their fields.
 
 ```swift
-let automations = try await client.listAutomations(spaceId: 38155)
+let automations = try await client.listAutomations(spaceId: 12)
 for automation in automations {
   switch automation.actions?.first?.actionType {
   case .moveToPath: print("moves cards")
@@ -648,7 +648,7 @@ for automation in automations {
 }
 
 let created = try await client.createAutomation(
-  spaceId: 38155,
+  spaceId: 12,
   type: .onDemand,
   actions: [.init(actionType: .completeChecklists)],
   name: "Complete all checklists"
@@ -1345,7 +1345,7 @@ ones, or `null` to clear the property. Resolve the IDs first with `listCustomPro
 From the CLI, `create-card` and `update-card` take the same payload as a JSON object:
 
 ```bash
-kaiten update-card --id 123 --properties '{"id_299126": [106915]}'
+kaiten update-card --id 123 --properties '{"id_56": [78]}'
 ```
 
 The object is parsed and validated locally, so a malformed payload fails before any request is sent.

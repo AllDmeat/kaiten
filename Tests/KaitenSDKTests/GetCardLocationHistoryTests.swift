@@ -24,7 +24,7 @@ struct GetCardLocationHistoryTests {
 
   private let withAuthorJSON = """
     [{
-      "id": "3418058",
+      "id": "1001",
       "card_id": 42,
       "board_id": 10,
       "column_id": 100,
@@ -86,7 +86,7 @@ struct GetCardLocationHistoryTests {
 
     let history = try await client.getCardLocationHistory(cardId: 42)
     #expect(history.count == 1)
-    #expect(history[0].id == "3418058")
+    #expect(history[0].id == "1001")
     let author = try #require(history[0].author)
     #expect(author.id == 5)
     #expect(author.full_name == "Test User")

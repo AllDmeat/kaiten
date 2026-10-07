@@ -12,7 +12,7 @@ struct JSONOutputTests {
     "owner_id": 7,
     "tag_ids": [4, 9],
     "files": [],
-    "owner": ["id": 7, "full_name": "Aleksey Berezka"],
+    "owner": ["id": 7, "full_name": "Jane Doe"],
     "tags": [["id": 4, "name": "backend"]],
     "children": [
       [
@@ -47,7 +47,7 @@ struct JSONOutputTests {
   func expandsNamedField() throws {
     let trimmed = try object(JSONOutput.trim(card, expand: ["owner"]))
 
-    #expect(try object(#require(trimmed["owner"]))["full_name"] as? String == "Aleksey Berezka")
+    #expect(try object(#require(trimmed["owner"]))["full_name"] as? String == "Jane Doe")
     #expect(trimmed["tags"] as? [Int] == [4], "unexpanded collections stay as ids")
     #expect(trimmed["owner_id"] as? Int == 7, "expanding adds, it does not replace the reference")
   }
@@ -136,13 +136,13 @@ struct JSONOutputTests {
     let card: [String: Any] = [
       "id": 42,
       "owner": ["id": 7, "full_name": "A"],
-      "properties": ["id_714": [1088], "id_369988": 100],
+      "properties": ["id_714": [1088], "id_90": 100],
     ]
 
     let trimmed = try object(JSONOutput.trim(card, expand: []))
 
     #expect(trimmed["owner"] == nil, "an entity goes; owner_id already carries the fact")
-    #expect(try object(#require(trimmed["properties"]))["id_369988"] as? Int == 100)
+    #expect(try object(#require(trimmed["properties"]))["id_90"] as? Int == 100)
   }
 
   @Test("A collection whose elements have no id is data too, and survives whole")
@@ -216,7 +216,7 @@ struct JSONOutputTests {
 
   @Test("Expanding a flat response is rejected")
   func rejectsExpandOnFlatResponse() {
-    let user: [String: Any] = ["id": 7, "full_name": "Aleksey Berezka"]
+    let user: [String: Any] = ["id": 7, "full_name": "Jane Doe"]
 
     #expect(throws: ValidationError.self) {
       _ = try JSONOutput.trim(user, expand: ["manager"])
@@ -265,7 +265,7 @@ struct JSONOutputTests {
     archived: false,
     size: 3,
     ownerId: 7,
-    owner: Owner(id: 7, fullName: "Aleksey Berezka")
+    owner: Owner(id: 7, fullName: "Jane Doe")
   )
 
   @Test("Rendered output is compact and trimmed")
@@ -279,7 +279,7 @@ struct JSONOutputTests {
   func rendersExpandedEntities() throws {
     let rendered = try renderJSON(encodable, expand: ["owner"])
 
-    #expect(rendered.contains(#""owner":{"fullName":"Aleksey Berezka","id":7}"#))
+    #expect(rendered.contains(#""owner":{"fullName":"Jane Doe","id":7}"#))
   }
 
   @Test("Booleans survive the trimming round trip as booleans")

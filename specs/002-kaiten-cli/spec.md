@@ -290,7 +290,7 @@ stdout confirms it works.
   `update-space --hidden-card-type-uids` (comma-separated) and `--settings`
   (JSON object); `create-board --top`, `--left`, `--columns` and `--lanes`
   (JSON arrays); `update-board --top`, `--left`, `--type`,
-  `--cell-wip-limits` (JSON object), `--move-parents-to-done`,
+  `--cell-wip-limits` (any JSON value), `--move-parents-to-done`,
   `--hide-done-policies`, `--hide-done-policies-in-done-column`,
   `--move-from-space-id` and `--card-properties` (JSON array). JSON options
   follow FR-024. An empty `--columns` or `--lanes` array MUST fail locally

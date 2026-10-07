@@ -7978,15 +7978,13 @@ components:
           - string
           - 'null'
           description: Lock status
-        # DOC_MISMATCH: not in docs, present in actual responses for columns embedded in a board (`array | null`) — https://developers.kaiten.ru/boards/get-board
+        # DOC_MISMATCH: not in docs, present in actual responses for some columns embedded in a board (observed only `array`) — https://developers.kaiten.ru/boards/get-board
         policies:
-          type:
-          - array
-          - 'null'
+          type: array
           items:
             type: object
             additionalProperties: true
-          description: Column policies. Returned only for columns embedded in a board.
+          description: Column policies. May be returned for columns embedded in a board.
     Lane:
       type: object
       properties:
@@ -8069,6 +8067,7 @@ components:
         title:
           type: string
           description: Board title
+        # DOC_MISMATCH: docs=`null | array`, actual=`object | null` holding a `limits` array — https://developers.kaiten.ru/boards/get-board
         cell_wip_limits:
           description: JSON containing wip limits rules for cells. Object with "limits" array, not an array itself.
           type:
@@ -8149,25 +8148,34 @@ components:
           type: string
           description: Optional deprecation message returned when cards are excluded from the response
         top:
-          type: integer
+          # DOC_MISMATCH: docs=`integer`, actual=`integer | null` (null for boards attached as a sidebar) — https://developers.kaiten.ru/space-boards/create-new-board
+          type:
+          - integer
+          - 'null'
           description: Y coordinate of the board on space. Returned by board create and update only.
         left:
-          type: integer
+          # DOC_MISMATCH: docs=`integer`, actual=`integer | null` (null for boards attached as a sidebar) — https://developers.kaiten.ru/space-boards/create-new-board
+          type:
+          - integer
+          - 'null'
           description: X coordinate of the board on space. Returned by board create and update only.
         sort_order:
-          type: number
+          # DOC_MISMATCH: docs=`number`, actual=`number | null` (null for boards attached as a sidebar) — https://developers.kaiten.ru/space-boards/create-new-board
+          type:
+          - number
+          - 'null'
           description: Position. Returned by board create and update only.
         # DOC_MISMATCH: not in docs, present in actual API responses (`string`) — https://developers.kaiten.ru/boards/get-board
         uid:
           type: string
           description: Board UID
-        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/boards/get-board
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only `null`) — https://developers.kaiten.ru/boards/get-board
         import_uid:
           type:
           - string
           - 'null'
           description: Import UID
-        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/boards/get-board
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only `null`) — https://developers.kaiten.ru/boards/get-board
         locked:
           type:
           - string
@@ -8195,6 +8203,7 @@ components:
         title:
           type: string
           description: Board title
+        # DOC_MISMATCH: docs=`null | array`, actual=`object | null` holding a `limits` array — https://developers.kaiten.ru/space-boards/get-board
         cell_wip_limits:
           description: JSON containing wip limits rules for cells. Object with "limits" array, not an array itself.
           type:
@@ -8298,13 +8307,22 @@ components:
           type: string
           description: Optional deprecation message returned when cards are excluded from the response
         top:
-          type: integer
+          # DOC_MISMATCH: docs=`integer`, actual=`integer | null` (null for boards attached as a sidebar) — https://developers.kaiten.ru/space-boards/get-board
+          type:
+          - integer
+          - 'null'
           description: Y coordinate of the board on space
         left:
-          type: integer
+          # DOC_MISMATCH: docs=`integer`, actual=`integer | null` (null for boards attached as a sidebar) — https://developers.kaiten.ru/space-boards/get-board
+          type:
+          - integer
+          - 'null'
           description: X coordinate of the board on space
         sort_order:
-          type: number
+          # DOC_MISMATCH: docs=`number`, actual=`number | null` (null for boards attached as a sidebar) — https://developers.kaiten.ru/space-boards/get-board
+          type:
+          - number
+          - 'null'
           description: Position
         space_id:
           type: integer
@@ -8402,13 +8420,13 @@ components:
         access_mod:
           type: string
           description: User access modifier
-        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/spaces/retrieve-space
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only `null`) — https://developers.kaiten.ru/spaces/retrieve-space
         work_calendar_id:
           type:
           - string
           - 'null'
           description: Work calendar id
-        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/spaces/retrieve-space
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only `null`) — https://developers.kaiten.ru/spaces/retrieve-space
         author_uid:
           type:
           - string
@@ -8432,13 +8450,13 @@ components:
           - string
           - 'null'
           description: Icon value
-        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/spaces/retrieve-space
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only `null`) — https://developers.kaiten.ru/spaces/retrieve-space
         import_uid:
           type:
           - string
           - 'null'
           description: Import uid
-        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/spaces/retrieve-space
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only `null`) — https://developers.kaiten.ru/spaces/retrieve-space
         key:
           type:
           - string
@@ -9032,6 +9050,7 @@ components:
         title:
           type: string
           description: Board title
+        # DOC_MISMATCH: docs=`null | array`, actual=`object | null` holding a `limits` array — https://developers.kaiten.ru/space-boards/get-list-of-boards
         cell_wip_limits:
           description: JSON containing wip limits rules for cells. Object with "limits" array, not an array itself.
           type:
@@ -9104,13 +9123,22 @@ components:
             $ref: '#/components/schemas/Lane'
           description: Board lanes
         top:
-          type: integer
+          # DOC_MISMATCH: docs=`integer`, actual=`integer | null` (null for boards attached as a sidebar) — https://developers.kaiten.ru/space-boards/get-list-of-boards
+          type:
+          - integer
+          - 'null'
           description: Y coordinate of the board on space
         left:
-          type: integer
+          # DOC_MISMATCH: docs=`integer`, actual=`integer | null` (null for boards attached as a sidebar) — https://developers.kaiten.ru/space-boards/get-list-of-boards
+          type:
+          - integer
+          - 'null'
           description: X coordinate of the board on space
         sort_order:
-          type: number
+          # DOC_MISMATCH: docs=`number`, actual=`number | null` (null for boards attached as a sidebar) — https://developers.kaiten.ru/space-boards/get-list-of-boards
+          type:
+          - number
+          - 'null'
           description: Position
         type:
           type: integer
@@ -9127,13 +9155,13 @@ components:
         uid:
           type: string
           description: Board UID
-        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/space-boards/get-list-of-boards
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only `null`) — https://developers.kaiten.ru/space-boards/get-list-of-boards
         import_uid:
           type:
           - string
           - 'null'
           description: Import UID
-        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/space-boards/get-list-of-boards
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only `null`) — https://developers.kaiten.ru/space-boards/get-list-of-boards
         locked:
           type:
           - string
@@ -11903,13 +11931,83 @@ components:
         columns:
           type: array
           items:
-            $ref: '#/components/schemas/CreateColumnRequest'
+            $ref: '#/components/schemas/CreateBoardColumnRequest'
           description: Board columns. A default column is created when omitted; an empty array is rejected by the API.
         lanes:
           type: array
           items:
-            $ref: '#/components/schemas/CreateLaneRequest'
+            $ref: '#/components/schemas/CreateBoardLaneRequest'
           description: Board lanes. A default lane is created when omitted; an empty array is rejected by the API.
+    CreateBoardColumnRequest:
+      type: object
+      required:
+      - title
+      - type
+      properties:
+        title:
+          type: string
+          description: Column title
+        type:
+          type: integer
+          description: "1 - queue, 2 - in progress, 3 - done"
+        sort_order:
+          type: number
+          description: Position
+        wip_limit:
+          type: integer
+          description: Work in progress recommended limit for column
+        col_count:
+          type: integer
+          description: Width
+        archive_after_days:
+          type: integer
+          description: Days after which cards are automatically archived. Works only for columns with type done
+        months_to_hide_cards:
+          type:
+          - integer
+          - 'null'
+          deprecated: true
+          description: Hide cards not moved for the last N months (deprecated by the API)
+        card_hide_after_days:
+          type:
+          - integer
+          - 'null'
+          description: Hide cards not moved for the last N days
+        rules:
+          type: integer
+          description: "Bit mask for column rules: 1 - checklists must be checked, 2 - display FIFO order"
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: External id
+        default_tags:
+          type:
+          - string
+          - 'null'
+          description: Default tags
+    CreateBoardLaneRequest:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
+          description: Lane title
+        sort_order:
+          type: number
+          description: Position
+        wip_limit:
+          type: integer
+          description: Work in progress recommended limit for lane
+        row_count:
+          type: integer
+          description: Height
+        default_tags:
+          type:
+          - string
+          - 'null'
+          description: Default tags
     UpdateBoardRequest:
       type: object
       properties:
@@ -11961,9 +12059,8 @@ components:
         type:
           type: integer
           description: "1 - place on space with coordinates (top, left), 5 - attach to space as sidebar"
-        # DOC_MISMATCH: docs=`array`, actual=`object` holding a `limits` array (response shape; request mirrors it) — https://developers.kaiten.ru/space-boards/update-board
+        # DOC_MISMATCH: docs=`array`, but responses return an `object` with a `limits` array; the request shape is unverified and left untyped — https://developers.kaiten.ru/space-boards/update-board
         cell_wip_limits:
-          type: object
           description: JSON containing wip limits rules for cells
         move_parents_to_done:
           type: boolean

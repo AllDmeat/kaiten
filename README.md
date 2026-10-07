@@ -402,7 +402,7 @@ CLI: `create-space --title <title> [--work-calendar-id <id>]`,
 
 CLI: `get-space-board --space-id <id> --id <id>`,
 `create-board --space-id <id> --title <title> [--top <n>] [--left <n>] [--columns <json-array>] [--lanes <json-array>]`,
-`update-board --space-id <id> --id <id> [--top <n>] [--left <n>] [--type <1|5>] [--cell-wip-limits <json-object>] [--move-parents-to-done <bool>] [--hide-done-policies <bool>] [--hide-done-policies-in-done-column <bool>] [--move-from-space-id <id>] [--card-properties <json-array>]`.
+`update-board --space-id <id> --id <id> [--top <n>] [--left <n>] [--type <1|5>] [--cell-wip-limits <json>] [--move-parents-to-done <bool>] [--hide-done-policies <bool>] [--hide-done-policies-in-done-column <bool>] [--move-from-space-id <id>] [--card-properties <json-array>]`.
 
 ### Columns
 

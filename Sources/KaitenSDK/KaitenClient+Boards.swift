@@ -75,8 +75,8 @@ extension KaitenClient {
     externalId: String? = nil,
     top: Int? = nil,
     left: Int? = nil,
-    columns: [Components.Schemas.CreateColumnRequest]? = nil,
-    lanes: [Components.Schemas.CreateLaneRequest]? = nil
+    columns: [Components.Schemas.CreateBoardColumnRequest]? = nil,
+    lanes: [Components.Schemas.CreateBoardLaneRequest]? = nil
   ) async throws(KaitenError) -> Components.Schemas.Board {
     let response = try await call {
       try await client.create_board(
@@ -111,7 +111,8 @@ extension KaitenClient {
   ///   - left: The updated X coordinate of the board on the space.
   ///   - type: The placement type: `1` places the board on the space by coordinates,
   ///     `5` attaches it to the space as a sidebar.
-  ///   - cellWipLimits: The WIP limit rules for cells, as a JSON object.
+  ///   - cellWipLimits: The WIP limit rules for cells, as any JSON value. The documentation declares an
+  ///     array while responses return an object with a `limits` array; the request shape is unverified.
   ///   - moveParentsToDone: Whether parent cards move to done when their children on this board are done.
   ///   - hideDonePolicies: Whether done checklist policies are hidden.
   ///   - hideDonePoliciesInDoneColumn: Whether done checklist policies are hidden only in the done column.
@@ -134,7 +135,7 @@ extension KaitenClient {
     top: Int? = nil,
     left: Int? = nil,
     type: Int? = nil,
-    cellWipLimits: OpenAPIObjectContainer? = nil,
+    cellWipLimits: OpenAPIValueContainer? = nil,
     moveParentsToDone: Bool? = nil,
     hideDonePolicies: Bool? = nil,
     hideDonePoliciesInDoneColumn: Bool? = nil,

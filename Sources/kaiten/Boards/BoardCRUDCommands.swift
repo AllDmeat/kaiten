@@ -47,9 +47,9 @@ struct CreateBoard: AsyncParsableCommand {
 
   func run() async throws {
     let parsedColumns = try parseCardTypeJSON(
-      columns, as: [Components.Schemas.CreateColumnRequest].self, fieldName: "columns")
+      columns, as: [Components.Schemas.CreateBoardColumnRequest].self, fieldName: "columns")
     let parsedLanes = try parseCardTypeJSON(
-      lanes, as: [Components.Schemas.CreateLaneRequest].self, fieldName: "lanes")
+      lanes, as: [Components.Schemas.CreateBoardLaneRequest].self, fieldName: "lanes")
     if parsedColumns?.isEmpty == true {
       throw ValidationError("--columns must not be an empty array")
     }
@@ -112,7 +112,7 @@ struct UpdateBoard: AsyncParsableCommand {
   )
   var type: Int?
 
-  @Option(name: .long, help: "WIP limit rules for cells as a JSON object")
+  @Option(name: .long, help: "WIP limit rules for cells as JSON")
   var cellWipLimits: String?
 
   @Option(name: .long, help: "Move parent cards to done when their children on this board are done")
@@ -132,7 +132,7 @@ struct UpdateBoard: AsyncParsableCommand {
 
   func run() async throws {
     let parsedCellWipLimits = try parseCardTypeJSON(
-      cellWipLimits, as: OpenAPIObjectContainer.self, fieldName: "cell-wip-limits")
+      cellWipLimits, as: OpenAPIValueContainer.self, fieldName: "cell-wip-limits")
     let parsedCardProperties = try parseCardTypeJSON(
       cardProperties, as: [OpenAPIObjectContainer].self, fieldName: "card-properties")
 

@@ -94,13 +94,16 @@ struct SpaceBoardAttributesTests {
     #expect(board.settings != nil)
   }
 
-  @Test("SpaceBoard decodes cards_deprecation_message")
+  @Test("SpaceBoard decodes cards_deprecation_message and null sidebar placement")
   func spaceBoardDeprecationMessage() async throws {
-    let json = #"{"id": 10, "cards_deprecation_message": "use cards"}"#
+    let json =
+      #"{"id": 10, "cards_deprecation_message": "use cards", "type": 5, "top": null, "left": null, "sort_order": null}"#
     let client = try makeClient(.returning(statusCode: 200, body: json))
 
     let board = try await client.getSpaceBoard(spaceId: 1, id: 10)
     #expect(board.cards_deprecation_message == "use cards")
+    #expect(board.top == nil)
+    #expect(board.sort_order == nil)
   }
 
   @Test("createSpace sends work_calendar_id")
@@ -140,6 +143,7 @@ struct SpaceBoardAttributesTests {
     let columns = try #require(json["columns"] as? [[String: Any]])
     #expect(columns.first?["title"] as? String == "Queue")
     #expect(columns.first?["type"] as? Int == 1)
+    #expect(columns.first?["wip_limit_type"] == nil)
     let lanes = try #require(json["lanes"] as? [[String: Any]])
     #expect(lanes.first?["title"] as? String == "Lane")
   }
@@ -148,7 +152,7 @@ struct SpaceBoardAttributesTests {
   func updateBoardSendsNewFields() async throws {
     let transport = MockClientTransport.returning(statusCode: 200, body: #"{"id": 10}"#)
     let limits = try JSONDecoder().decode(
-      OpenAPIObjectContainer.self, from: Data(#"{"limits": []}"#.utf8))
+      OpenAPIValueContainer.self, from: Data(#"[{"limit": 1}]"#.utf8))
     let property = try JSONDecoder().decode(
       OpenAPIObjectContainer.self, from: Data(#"{"key": "id_1", "required": true}"#.utf8))
     _ = try await makeClient(transport).updateBoard(
@@ -160,7 +164,7 @@ struct SpaceBoardAttributesTests {
     #expect(json["top"] as? Int == 3)
     #expect(json["left"] as? Int == 4)
     #expect(json["type"] as? Int == 5)
-    #expect((json["cell_wip_limits"] as? [String: Any])?["limits"] != nil)
+    #expect((json["cell_wip_limits"] as? [[String: Any]])?.first?["limit"] as? Int == 1)
     #expect(json["move_parents_to_done"] as? Bool == true)
     #expect(json["hide_done_policies"] as? Bool == false)
     #expect(json["hide_done_policies_in_done_column"] as? Bool == true)

@@ -1233,7 +1233,7 @@ Available auto-pagination methods:
 |--------|-------------|
 | `allCards(boardId:columnId:laneId:filter:pageSize:)` | All cards matching the given criteria |
 | `allUsers(type:query:includeInactive:accessTypePermissions:excludeMembersByEntityUid:excludeDirectlyAddedMembersByEntityUid:pageSize:)` | All users |
-| `allCustomProperties(query:pageSize:)` | All custom property definitions |
+| `allCustomProperties(query:pageSize:)` | All custom property definitions. The `includeValues:` overload is deprecated |
 | `allSpaces(pageSize:)` | All spaces |
 | `allSpaceUsers(spaceId:includeInheritedAccess:inactive:pageSize:)` | All users of a space (cursor-paged by `last_user_id`) |
 | `allCardComments(cardId:pageSize:)` | All comments on a card |

@@ -44,21 +44,48 @@ extension KaitenClient {
     return try decodeResponse(response.toCase()) { try $0.json }
   }
 
-  /// Retrieves the signed URL of a custom property file.
+  /// Retrieves the metadata and signed URL of a custom property file.
   ///
-  /// The endpoint requires the "Restricted file access" company setting to be
-  /// enabled. With ``CustomPropertyFileResponseType/json`` (the default) the API
-  /// returns the signed URL as JSON. With ``CustomPropertyFileResponseType/inline``
-  /// or ``CustomPropertyFileResponseType/attachment`` the API responds with a 302
-  /// redirect to the file itself; the underlying transport follows the redirect,
-  /// so the response is the raw file content and cannot be decoded as JSON — those
-  /// values are only useful for clients that handle redirects themselves.
+  /// The endpoint requires the "Restricted file access" company setting to be enabled. The
+  /// API answers 404 for a file uploaded without restricted access.
   ///
   /// - Parameters:
   ///   - cardUid: The card UID.
   ///   - propertyUid: The custom property UID.
   ///   - fileId: The file ID.
-  ///   - responseType: The documented `response_type` query parameter. Defaults to `.json`.
+  ///   - download: If `true`, the signed URL serves the file as an attachment.
+  /// - Returns: The file metadata with its signed URL.
+  /// - Throws:
+  ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
+  ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
+  ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
+  ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403), not found
+  ///     (404) or other undocumented HTTP status codes.
+  public func getCustomPropertyFile(
+    cardUid: String,
+    propertyUid: String,
+    fileId: String,
+    download: Bool? = nil
+  ) async throws(KaitenError) -> Components.Schemas.CustomPropertyFileUrl {
+    let response = try await call {
+      try await client.get_custom_property_file(
+        path: .init(card_uid: cardUid, property_uid: propertyUid, id: fileId),
+        query: .init(download: download)
+      )
+    }
+    return try decodeResponse(response.toCase()) { try $0.json }
+  }
+
+  /// Retrieves the signed URL of a custom property file.
+  ///
+  /// Deprecated: the API ignores `response_type` and always answers with the file metadata,
+  /// of which this method keeps only the URL.
+  ///
+  /// - Parameters:
+  ///   - cardUid: The card UID.
+  ///   - propertyUid: The custom property UID.
+  ///   - fileId: The file ID.
+  ///   - responseType: Sent as `response_type`; ignored by the API.
   /// - Returns: The signed file URL.
   /// - Throws:
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
@@ -66,6 +93,11 @@ extension KaitenClient {
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403), not found
   ///     (404) or other undocumented HTTP status codes.
+  @available(
+    *, deprecated,
+    message:
+      "The API ignores response_type. Use getCustomPropertyFile(cardUid:propertyUid:fileId:download:)."
+  )
   public func getCustomPropertyFileUrl(
     cardUid: String,
     propertyUid: String,
@@ -82,6 +114,40 @@ extension KaitenClient {
       try $0.json
     }
     return result.url
+  }
+
+  /// Updates a custom property file.
+  ///
+  /// The endpoint requires the "Restricted file access" company setting to be enabled.
+  /// Setting `cardCover` to `true` additionally requires card update permission.
+  ///
+  /// - Parameters:
+  ///   - cardUid: The card UID.
+  ///   - propertyUid: The custom property UID.
+  ///   - fileId: The file ID.
+  ///   - name: The new file name.
+  ///   - cardCover: Whether the image is used as the card cover.
+  /// - Returns: The updated custom property file.
+  /// - Throws:
+  ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
+  ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
+  ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
+  ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for validation errors (400),
+  ///     forbidden (403), not found (404) or other undocumented HTTP status codes.
+  public func updateCustomPropertyFile(
+    cardUid: String,
+    propertyUid: String,
+    fileId: String,
+    name: String? = nil,
+    cardCover: Bool? = nil
+  ) async throws(KaitenError) -> Components.Schemas.CustomPropertyFile {
+    let response = try await call {
+      try await client.update_custom_property_file(
+        path: .init(card_uid: cardUid, property_uid: propertyUid, id: fileId),
+        body: .json(.init(name: name, card_cover: cardCover))
+      )
+    }
+    return try decodeResponse(response.toCase()) { try $0.json }
   }
 
   /// Deletes a custom property file.

@@ -48,6 +48,7 @@ struct PrivateCommentFilesTests {
       "author_uid": "bbbb2222-cc33-dd44-ee55-ffff6666aaaa",
       "card_uid": "cccc3333-dd44-ee55-ff66-aaaa7777bbbb",
       "comment_uid": "dddd4444-ee55-ff66-aa77-bbbb8888cccc",
+      "company_uid": "company-uid-1",
       "entity_type": "comment",
       "created": "2024-03-22T14:03:35.022Z",
       "updated": "2024-03-22T14:03:35.022Z",
@@ -146,19 +147,42 @@ struct PrivateCommentFilesTests {
 
   // MARK: - Get
 
-  @Test("200 returns the signed URL")
+  /// Live GET shape: the documented attributes plus the undocumented `kind`.
+  static let getResponse = """
+    {
+      "id": "aaaa1111-bb22-cc33-dd44-eeee5555ffff",
+      "name": "notes.txt",
+      "size": "12",
+      "mime_type": "text/plain",
+      "entity_type": "comment",
+      "created": "2024-05-20T14:03:35.022Z",
+      "updated": "2024-05-20T14:03:35.022Z",
+      "card_uid": "card-uid-1",
+      "author_uid": "author-uid-1",
+      "card_cover": false,
+      "comment_uid": "comment-uid-1",
+      "kind": "attachment",
+      "url": "https://files.test.kaiten.ru/signed/aaaa1111?sig=abc"
+    }
+    """
+
+  @Test("200 returns the file metadata with the signed URL")
   func getSuccess() async throws {
-    let json = """
-      {"url": "https://files.test.kaiten.ru/signed/aaaa1111?sig=abc"}
-      """
-    let transport = MockClientTransport.returning(statusCode: 200, body: json)
+    let transport = MockClientTransport.returning(statusCode: 200, body: Self.getResponse)
     let client = try makeClient(transport)
 
-    let signed = try await client.getCommentFile(
+    let file = try await client.getCommentFile(
       cardUid: "card-uid-1", commentUid: "comment-uid-1",
       fileId: "aaaa1111-bb22-cc33-dd44-eeee5555ffff")
 
-    #expect(signed.url == "https://files.test.kaiten.ru/signed/aaaa1111?sig=abc")
+    #expect(file.url == "https://files.test.kaiten.ru/signed/aaaa1111?sig=abc")
+    #expect(file.id == "aaaa1111-bb22-cc33-dd44-eeee5555ffff")
+    #expect(file.name == "notes.txt")
+    #expect(file.size == "12")
+    #expect(file.entity_type == "comment")
+    #expect(file.comment_uid == "comment-uid-1")
+    #expect(file.kind == "attachment")
+    #expect(file.card_cover == false)
 
     let recorded = try #require(transport.recordedRequests.first)
     #expect(recorded.request.method == .get)
@@ -166,18 +190,42 @@ struct PrivateCommentFilesTests {
     #expect(
       path.hasPrefix(
         "/cards/card-uid-1/comments/comment-uid-1/files/aaaa1111-bb22-cc33-dd44-eeee5555ffff"))
-    #expect(path.contains("response_type=json"))
+    #expect(!path.contains("response_type"))
   }
 
-  /// `inline` and `attachment` dispositions answer with a redirect to the file
-  /// content instead of a JSON body, which the SDK reports as `unexpectedResponse`.
+  @Test("get forwards download and accepts the literal new comment UID")
+  func getDownloadAndNewComment() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: Self.getResponse)
+    let client = try makeClient(transport)
+
+    _ = try await client.getCommentFile(
+      cardUid: "card-uid-1", commentUid: "new", fileId: "file-id-1", download: true)
+
+    let path = try #require(transport.recordedRequests.first?.request.path)
+    #expect(path.hasPrefix("/cards/card-uid-1/comments/new/files/file-id-1"))
+    #expect(path.contains("download=true"))
+  }
+
+  @Test("get (deprecated) still sends response_type")
+  @available(*, deprecated)
+  func getDeprecated() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: Self.getResponse)
+    let client = try makeClient(transport)
+
+    let file = try await client.getCommentFile(
+      cardUid: "card-uid-1", commentUid: "comment-uid-1", fileId: "file-id-1",
+      responseType: .json)
+
+    #expect(file.url == "https://files.test.kaiten.ru/signed/aaaa1111?sig=abc")
+    #expect(transport.recordedRequests.first?.request.path?.contains("response_type=json") == true)
+  }
+
   @Test("302 redirect throws unexpectedResponse")
   func getRedirect() async throws {
     let client = try makeClient(.returning(statusCode: 302))
     await expectUnexpectedResponse(statusCode: 302) {
       _ = try await client.getCommentFile(
-        cardUid: "card-uid-1", commentUid: "comment-uid-1", fileId: "file-id-1",
-        responseType: .inline)
+        cardUid: "card-uid-1", commentUid: "comment-uid-1", fileId: "file-id-1")
     }
   }
 
@@ -196,6 +244,38 @@ struct PrivateCommentFilesTests {
     await expectUnexpectedResponse(statusCode: 422) {
       _ = try await client.getCommentFile(
         cardUid: "card-uid-1", commentUid: "comment-uid-1", fileId: "file-id-1")
+    }
+  }
+
+  // MARK: - Update
+
+  @Test("update sends PATCH with name and card_cover, returns the file")
+  func updateSuccess() async throws {
+    let transport = MockClientTransport.returning(
+      statusCode: 200, body: Self.commentFileResponse)
+    let client = try makeClient(transport)
+
+    let file = try await client.updateCommentFile(
+      cardUid: "card-uid-1", commentUid: "comment-uid-1", fileId: "file-id-1",
+      name: "renamed.txt", cardCover: false)
+
+    #expect(file.company_uid == "company-uid-1")
+
+    let recorded = try #require(transport.recordedRequests.first)
+    #expect(recorded.request.method == .patch)
+    #expect(recorded.request.path == "/cards/card-uid-1/comments/comment-uid-1/files/file-id-1")
+    let bytes = try await Data(collecting: #require(recorded.body), upTo: 1024 * 1024)
+    let sent = try #require(try JSONSerialization.jsonObject(with: bytes) as? [String: Any])
+    #expect(sent["name"] as? String == "renamed.txt")
+    #expect(sent["card_cover"] as? Bool == false)
+  }
+
+  @Test("update 404 throws unexpectedResponse")
+  func updateNotFound() async throws {
+    let client = try makeClient(.returning(statusCode: 404))
+    await expectUnexpectedResponse(statusCode: 404) {
+      _ = try await client.updateCommentFile(
+        cardUid: "card-uid-1", commentUid: "comment-uid-1", fileId: "missing", name: "x")
     }
   }
 
@@ -234,6 +314,7 @@ struct PrivateCommentFilesTests {
   // MARK: - Enum
 
   @Test("CommentFileResponseType round-trips and preserves unknown values")
+  @available(*, deprecated)
   func responseTypeEnum() {
     for c in CommentFileResponseType.allCases {
       #expect(CommentFileResponseType(rawValue: c.rawValue) == c)

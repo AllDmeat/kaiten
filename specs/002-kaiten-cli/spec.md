@@ -251,6 +251,17 @@ stdout confirms it works.
   `--exclude-directly-added-members-by-entity-uid` alongside the existing
   `--type`, `--query`, `--ids`, `--limit`, `--offset` and
   `--include-inactive`.
+- **FR-027**: `get-private-card-file`, `get-comment-file` and
+  `get-custom-property-file` MUST print the full file metadata the API
+  returns, not only the signed URL, and accept `--download`. The
+  `--response-type` option of the card and custom property subcommands
+  stays accepted for existing scripts; its help says the API ignores it. `update-private-card-file`,
+  `update-comment-file` and `update-custom-property-file` expose the
+  restricted access `PATCH` routes with `--name` and `--card-cover`. The
+  help of the restricted GET subcommands states that the API answers 404
+  for files uploaded without restricted access, and the help of
+  `attach-card-file` states that Kaiten deprecated that upload (SDK
+  FR-037).
 
 ### Non-Functional Requirements
 

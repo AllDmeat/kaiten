@@ -1294,6 +1294,7 @@ public enum CardTypeRegularProperty: Sendable, Equatable, CaseIterable, Codable 
 ///
 /// Used in ``KaitenClient/getCommentFile(cardUid:commentUid:fileId:responseType:)``.
 /// - SeeAlso: [Kaiten API – Private Comment Files](https://developers.kaiten.ru/private-comment-files/get-comment-file)
+@available(*, deprecated, message: "The API ignores response_type.")
 public enum CommentFileResponseType: Sendable, Equatable, CaseIterable, Codable {
   /// Return a signed URL in a JSON body.
   case json
@@ -2242,6 +2243,7 @@ public enum DocumentIconType: Sendable, Equatable, CaseIterable, Codable {
 /// plain `string` in the OpenAPI spec so an undocumented value cannot fail a request;
 /// the ``unknown(_:)`` case preserves anything new the API adds.
 /// - SeeAlso: [Kaiten API – Private card files](https://developers.kaiten.ru/private-card-files/get-card-file)
+@available(*, deprecated, message: "The API ignores response_type.")
 public enum PrivateCardFileResponseType: Sendable, Equatable, CaseIterable, Codable {
   /// Return the signed file URL as JSON.
   case json
@@ -2351,6 +2353,7 @@ public enum IterationStatus: Sendable, Equatable, CaseIterable, Codable {
 ///
 /// Used in ``KaitenClient/getCustomPropertyFileUrl(cardUid:propertyUid:fileId:responseType:)``.
 /// - SeeAlso: [Kaiten API – Private Custom Property Files](https://developers.kaiten.ru/private-custom-property-files/get-custom-property-file)
+@available(*, deprecated, message: "The API ignores response_type.")
 public enum CustomPropertyFileResponseType: Sendable, Equatable, CaseIterable, Codable {
   /// The API returns the signed file URL as JSON.
   case json

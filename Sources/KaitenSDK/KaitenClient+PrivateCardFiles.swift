@@ -43,28 +43,90 @@ extension KaitenClient {
     return try decodeResponse(response.toCase()) { try $0.json }
   }
 
-  /// Retrieves the signed URL of a private card file.
+  /// Retrieves the metadata and signed URL of a private card file.
   ///
-  /// Requires "Restricted file access" enabled in company settings. With
-  /// ``PrivateCardFileResponseType/json`` (the default) the API returns the signed URL as
-  /// JSON. With ``PrivateCardFileResponseType/inline`` or
-  /// ``PrivateCardFileResponseType/attachment`` the API answers with a 302 redirect to the
-  /// file instead, which this method surfaces as
-  /// ``KaitenError/unexpectedResponse(statusCode:body:)``.
+  /// Requires "Restricted file access" enabled in company settings. The API answers 404 for
+  /// a file uploaded without restricted access.
   ///
   /// - Parameters:
   ///   - cardUid: The card UID.
   ///   - fileId: The file ID.
-  ///   - responseType: The requested delivery of the file.
+  ///   - download: If `true`, the signed URL serves the file as an attachment.
+  /// - Returns: The file metadata with its signed URL.
+  /// - Throws:
+  ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
+  ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
+  ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
+  ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403), not found
+  ///     (404), malicious files (422) or other undocumented HTTP status codes. A 404 is
+  ///     reported as `unexpectedResponse` rather than ``KaitenError/notFound(resource:id:)``
+  ///     because the file is addressed by string ID.
+  public func getPrivateCardFile(
+    cardUid: String,
+    fileId: String,
+    download: Bool? = nil
+  ) async throws(KaitenError) -> Components.Schemas.PrivateCardFileUrlResponse {
+    let response = try await call {
+      try await client.get_private_card_file(
+        path: .init(card_uid: cardUid, id: fileId),
+        query: .init(download: download)
+      )
+    }
+    return try decodeResponse(response.toCase()) { try $0.json }
+  }
+
+  /// Updates a private card file.
+  ///
+  /// Requires "Restricted file access" enabled in company settings. Setting `cardCover` to
+  /// `true` additionally requires card update permission.
+  ///
+  /// - Parameters:
+  ///   - cardUid: The card UID.
+  ///   - fileId: The file ID.
+  ///   - name: The new file name.
+  ///   - cardCover: Whether the image is used as the card cover.
+  /// - Returns: The updated file.
+  /// - Throws:
+  ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
+  ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
+  ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
+  ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for validation errors (400),
+  ///     forbidden (403), not found (404) or other undocumented HTTP status codes.
+  public func updatePrivateFile(
+    cardUid: String,
+    fileId: String,
+    name: String? = nil,
+    cardCover: Bool? = nil
+  ) async throws(KaitenError) -> Components.Schemas.PrivateCardFile {
+    let response = try await call {
+      try await client.update_private_card_file(
+        path: .init(card_uid: cardUid, id: fileId),
+        body: .json(.init(name: name, card_cover: cardCover))
+      )
+    }
+    return try decodeResponse(response.toCase()) { try $0.json }
+  }
+
+  /// Retrieves the signed URL of a private card file.
+  ///
+  /// Deprecated: the API ignores `response_type` and always answers with the file metadata,
+  /// of which this method keeps only the URL.
+  ///
+  /// - Parameters:
+  ///   - cardUid: The card UID.
+  ///   - fileId: The file ID.
+  ///   - responseType: Sent as `response_type`; ignored by the API.
   /// - Returns: The signed file URL.
   /// - Throws:
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
-  ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for redirects (302), forbidden
-  ///     (403), not found (404), malicious files (422) or other undocumented HTTP status
-  ///     codes. A 404 is reported as `unexpectedResponse` rather than
-  ///     ``KaitenError/notFound(resource:id:)`` because the file is addressed by string ID.
+  ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403), not found
+  ///     (404), malicious files (422) or other undocumented HTTP status codes.
+  @available(
+    *, deprecated,
+    message: "The API ignores response_type. Use getPrivateCardFile(cardUid:fileId:download:)."
+  )
   public func getPrivateFile(
     cardUid: String,
     fileId: String,

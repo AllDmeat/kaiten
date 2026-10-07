@@ -102,40 +102,102 @@ struct PrivateCustomPropertyFilesTests {
     }
   }
 
-  // MARK: - Get URL
+  // MARK: - Get
 
-  @Test("200 returns signed URL")
-  func getUrlSuccess() async throws {
-    let json = #"{"url": "https://storage.example.com/signed/file-uid-1?sig=abc"}"#
-    let client = try makeClient(.returning(statusCode: 200, body: json))
+  /// Built from the documented GET attributes; no custom property file was available live.
+  static let getResponse = """
+    {
+      "id": "file-uid-1",
+      "name": "spec.pdf",
+      "size": "2048",
+      "mime_type": "application/pdf",
+      "entity_type": "custom_property",
+      "created": "2024-05-20T14:03:35.022Z",
+      "updated": "2024-05-20T14:03:35.022Z",
+      "card_uid": "card-uid-1",
+      "custom_property_uid": "prop-uid-1",
+      "author_uid": "author-uid-1",
+      "card_cover": false,
+      "url": "https://storage.example.com/signed/file-uid-1?sig=abc"
+    }
+    """
+
+  @Test("200 returns the file metadata with the signed URL")
+  func getSuccess() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: Self.getResponse)
+    let client = try makeClient(transport)
+
+    let file = try await client.getCustomPropertyFile(
+      cardUid: "card-uid-1", propertyUid: "prop-uid-1", fileId: "file-uid-1", download: true)
+
+    #expect(file.url == "https://storage.example.com/signed/file-uid-1?sig=abc")
+    #expect(file.name == "spec.pdf")
+    #expect(file.custom_property_uid == "prop-uid-1")
+    #expect(file.entity_type == "custom_property")
+
+    let path = try #require(transport.recordedRequests.first?.request.path)
+    #expect(path.hasPrefix("/cards/card-uid-1/custom-properties/prop-uid-1/files/file-uid-1"))
+    #expect(path.contains("download=true"))
+    #expect(!path.contains("response_type"))
+  }
+
+  @Test("get (deprecated) returns the URL and still sends response_type")
+  @available(*, deprecated)
+  func getUrlDeprecated() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: Self.getResponse)
+    let client = try makeClient(transport)
 
     let url = try await client.getCustomPropertyFileUrl(
       cardUid: "card-uid-1", propertyUid: "prop-uid-1", fileId: "file-uid-1")
+
     #expect(url == "https://storage.example.com/signed/file-uid-1?sig=abc")
-  }
-
-  @Test("get sends response_type query parameter")
-  func getUrlSendsResponseType() async throws {
-    let transport = MockClientTransport { request, _, _, _ in
-      #expect(request.path?.contains("response_type=json") == true)
-      var response = HTTPResponse(status: .init(code: 200))
-      response.headerFields[.contentType] = "application/json"
-      return (response, .init(#"{"url": "https://storage.example.com/f"}"#))
-    }
-    let client = try makeClient(transport)
-
-    _ = try await client.getCustomPropertyFileUrl(
-      cardUid: "card-uid-1", propertyUid: "prop-uid-1", fileId: "file-uid-1")
+    #expect(transport.recordedRequests.first?.request.path?.contains("response_type=json") == true)
   }
 
   /// UID-addressed resource: a 404 must not fake a `notFound(resource:id:)` (FR-021).
   @Test("get: 404 throws unexpectedResponse")
-  func getUrlNotFound() async throws {
+  func getNotFound() async throws {
     let client = try makeClient(.returning(statusCode: 404))
     await expectUnexpectedResponse(statusCode: 404) {
-      _ = try await client.getCustomPropertyFileUrl(
+      _ = try await client.getCustomPropertyFile(
         cardUid: "card-uid-1", propertyUid: "prop-uid-1", fileId: "missing")
     }
+  }
+
+  // MARK: - Update
+
+  @Test("update sends PATCH with name and card_cover, returns the file")
+  func updateSuccess() async throws {
+    let json = """
+      {
+        "id": "file-uid-1",
+        "name": "renamed.pdf",
+        "size": null,
+        "custom_property_uid": "prop-uid-1",
+        "company_uid": "company-uid-1",
+        "entity_type": "custom_property",
+        "card_cover": true
+      }
+      """
+    let transport = MockClientTransport.returning(statusCode: 200, body: json)
+    let client = try makeClient(transport)
+
+    let file = try await client.updateCustomPropertyFile(
+      cardUid: "card-uid-1", propertyUid: "prop-uid-1", fileId: "file-uid-1",
+      name: "renamed.pdf", cardCover: true)
+
+    #expect(file.name == "renamed.pdf")
+    #expect(file.size == nil)
+    #expect(file.company_uid == "company-uid-1")
+
+    let recorded = try #require(transport.recordedRequests.first)
+    #expect(recorded.request.method == .patch)
+    #expect(
+      recorded.request.path == "/cards/card-uid-1/custom-properties/prop-uid-1/files/file-uid-1")
+    let bytes = try await Data(collecting: #require(recorded.body), upTo: 1024 * 1024)
+    let sent = try #require(try JSONSerialization.jsonObject(with: bytes) as? [String: Any])
+    #expect(sent["name"] as? String == "renamed.pdf")
+    #expect(sent["card_cover"] as? Bool == true)
   }
 
   // MARK: - Delete
@@ -171,6 +233,7 @@ struct PrivateCustomPropertyFilesTests {
   // MARK: - Response Type Enum
 
   @Test("CustomPropertyFileResponseType preserves unknown values")
+  @available(*, deprecated)
   func responseTypeUnknown() {
     #expect(CustomPropertyFileResponseType(rawValue: "json") == .json)
     #expect(CustomPropertyFileResponseType(rawValue: "inline") == .inline)

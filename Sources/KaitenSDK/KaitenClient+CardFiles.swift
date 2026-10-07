@@ -6,6 +6,9 @@ import OpenAPIRuntime
 extension KaitenClient {
   /// Attaches a file to a card.
   ///
+  /// Deprecated by Kaiten: the file is uploaded without restricted access, and the route is
+  /// unavailable for companies created on or after 2026-05-21.
+  ///
   /// The file is uploaded as `multipart/form-data`. The response is one of two shapes:
   /// a legacy attachment (integer `id`) or a private file (UUID string `id`) — the same
   /// pair a card's `files` array carries.
@@ -22,6 +25,11 @@ extension KaitenClient {
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for upload errors (400),
   ///     forbidden (403), service unavailable (503) or other undocumented HTTP status codes.
+  @available(
+    *, deprecated,
+    message:
+      "Kaiten deprecated uploads without restricted access. Use attachPrivateFile(cardUid:fileData:filename:)."
+  )
   public func attachFile(
     cardId: Int,
     fileData: Data,

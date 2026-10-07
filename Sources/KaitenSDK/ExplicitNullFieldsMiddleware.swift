@@ -29,7 +29,8 @@ struct ExplicitNullFieldsMiddleware: ClientMiddleware {
     for field in fields {
       json[field] = NSNull()
     }
-    let patched = try JSONSerialization.data(withJSONObject: json)
+    let patched = try JSONSerialization.data(
+      withJSONObject: json, options: [.sortedKeys, .withoutEscapingSlashes])
     // The runtime stamps content-length from the original body before middlewares run.
     var request = request
     request.headerFields[.contentLength] = String(patched.count)

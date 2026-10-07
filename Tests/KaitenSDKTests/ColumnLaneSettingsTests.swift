@@ -293,16 +293,16 @@ struct ColumnLaneSettingsTests {
   func wipLimitConflict() async throws {
     let transport = MockClientTransport.returning(statusCode: 200, body: columnJSON)
     let client = try makeClient(transport)
-    await #expect(throws: KaitenError.self) {
+    let columnError = await #expect(throws: KaitenError.self) {
       _ = try await client.updateColumn(boardId: 10, id: 100, wipLimit: 3, clearWipLimit: true)
     }
-    do {
+    let laneError = await #expect(throws: KaitenError.self) {
       _ = try await client.updateLane(boardId: 10, id: 200, wipLimit: 3, clearWipLimit: true)
-      Issue.record("expected conflictingArguments")
-    } catch {
+    }
+    for error in [columnError, laneError] {
       guard case .conflictingArguments("wipLimit", "clearWipLimit") = error else {
-        Issue.record("unexpected error: \(error)")
-        return
+        Issue.record("unexpected error: \(String(describing: error))")
+        continue
       }
     }
     #expect(transport.recordedRequests.isEmpty)

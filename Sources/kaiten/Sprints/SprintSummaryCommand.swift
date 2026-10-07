@@ -4,7 +4,11 @@ import KaitenSDK
 struct GetSprintSummary: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "get-sprint-summary",
-    abstract: "Get sprint summary by ID"
+    abstract: "Get sprint summary by ID",
+    discussion: """
+      Kaiten deprecated sprints: starting new sprints is unavailable since 2026-10-01. \
+      Existing sprints can still be finished and read; iterations replace them.
+      """
   )
 
   @OptionGroup var global: GlobalOptions

@@ -428,6 +428,10 @@ CLI: `create-space --title <title> [--work-calendar-id <id>]`,
 | `createBoard(spaceId:title:description:sortOrder:externalId:top:left:columns:lanes:)` | Create a board; `columns` and `lanes` must not be empty arrays |
 | `updateBoard(spaceId:id:title:description:sortOrder:externalId:top:left:type:cellWipLimits:moveParentsToDone:hideDonePolicies:hideDonePoliciesInDoneColumn:moveFromSpaceId:cardProperties:)` | Update a board, including its placement on the space |
 
+Kaiten deprecated the `cards` field returned by both board reads: it holds at most 100
+cards since 2026-10-01 and is no longer returned from 2026-11-01. Page through a board's cards with
+`listCards(boardId:)` or `allCards(boardId:)`.
+
 CLI: `get-space-board --space-id <id> --id <id>`,
 `create-board --space-id <id> --title <title> [--top <n>] [--left <n>] [--columns <json-array>] [--lanes <json-array>]`,
 `update-board --space-id <id> --id <id> [--top <n>] [--left <n>] [--type <1|5>] [--cell-wip-limits <json>] [--move-parents-to-done <bool>] [--hide-done-policies <bool>] [--hide-done-policies-in-done-column <bool>] [--move-from-space-id <id>] [--card-properties <json-array>]`.
@@ -462,7 +466,8 @@ CLI: `get-space-board --space-id <id> --id <id>`,
 | `createCustomProperty(name:type:...:directoryId:formula:formulaSourceCard:)` | Create a custom property definition |
 | `updateCustomProperty(id:...)` | Update a custom property definition |
 | `removeCustomProperty(id:)` | Remove a custom property definition |
-| `listCustomPropertySelectValues(propertyId:)` | List select values for a custom property |
+| `listCustomPropertySelectValues(propertyId:query:orderBy:ids:conditions:offset:limit:)` | List select values for a custom property |
+| `listCustomPropertySelectValues(propertyId:v2SelectSearch:...)` | Deprecated: Kaiten documents `v2_select_search` as having no effect |
 | `getCustomPropertySelectValue(propertyId:id:)` | Get a single select value |
 | `createCustomPropertySelectValue(propertyId:value:color:)` | Create a select value for a custom property |
 | `updateCustomPropertySelectValue(propertyId:id:value:color:condition:sortOrder:deleted:)` | Update a select value |
@@ -630,18 +635,26 @@ CLI: `list-user-roles`, `get-user-role --id <id>`,
 |--------|-------------|
 | `listCardTypes()` | List card types |
 | `getCardType(id:)` | Get a card type |
-| `createCardType(letter:name:color:properties:cardProperties:suggestFields:)` | Create a new card type |
-| `updateCardType(id:letter:name:color:properties:cardProperties:suggestFields:)` | Update a card type |
+| `createCardType(letter:name:color:cardProperties:suggestFields:)` | Create a new card type |
+| `createCardType(letter:name:color:properties:cardProperties:suggestFields:)` | Deprecated: Kaiten deprecated `properties` in favour of `card_properties` |
+| `updateCardType(id:letter:name:color:cardProperties:suggestFields:)` | Update a card type |
+| `updateCardType(id:letter:name:color:properties:cardProperties:suggestFields:)` | Deprecated: Kaiten deprecated `properties` in favour of `card_properties` |
 | `deleteCardType(id:replaceTypeId:)` | Remove a card type, replacing it in existing cards |
 | `listCardTypeTreeEntities(typeId:)` | List tree entities of a card type |
 | `addCardTypeTreeEntity(typeId:treeEntityUid:)` | Add a tree entity to a card type |
 | `deleteCardTypeTreeEntity(typeId:uid:)` | Delete a tree entity from a card type |
-| `listSprints()` | List sprints |
-| `getSprintSummary(...)` | Get sprint summary |
+| `listSprints()` | Deprecated by Kaiten. List sprints |
+| `getSprintSummary(...)` | Deprecated by Kaiten. Get sprint summary |
 
 The `regular_property` key of a card type's suggested properties is exposed as
 the `CardTypeRegularProperty` Swift enum with an `unknown(String)` case, so
-values the documentation does not list survive decoding.
+values the documentation does not list survive decoding. A card type's
+`properties` is deprecated in favour of `card_properties`, though the API still
+returns it; `card_properties` is `null` on many types and `company_id` is `null`
+on system types.
+
+Kaiten deprecated sprints: starting new sprints is unavailable since 2026-10-01.
+Existing sprints can still be finished and read; iterations replace them.
 
 CLI: `list-card-types`, `get-card-type --id <id>`,
 `create-card-type --letter <letter> --name <name> --color <color>`,
@@ -1281,7 +1294,7 @@ Available auto-pagination methods:
 | `allGroupUsers(groupUid:pageSize:)` | All users in a company group |
 | `allCustomPropertySelectValues(propertyId:pageSize:)` | All select values for a property |
 | `allCardTypes(pageSize:)` | All card types |
-| `allSprints(active:pageSize:)` | All sprints |
+| `allSprints(active:pageSize:)` | Deprecated by Kaiten. All sprints |
 
 Each method accepts an optional `pageSize` parameter (default `100`).
 

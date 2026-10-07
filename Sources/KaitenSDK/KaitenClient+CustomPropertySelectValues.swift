@@ -21,13 +21,12 @@ extension KaitenClient {
   ///
   /// - Parameters:
   ///   - propertyId: The custom property identifier.
-  ///   - v2SelectSearch: Enable additional filtering capabilities.
-  ///   - query: Filter by select value (requires `v2SelectSearch`).
-  ///   - orderBy: Field to sort by (requires `v2SelectSearch`).
-  ///   - ids: Array of value IDs to filter by (requires `v2SelectSearch`).
-  ///   - conditions: Array of conditions to filter by (requires `v2SelectSearch`).
-  ///   - offset: Number of records to skip (requires `v2SelectSearch`).
-  ///   - limit: Maximum number of values to return (requires `v2SelectSearch`, default `100`).
+  ///   - query: Filter by select value.
+  ///   - orderBy: Field to sort by.
+  ///   - ids: Array of value IDs to filter by.
+  ///   - conditions: Array of conditions to filter by.
+  ///   - offset: Number of records to skip.
+  ///   - limit: Maximum number of values to return (default `100`).
   /// - Returns: A ``Page`` of select values.
   /// - Throws:
   ///   - ``KaitenError/invalidPaginationRange(offset:limit:)`` if pagination parameters are out of range.
@@ -38,13 +37,50 @@ extension KaitenClient {
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403) or other undocumented HTTP status codes.
   public func listCustomPropertySelectValues(
     propertyId: Int,
-    v2SelectSearch: Bool? = nil,
     query: String? = nil,
     orderBy: String? = nil,
     ids: [Int]? = nil,
     conditions: [String]? = nil,
     offset: Int = 0,
     limit: Int = 100
+  ) async throws(KaitenError) -> Page<Components.Schemas.CustomPropertySelectValue> {
+    try await selectValues(
+      propertyId: propertyId, v2SelectSearch: nil, query: query, orderBy: orderBy,
+      ids: ids, conditions: conditions, offset: offset, limit: limit)
+  }
+
+  /// Lists select values for a select-type custom property, sending `v2_select_search`.
+  ///
+  /// Kaiten documents `v2_select_search` as a deprecated parameter with no effect.
+  @available(
+    *, deprecated,
+    message:
+      "v2_select_search has no effect. Use listCustomPropertySelectValues(propertyId:query:orderBy:ids:conditions:offset:limit:)."
+  )
+  public func listCustomPropertySelectValues(
+    propertyId: Int,
+    v2SelectSearch: Bool?,
+    query: String? = nil,
+    orderBy: String? = nil,
+    ids: [Int]? = nil,
+    conditions: [String]? = nil,
+    offset: Int = 0,
+    limit: Int = 100
+  ) async throws(KaitenError) -> Page<Components.Schemas.CustomPropertySelectValue> {
+    try await selectValues(
+      propertyId: propertyId, v2SelectSearch: v2SelectSearch, query: query, orderBy: orderBy,
+      ids: ids, conditions: conditions, offset: offset, limit: limit)
+  }
+
+  private func selectValues(
+    propertyId: Int,
+    v2SelectSearch: Bool?,
+    query: String?,
+    orderBy: String?,
+    ids: [Int]?,
+    conditions: [String]?,
+    offset: Int,
+    limit: Int
   ) async throws(KaitenError) -> Page<Components.Schemas.CustomPropertySelectValue> {
     try validatePagination(offset: offset, limit: limit)
     guard

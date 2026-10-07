@@ -307,6 +307,17 @@ stdout confirms it works.
   `--move-from-space-id` and `--card-properties` (JSON array). JSON options
   follow FR-024. An empty `--columns` or `--lanes` array MUST fail locally
   with a validation error, because the API rejects it.
+- **FR-031**: Subcommands over deprecated API surface MUST say so in their
+  help (SDK FR-040). `get-board` and `get-space-board` state that the
+  response's `cards` is capped at 100 since 2026-10-01 and no longer
+  returned from 2026-11-01, and that the API pages a board's cards
+  through `GET /cards` with `board_id`, `limit` and `offset`. `list-sprints` and `get-sprint-summary` stay
+  available and state that the sprints API is deprecated: new sprints
+  cannot be started since 2026-10-01, existing ones can still be read.
+  `list-card-types` and `get-card-type` state that `properties` is
+  deprecated in favour of `card_properties`.
+  `list-custom-property-select-values` keeps `--v2-select-search` for
+  existing scripts; its help says the parameter has no effect.
 - **FR-035**: `update-column` and `update-lane` take `--wip-limit` as a
   string option following FR-028: an empty string `""` sends JSON `null`
   and removes the WIP limit (SDK FR-038), a number sets it, omitting the

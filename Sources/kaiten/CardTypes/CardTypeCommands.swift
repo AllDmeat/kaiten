@@ -24,7 +24,11 @@ func parseCardTypeJSON<T: Decodable>(
 struct ListCardTypes: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "list-card-types",
-    abstract: "List card types"
+    abstract: "List card types",
+    discussion: """
+      Kaiten deprecated `properties` in favour of `card_properties` and announced its removal \
+      after 2026-01-31; the API still returns it.
+      """
   )
 
   @OptionGroup var global: GlobalOptions
@@ -45,7 +49,11 @@ struct ListCardTypes: AsyncParsableCommand {
 struct GetCardType: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "get-card-type",
-    abstract: "Get a card type by ID"
+    abstract: "Get a card type by ID",
+    discussion: """
+      Kaiten deprecated `properties` in favour of `card_properties` and announced its removal \
+      after 2026-01-31; the API still returns it.
+      """
   )
 
   @OptionGroup var global: GlobalOptions

@@ -18,6 +18,7 @@ struct SpaceBoardsTests {
   /// board's space placement (`top`, `left`, `sort_order`, `space_id`) next to the full
   /// board contents, although the documentation declares an array of objects.
   @Test("200 returns SpaceBoard with space placement")
+  @available(*, deprecated)
   func getSpaceBoardSuccess() async throws {
     let json = """
       {

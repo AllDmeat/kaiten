@@ -149,8 +149,6 @@ extension KaitenClient {
 
   /// Returns all select values for a custom property across all pages.
   ///
-  /// Automatically enables `v2SelectSearch` to support offset-based pagination.
-  ///
   /// - Parameters:
   ///   - propertyId: The custom property identifier.
   ///   - query: Filter by select value name.
@@ -165,8 +163,7 @@ extension KaitenClient {
   ) -> AsyncThrowingStream<Components.Schemas.CustomPropertySelectValue, Error> {
     allPages(pageSize: pageSize) { [self] offset, limit in
       try await self.listCustomPropertySelectValues(
-        propertyId: propertyId, v2SelectSearch: true,
-        query: query, orderBy: orderBy, offset: offset, limit: limit
+        propertyId: propertyId, query: query, orderBy: orderBy, offset: offset, limit: limit
       )
     }
   }
@@ -219,10 +216,18 @@ extension KaitenClient {
 
   /// Returns all sprints across all pages.
   ///
+  /// Kaiten deprecated sprints: starting new sprints is unavailable since 2026-10-01. Existing
+  /// sprints can still be finished and read; iterations replace them.
+  ///
   /// - Parameters:
   ///   - active: Filter by active status.
   ///   - pageSize: Number of sprints per page (default `100`).
   /// - Returns: An `AsyncThrowingStream` of all sprints.
+  @available(
+    *, deprecated,
+    message:
+      "Kaiten deprecated sprints: new sprints cannot be started since 2026-10-01. Use iterations."
+  )
   public func allSprints(
     active: Bool? = nil,
     pageSize: Int = 100

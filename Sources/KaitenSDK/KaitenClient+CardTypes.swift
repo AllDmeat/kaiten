@@ -73,8 +73,6 @@ extension KaitenClient {
   ///   - letter: Character that represents the type. Kaiten accepts 1 character (up to 11 for emoji).
   ///   - name: The type name (1 to 64 characters).
   ///   - color: The color number (2 to 25).
-  ///   - properties: Properties of the card suggested for filling. Deprecated old format; use
-  ///     `cardProperties` instead.
   ///   - cardProperties: Card properties that will be suggested for filling in cards of this type.
   ///   - suggestFields: Whether cards of this type will be offered to display additional fields
   ///     based on statistics.
@@ -89,22 +87,42 @@ extension KaitenClient {
     letter: String,
     name: String,
     color: Int,
-    properties: OpenAPIRuntime.OpenAPIObjectContainer? = nil,
     cardProperties: [Components.Schemas.CardTypePropertyInput]? = nil,
     suggestFields: Bool? = nil
   ) async throws(KaitenError) -> Components.Schemas.CardType {
+    try await createCardType(
+      body: .init(
+        letter: letter, name: name, color: color, card_properties: cardProperties,
+        suggest_fields: suggestFields))
+  }
+
+  /// Creates a new card type with the old-format `properties`.
+  ///
+  /// Kaiten deprecated `properties` in favour of `card_properties`.
+  @available(
+    *, deprecated,
+    message: "Kaiten deprecated card type properties. Use cardProperties instead."
+  )
+  public func createCardType(
+    letter: String,
+    name: String,
+    color: Int,
+    properties: OpenAPIRuntime.OpenAPIObjectContainer?,
+    cardProperties: [Components.Schemas.CardTypePropertyInput]? = nil,
+    suggestFields: Bool? = nil
+  ) async throws(KaitenError) -> Components.Schemas.CardType {
+    var body = Components.Schemas.CreateCardTypeRequest(
+      letter: letter, name: name, color: color, card_properties: cardProperties,
+      suggest_fields: suggestFields)
+    body.properties = properties
+    return try await createCardType(body: body)
+  }
+
+  private func createCardType(
+    body: Components.Schemas.CreateCardTypeRequest
+  ) async throws(KaitenError) -> Components.Schemas.CardType {
     let response = try await call {
-      try await client.create_card_type(
-        body: .json(
-          .init(
-            letter: letter,
-            name: name,
-            color: color,
-            properties: properties,
-            card_properties: cardProperties,
-            suggest_fields: suggestFields
-          ))
-      )
+      try await client.create_card_type(body: .json(body))
     }
     return try decodeResponse(response.toCase()) { try $0.json }
   }
@@ -116,8 +134,6 @@ extension KaitenClient {
   ///   - letter: The updated letter. Kaiten accepts 1 character (up to 11 for emoji).
   ///   - name: The updated type name (1 to 64 characters).
   ///   - color: The updated color number (2 to 25).
-  ///   - properties: Properties of the card suggested for filling. Deprecated old format; use
-  ///     `cardProperties` instead.
   ///   - cardProperties: Card properties that will be suggested for filling in cards of this type.
   ///   - suggestFields: Whether cards of this type will be offered to display additional fields
   ///     based on statistics.
@@ -134,23 +150,44 @@ extension KaitenClient {
     letter: String? = nil,
     name: String? = nil,
     color: Int? = nil,
-    properties: OpenAPIRuntime.OpenAPIObjectContainer? = nil,
     cardProperties: [Components.Schemas.CardTypePropertyInput]? = nil,
     suggestFields: Bool? = nil
   ) async throws(KaitenError) -> Components.Schemas.CardType {
+    try await updateCardType(
+      id: id,
+      body: .init(
+        letter: letter, name: name, color: color, card_properties: cardProperties,
+        suggest_fields: suggestFields))
+  }
+
+  /// Updates a card type with the old-format `properties`.
+  ///
+  /// Kaiten deprecated `properties` in favour of `card_properties`.
+  @available(
+    *, deprecated,
+    message: "Kaiten deprecated card type properties. Use cardProperties instead."
+  )
+  public func updateCardType(
+    id: Int,
+    letter: String? = nil,
+    name: String? = nil,
+    color: Int? = nil,
+    properties: OpenAPIRuntime.OpenAPIObjectContainer?,
+    cardProperties: [Components.Schemas.CardTypePropertyInput]? = nil,
+    suggestFields: Bool? = nil
+  ) async throws(KaitenError) -> Components.Schemas.CardType {
+    var body = Components.Schemas.UpdateCardTypeRequest(
+      letter: letter, name: name, color: color, card_properties: cardProperties,
+      suggest_fields: suggestFields)
+    body.properties = properties
+    return try await updateCardType(id: id, body: body)
+  }
+
+  private func updateCardType(
+    id: Int, body: Components.Schemas.UpdateCardTypeRequest
+  ) async throws(KaitenError) -> Components.Schemas.CardType {
     let response = try await call {
-      try await client.update_card_type(
-        path: .init(id: id),
-        body: .json(
-          .init(
-            letter: letter,
-            name: name,
-            color: color,
-            properties: properties,
-            card_properties: cardProperties,
-            suggest_fields: suggestFields
-          ))
-      )
+      try await client.update_card_type(path: .init(id: id), body: .json(body))
     }
     return try decodeResponse(response.toCase(), notFoundResource: ("cardType", id)) {
       try $0.json

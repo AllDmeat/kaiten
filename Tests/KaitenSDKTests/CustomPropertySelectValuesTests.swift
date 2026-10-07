@@ -27,6 +27,45 @@ struct CustomPropertySelectValuesTests {
     #expect(page.limit == 100)
   }
 
+  @Test("listCustomPropertySelectValues does not send v2_select_search")
+  func listOmitsV2SelectSearch() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: "[]")
+    let client = try KaitenClient(
+      baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+    _ = try await client.listCustomPropertySelectValues(propertyId: 100, query: "io")
+
+    let recorded = try #require(transport.recordedRequests.first)
+    let path = try #require(recorded.request.path)
+    #expect(path.contains("query=io"))
+    #expect(!path.contains("v2_select_search"))
+  }
+
+  @Test("listCustomPropertySelectValues (deprecated) still sends v2_select_search")
+  @available(*, deprecated)
+  func listSendsDeprecatedV2SelectSearch() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: "[]")
+    let client = try KaitenClient(
+      baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+    _ = try await client.listCustomPropertySelectValues(propertyId: 100, v2SelectSearch: true)
+
+    let recorded = try #require(transport.recordedRequests.first)
+    #expect(recorded.request.path?.contains("v2_select_search=true") == true)
+  }
+
+  @Test("allCustomPropertySelectValues does not send v2_select_search")
+  func allOmitsV2SelectSearch() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: "[]")
+    let client = try KaitenClient(
+      baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+    for try await _ in client.allCustomPropertySelectValues(propertyId: 100) {}
+
+    let recorded = try #require(transport.recordedRequests.first)
+    #expect(recorded.request.path?.contains("v2_select_search") == false)
+  }
+
   @Test("listCustomPropertySelectValues 404 throws notFound")
   func listNotFound() async throws {
     let transport = MockClientTransport.returning(statusCode: 404)

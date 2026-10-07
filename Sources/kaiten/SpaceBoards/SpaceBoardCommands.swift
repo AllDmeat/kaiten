@@ -6,7 +6,12 @@ import KaitenSDK
 struct GetSpaceBoard: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "get-space-board",
-    abstract: "Get a board within a space, including its position on the space"
+    abstract: "Get a board within a space, including its position on the space",
+    discussion: """
+      Kaiten deprecated card retrieval from this endpoint: `cards` holds at most 100 cards \
+      since 2026-10-01 and is no longer returned from 2026-11-01. The API pages a board's \
+      cards through `GET /cards` with `board_id`, `limit` and `offset`.
+      """
   )
 
   @OptionGroup var global: GlobalOptions

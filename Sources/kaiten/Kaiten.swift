@@ -240,17 +240,18 @@ struct GlobalOptions: ParsableArguments {
     help: ArgumentHelp(
       "Comma-separated nested fields to include in the output, or 'all'.",
       discussion: """
-        Responses omit nested entities by default. A single one is dropped, its `*_id` staying \
-        behind: a card keeps owner_id and loses the embedded owner object. A collection collapses \
+        Responses omit nested entities by default. A single one is dropped only when its reference \
+        sits beside it as `<field>_id` or `<field>_uid`: a card keeps owner_id and loses the \
+        embedded owner object. A collection of objects that all carry an id collapses \
         to an array of its members' ids under its own key, so `members` holds user ids, and an \
         empty `members` means nobody rather than something withheld.
 
         Naming a field brings the entities back, one level deep — an expanded value is itself \
-        stripped of its nested fields.
+        stripped of the nested entities this rule would omit.
 
-        A nested value carrying no id is data, not a reference, and nothing else in the response \
-        stands in for it, so it is always present and cannot be expanded: a card's custom field \
-        values are never omitted.
+        Any other nested value is data that nothing else in the response stands in for, so it is \
+        always present and cannot be expanded: a card's custom field values and a user's \
+        personal_settings are never omitted.
 
         Pass an unknown name to list what a command offers.
         """,

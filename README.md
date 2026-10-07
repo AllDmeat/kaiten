@@ -133,11 +133,13 @@ Expand a collection to return its entities:
 kaiten get-card --id 123 --expand members
 ```
 
-Only entities are trimmed, and an `id` is what marks one. A nested value
-without an `id` is data, not a reference — a card's `properties` holds the
-custom field values, `{"id_714":[1088]}` — so it is passed through whole. There
-is no `properties_id` to stand in for it, and dropping it would lose the values
-rather than a pointer to them.
+Only what the response can point at elsewhere is trimmed. A single object is
+dropped only when its reference sits beside it — `owner` beside `owner_id`, or
+a `<field>_uid` — and a collection only when every element has an `id`.
+Anything else is data, not a reference, and is passed through whole: a card's
+`properties` holds the custom field values, `{"id_714":[1088]}`, and a user's
+`personal_settings` has an `id` but no `personal_settings_id`. Dropping either
+would lose the values rather than a pointer to them.
 
 Id arrays Kaiten sends itself (`tag_ids`, `parents_ids`) are passed through
 untouched, and nothing is ever invented.

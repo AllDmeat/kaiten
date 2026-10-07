@@ -71,10 +71,38 @@ struct UpdateCardBlocker: AsyncParsableCommand {
   @Option(name: .long, help: "Blocker card ID")
   var blockerCardId: Int?
 
+  @Option(name: .long, help: "Block deadline, ISO 8601 format")
+  var dueDate: String?
+
+  @Flag(name: .long, help: "Clear the block deadline")
+  var clearDueDate = false
+
+  @Option(name: .long, help: "Whether the deadline is specified up to hours and minutes")
+  var dueDateTimePresent: Bool?
+
+  func validate() throws {
+    if dueDate != nil && clearDueDate {
+      throw ValidationError("--due-date and --clear-due-date are mutually exclusive")
+    }
+  }
+
   func run() async throws {
+    let dueDateUpdate: String?? =
+      if clearDueDate {
+        .some(nil)
+      } else if let dueDate {
+        .some(dueDate)
+      } else {
+        .none
+      }
     let client = try await global.makeClient()
     let blocker = try await client.updateCardBlocker(
-      cardId: cardId, blockerId: blockerId, reason: reason, blockerCardId: blockerCardId)
+      cardId: cardId,
+      blockerId: blockerId,
+      reason: reason,
+      blockerCardId: blockerCardId,
+      dueDate: dueDateUpdate,
+      dueDateTimePresent: dueDateTimePresent)
     try printJSON(blocker, expand: global.expandedFields)
   }
 }

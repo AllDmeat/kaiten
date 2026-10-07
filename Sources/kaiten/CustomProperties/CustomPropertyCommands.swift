@@ -158,7 +158,7 @@ struct CreateCustomProperty: AsyncParsableCommand {
   @Option(
     name: .long,
     help:
-      "Property value type: string, number, date, email, phone, checkbox, select, formula, url, collective_score, vote, collective_vote, catalog, user, attachment (default: string)"
+      "Property value type: string, number, date, email, phone, checkbox, select, formula, url, collective_score, vote, collective_vote, catalog, user, attachment, directory (default: string)"
   )
   var type: String?
 
@@ -199,6 +199,18 @@ struct CreateCustomProperty: AsyncParsableCommand {
     name: .long, help: "Field settings for catalog properties as a JSON object keyed by field UID")
   var fieldsSettings: String?
 
+  @Option(
+    name: .long,
+    help: "ID of an existing custom directory to link, required for directory properties")
+  var directoryId: String?
+
+  @Option(name: .long, help: "Formula for calculation")
+  var formula: String?
+
+  @Option(
+    name: .long, help: "Card data used to calculate the formula, as a JSON object")
+  var formulaSourceCard: String?
+
   func run() async throws {
     let parsedType = try parseCustomPropertyType(type)
     let parsedVoteVariant = try parseCustomPropertyVoteVariant(voteVariant)
@@ -209,6 +221,10 @@ struct CreateCustomProperty: AsyncParsableCommand {
       fieldsSettings,
       as: Components.Schemas.CreateCustomPropertyRequest.fields_settingsPayload.self,
       fieldName: "fields-settings")
+    let parsedFormulaSourceCard = try parseCustomPropertyJSON(
+      formulaSourceCard,
+      as: Components.Schemas.CreateCustomPropertyRequest.formula_source_cardPayload.self,
+      fieldName: "formula-source-card")
 
     let client = try await global.makeClient()
     let created = try await client.createCustomProperty(
@@ -223,7 +239,10 @@ struct CreateCustomProperty: AsyncParsableCommand {
       valuesCreatableByUsers: valuesCreatableByUsers,
       data: parsedData,
       color: color,
-      fieldsSettings: parsedFieldsSettings
+      fieldsSettings: parsedFieldsSettings,
+      directoryId: directoryId,
+      formula: formula,
+      formulaSourceCard: parsedFormulaSourceCard
     )
     try printJSON(created, expand: global.expandedFields)
   }

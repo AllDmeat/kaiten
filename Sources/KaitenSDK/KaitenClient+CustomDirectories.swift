@@ -247,13 +247,17 @@ extension KaitenClient {
   ///     properties permission.
   ///   - fields: The full fields list. Fields omitted from this array are soft-deleted
   ///     (their condition becomes `removed`).
+  ///   - expectedFieldIds: The IDs of all active and inactive fields as loaded. Checked only
+  ///     together with `fields`; it detects a changed field list, not concurrent edits to field
+  ///     attributes.
   /// - Returns: The updated directory.
   /// - Throws:
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for validation errors (400),
-  ///     not found (404) or other undocumented HTTP status codes. A 404 is reported as
+  ///     not found (404), a field list that differs from `expectedFieldIds` (409) or other
+  ///     undocumented HTTP status codes. A 404 is reported as
   ///     `unexpectedResponse` rather than ``KaitenError/notFound(resource:id:)`` because
   ///     directories are addressed by string ID.
   public func updateCustomDirectory(
@@ -263,7 +267,8 @@ extension KaitenClient {
     condition: CustomDirectoryCondition? = nil,
     multiSelect: Bool? = nil,
     allowEditing: Bool? = nil,
-    fields: [Components.Schemas.UpdateCustomDirectoryFieldRequest]? = nil
+    fields: [Components.Schemas.UpdateCustomDirectoryFieldRequest]? = nil,
+    expectedFieldIds: [String]? = nil
   ) async throws(KaitenError) -> Components.Schemas.CustomDirectory {
     let response = try await call {
       try await client.update_custom_directory(
@@ -275,6 +280,7 @@ extension KaitenClient {
             condition: condition?.rawValue,
             multi_select: multiSelect,
             allow_editing: allowEditing,
+            expected_field_ids: expectedFieldIds,
             fields: fields
           ))
       )

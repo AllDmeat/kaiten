@@ -181,6 +181,11 @@ extension KaitenClient {
   ///     described only through examples in the Kaiten documentation.
   ///   - color: Colour of a catalog property, or `nil` for no colour.
   ///   - fieldsSettings: Field settings for catalog properties, keyed by field UID.
+  ///   - directoryId: The ID of an existing custom directory to link. Required for
+  ///     ``CustomPropertyType/directory`` properties; it does not create the directory.
+  ///   - formula: The formula for calculation.
+  ///   - formulaSourceCard: Card data used to calculate the formula. The Kaiten documentation
+  ///     does not describe its fields.
   /// - Returns: The created custom property definition.
   /// - Throws:
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
@@ -200,7 +205,11 @@ extension KaitenClient {
     valuesCreatableByUsers: Bool? = nil,
     data: Components.Schemas.CreateCustomPropertyRequest.dataPayload? = nil,
     color: Int? = nil,
-    fieldsSettings: Components.Schemas.CreateCustomPropertyRequest.fields_settingsPayload? = nil
+    fieldsSettings: Components.Schemas.CreateCustomPropertyRequest.fields_settingsPayload? = nil,
+    directoryId: String? = nil,
+    formula: String? = nil,
+    formulaSourceCard: Components.Schemas.CreateCustomPropertyRequest.formula_source_cardPayload? =
+      nil
   ) async throws(KaitenError) -> Components.Schemas.CustomProperty {
     let response = try await call {
       try await client.create_property(
@@ -217,7 +226,10 @@ extension KaitenClient {
             values_creatable_by_users: valuesCreatableByUsers,
             data: data,
             color: color,
-            fields_settings: fieldsSettings
+            fields_settings: fieldsSettings,
+            directory_id: directoryId,
+            formula: formula,
+            formula_source_card: formulaSourceCard
           ))
       )
     }

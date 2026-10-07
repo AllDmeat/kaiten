@@ -45,6 +45,9 @@ extension KaitenClient {
   ///   - cardId: The card identifier.
   ///   - name: Checklist name (required).
   ///   - sortOrder: Position (optional).
+  ///   - itemsSourceChecklistId: The checklist to copy list items from.
+  ///   - excludeItemIds: Items of `itemsSourceChecklistId` not to copy.
+  ///   - sourceShareId: The share checklist id.
   /// - Returns: The created checklist.
   /// - Throws:
   ///   - ``KaitenError/notFound(resource:id:)`` if the card does not exist.
@@ -52,13 +55,25 @@ extension KaitenClient {
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403) or other undocumented HTTP status codes.
-  public func createChecklist(cardId: Int, name: String, sortOrder: Double? = nil)
-    async throws(KaitenError) -> Components.Schemas.Checklist
-  {
+  public func createChecklist(
+    cardId: Int,
+    name: String,
+    sortOrder: Double? = nil,
+    itemsSourceChecklistId: Int? = nil,
+    excludeItemIds: [Int]? = nil,
+    sourceShareId: Int? = nil
+  ) async throws(KaitenError) -> Components.Schemas.Checklist {
     let response = try await call {
       try await client.create_checklist(
         path: .init(card_id: cardId),
-        body: .json(.init(name: name, sort_order: sortOrder))
+        body: .json(
+          .init(
+            name: name,
+            sort_order: sortOrder,
+            items_source_checklist_id: itemsSourceChecklistId,
+            exclude_item_ids: excludeItemIds,
+            source_share_id: sourceShareId
+          ))
       )
     }
     return try decodeResponse(response.toCase(), notFoundResource: ("card", cardId)) {

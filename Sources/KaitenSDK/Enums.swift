@@ -1421,13 +1421,15 @@ public enum CustomPropertyType: Sendable, Equatable, CaseIterable, Codable {
   case user
   /// File attachment value.
   case attachment
+  /// Record of a custom directory.
+  case directory
   /// Unknown value returned by the API (forward compatibility).
   case unknown(String)
 
   public static var allCases: [CustomPropertyType] {
     [
       .string, .number, .date, .email, .phone, .checkbox, .select, .formula, .url,
-      .collectiveScore, .vote, .collectiveVote, .catalog, .user, .attachment,
+      .collectiveScore, .vote, .collectiveVote, .catalog, .user, .attachment, .directory,
     ]
   }
 
@@ -1448,6 +1450,7 @@ public enum CustomPropertyType: Sendable, Equatable, CaseIterable, Codable {
     case "catalog": self = .catalog
     case "user": self = .user
     case "attachment": self = .attachment
+    case "directory": self = .directory
     default: self = .unknown(rawValue)
     }
   }
@@ -1469,6 +1472,7 @@ public enum CustomPropertyType: Sendable, Equatable, CaseIterable, Codable {
     case .catalog: "catalog"
     case .user: "user"
     case .attachment: "attachment"
+    case .directory: "directory"
     case .unknown(let v): v
     }
   }

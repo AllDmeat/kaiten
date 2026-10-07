@@ -169,7 +169,9 @@ struct UpdateCustomDirectory: AsyncParsableCommand {
     abstract: "Update a custom directory",
     discussion: """
       When --fields is provided it must carry the full fields list: fields \
-      omitted from the array are soft-deleted (condition=removed).
+      omitted from the array are soft-deleted (condition=removed). \
+      --expected-field-ids is checked only together with --fields; when the \
+      current field list differs from it, the API answers HTTP 409.
       """
   )
 
@@ -200,6 +202,11 @@ struct UpdateCustomDirectory: AsyncParsableCommand {
   @Option(name: .long, help: "Full fields list as a JSON array")
   var fields: String?
 
+  @Option(
+    name: .long,
+    help: "Comma-separated IDs of all active and inactive fields as loaded")
+  var expectedFieldIds: String?
+
   func validate() throws {
     if description != nil && clearDescription {
       throw ValidationError("--description and --clear-description are mutually exclusive")
@@ -210,6 +217,8 @@ struct UpdateCustomDirectory: AsyncParsableCommand {
     let parsedCondition = try parseCustomDirectoryCondition(condition)
     let parsedFields = try parseCustomDirectoryJSON(
       fields, as: [Components.Schemas.UpdateCustomDirectoryFieldRequest].self, fieldName: "fields")
+    let parsedExpectedFieldIds = try parseStringCSV(
+      expectedFieldIds, fieldName: "--expected-field-ids")
     let descriptionUpdate: String?? =
       if clearDescription {
         .some(nil)
@@ -226,7 +235,8 @@ struct UpdateCustomDirectory: AsyncParsableCommand {
       condition: parsedCondition,
       multiSelect: multiSelect,
       allowEditing: allowEditing,
-      fields: parsedFields
+      fields: parsedFields,
+      expectedFieldIds: parsedExpectedFieldIds
     )
     try printJSON(directory, expand: global.expandedFields)
   }

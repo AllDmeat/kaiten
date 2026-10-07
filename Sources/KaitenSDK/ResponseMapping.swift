@@ -1895,6 +1895,7 @@ extension Operations.update_custom_directory.Output {
     case .badRequest: .undocumented(statusCode: 400)
     case .unauthorized: .unauthorized
     case .notFound: .notFound
+    case .conflict: .undocumented(statusCode: 409)
     case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
     }
   }

@@ -269,10 +269,13 @@ struct CardsSearchTests {
     #expect(ids == [1, 2, 3])
   }
 
-  @Test("searchAllCards stops when the cursor does not advance")
+  @Test("searchAllCards stops when the API repeats a position, even with new cards")
   func searchAllCardsStopsOnRepeatedPosition() async throws {
-    let transport = MockClientTransport { _, _, _, _ in
-      self.response(#"{"result": [{"id": 1}, {"id": 2}], "position": "cursor-1"}"#)
+    let transport = MockClientTransport { request, _, _, _ in
+      if (request.path ?? "").contains("start_position=cursor-1") {
+        return self.response(#"{"result": [{"id": 3}], "position": "cursor-1"}"#)
+      }
+      return self.response(#"{"result": [{"id": 1}, {"id": 2}], "position": "cursor-1"}"#)
     }
     let client = try makeClient(transport)
 
@@ -281,8 +284,55 @@ struct CardsSearchTests {
       ids.append(try #require(card.id))
     }
 
-    #expect(ids == [1, 2])
+    #expect(ids == [1, 2, 3])
     #expect(transport.recordedRequests.count == 2)
+  }
+
+  @Test("searchAllCards keeps going past a fully duplicate page")
+  func searchAllCardsContinuesPastDuplicatePage() async throws {
+    let transport = MockClientTransport { request, _, _, _ in
+      let path = request.path ?? ""
+      if path.contains("start_position=cursor-3") {
+        return self.response(#"{"result": [], "position": "cursor-4"}"#)
+      }
+      if path.contains("start_position=cursor-2") {
+        return self.response(#"{"result": [{"id": 3}], "position": "cursor-3"}"#)
+      }
+      if path.contains("start_position=cursor-1") {
+        return self.response(#"{"result": [{"id": 1}, {"id": 2}], "position": "cursor-2"}"#)
+      }
+      return self.response(#"{"result": [{"id": 1}, {"id": 2}], "position": "cursor-1"}"#)
+    }
+    let client = try makeClient(transport)
+
+    var ids: [Int] = []
+    for try await card in client.searchAllCards(pageSize: 2) {
+      ids.append(try #require(card.id))
+    }
+
+    #expect(ids == [1, 2, 3])
+    #expect(transport.recordedRequests.count == 4)
+  }
+
+  @Test("searchAllCards stops after three consecutive pages without a new card")
+  func searchAllCardsStopsAfterThreeDuplicatePages() async throws {
+    let counter = Mutex(0)
+    let transport = MockClientTransport { _, _, _, _ in
+      let page = counter.withLock { value -> Int in
+        value += 1
+        return value
+      }
+      return self.response(#"{"result": [{"id": 1}], "position": "cursor-\#(page)"}"#)
+    }
+    let client = try makeClient(transport)
+
+    var ids: [Int] = []
+    for try await card in client.searchAllCards(pageSize: 1) {
+      ids.append(try #require(card.id))
+    }
+
+    #expect(ids == [1])
+    #expect(transport.recordedRequests.count == 4)
   }
 
   @Test("searchAllCards stops when a page carries no position")

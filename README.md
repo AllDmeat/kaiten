@@ -240,7 +240,8 @@ pass it back as `startPosition` to fetch the next page. Kaiten does not honour
 search answers with an empty `result`. Consecutive pages overlap even when
 `position` is passed back exactly, so a card can appear on more than one page:
 `searchCards` returns each page as the API sends it, while `searchAllCards`
-yields each card once and stops when a page adds no new card. `CardFilter` carries every documented
+yields each card once. It stops on an empty page, a missing or already seen
+`position`, or after three consecutive pages without a new card. `CardFilter` carries every documented
 filter, including `projectIds`, the beta base64-encoded `filter` condition
 tree, and `brokenApi`.
 

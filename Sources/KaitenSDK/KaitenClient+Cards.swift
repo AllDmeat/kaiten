@@ -130,8 +130,10 @@ extension KaitenClient {
   /// Returns every card a version=2 search matches, following the `position` cursor.
   ///
   /// Consecutive version=2 pages overlap, so each card is yielded once, the first time its id
-  /// appears. Pagination stops on an empty page, on a response without `position`, and on a
-  /// page that adds no card not already yielded — which also ends a cursor that stops advancing.
+  /// appears. Pagination stops on an empty page, on a response without `position`, on a
+  /// `position` already seen (a cursor that stops advancing), and — as a safety bound — after
+  /// three consecutive pages that add no card not already yielded. A single fully duplicate
+  /// page does not end the search, so later pages are not lost.
   ///
   /// - Parameters:
   ///   - boardId: Filter by board identifier (optional).
@@ -149,6 +151,8 @@ extension KaitenClient {
       let task = Task { [self] in
         var position: String?
         var seenIds: Set<Int> = []
+        var seenPositions: Set<String> = []
+        var pagesWithoutNewCards = 0
         do {
           while !Task.isCancelled {
             let page = try await searchCards(
@@ -166,7 +170,11 @@ extension KaitenClient {
               addedNewCard = true
               continuation.yield(item)
             }
-            guard addedNewCard, let next = page.position else { break }
+            let items = page.result ?? []
+            pagesWithoutNewCards = addedNewCard ? 0 : pagesWithoutNewCards + 1
+            guard !items.isEmpty, pagesWithoutNewCards < 3, let next = page.position,
+              seenPositions.insert(next).inserted
+            else { break }
             position = next
           }
           continuation.finish()

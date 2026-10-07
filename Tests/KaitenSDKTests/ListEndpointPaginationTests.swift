@@ -120,24 +120,42 @@ struct ListEndpointPaginationTests {
     #expect(try queryItems(transport, at: 1)["offset"] == "2")
   }
 
-  @Test("allSpaceUsers advances the cursor by the greatest id, not the last one")
-  func allSpaceUsersCursor() async throws {
-    let transport = MockClientTransport { request, _, _, _ in
-      let body =
-        request.path?.contains("last_user_id") == true
-        ? #"[{"id": 9}]"#
-        : #"[{"id": 7}, {"id": 2}, {"id": 5}]"#
+  /// Serves space-user pages keyed by the `last_user_id` cursor; an unknown cursor gets `[]`.
+  private func spaceUserPages(_ pages: [String: String]) -> MockClientTransport {
+    MockClientTransport { request, _, _, _ in
+      let items = URLComponents(string: request.path ?? "")?.queryItems ?? []
+      let cursor = items.first { $0.name == "last_user_id" }?.value ?? ""
       var fields = HTTPFields()
       fields[.contentType] = "application/json"
-      return (HTTPResponse(status: .ok, headerFields: fields), .init(body))
+      return (HTTPResponse(status: .ok, headerFields: fields), .init(pages[cursor] ?? "[]"))
     }
+  }
+
+  @Test("allSpaceUsers advances the cursor by the greatest id, not the last one")
+  func allSpaceUsersCursor() async throws {
+    let transport = spaceUserPages([
+      "": #"[{"id": 7}, {"id": 2}, {"id": 5}]"#,
+      "7": #"[{"id": 9}]"#,
+    ])
     let users = try await collect(try makeClient(transport).allSpaceUsers(spaceId: 1, pageSize: 3))
 
     #expect(users.map(\.id) == [7, 2, 5, 9])
-    #expect(transport.recordedRequests.count == 2)
     let second = try queryItems(transport, at: 1)
     #expect(second["last_user_id"] == "7")
     #expect(second["offset"] == nil)
+  }
+
+  @Test("allSpaceUsers keeps going after a short page and stops on an empty one")
+  func allSpaceUsersShortPage() async throws {
+    let transport = spaceUserPages([
+      "": #"[{"id": 3}, {"id": 1}]"#,
+      "3": #"[{"id": 4}, {"id": 6}, {"id": 5}]"#,
+    ])
+    let users = try await collect(try makeClient(transport).allSpaceUsers(spaceId: 1, pageSize: 3))
+
+    #expect(users.map(\.id) == [3, 1, 4, 6, 5])
+    #expect(transport.recordedRequests.count == 3)
+    #expect(try queryItems(transport, at: 2)["last_user_id"] == "6")
   }
 
   @Test("allSpaceUsers stops when the cursor does not advance")

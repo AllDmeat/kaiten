@@ -10,7 +10,8 @@ extension KaitenClient {
   ///   - spaceId: The space identifier.
   ///   - includeInheritedAccess: Include users whose access is inherited from a parent entity.
   ///   - inactive: Return only members who are inactive in the company.
-  ///   - limit: Maximum number of users to return (1–500). The API returns 100 when omitted.
+  ///   - limit: Maximum number of users to return (1–500). The API returns 100 when omitted, and
+  ///     often returns fewer than `limit` while more users remain.
   ///   - lastUserId: Cursor: return users whose id is greater than this. Pass the greatest user id
   ///     of the previous page, not the last element — the default list is not ordered by id.
   ///     The endpoint has no `offset`.

@@ -333,6 +333,9 @@ extension KaitenClient {
   ///
   /// The endpoint pages by a `last_user_id` cursor rather than an offset. Each request passes the
   /// greatest user id seen on the previous page, since the default list is not ordered by id.
+  /// The API often returns pages shorter than `pageSize` while more users remain, so the walk
+  /// ends only on an empty page. Which users the walk surfaces can also depend on `pageSize` —
+  /// a defect of the API that the SDK cannot correct.
   ///
   /// - Parameters:
   ///   - spaceId: The space identifier.
@@ -355,8 +358,9 @@ extension KaitenClient {
               spaceId: spaceId, includeInheritedAccess: includeInheritedAccess,
               inactive: inactive, limit: pageSize, lastUserId: lastUserId)
             for user in users { continuation.yield(user) }
-            // A short page is the last one; a cursor that stops growing would repeat the page.
-            guard users.count == pageSize, let maxId = users.compactMap(\.id).max(),
+            // Short pages are not the end here, only an empty one is; a cursor that stops growing
+            // would repeat the page.
+            guard let maxId = users.compactMap(\.id).max(),
               maxId > lastUserId ?? .min
             else { break }
             lastUserId = maxId

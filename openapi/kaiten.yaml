@@ -4574,6 +4574,7 @@ paths:
         schema:
           type: boolean
         description: The result includes only inactive in company members
+      # DOC_MISMATCH: docs=returns up to `limit` users, actual often returns fewer while more remain (only an empty page ends a last_user_id walk), and the users a walk returns vary with `limit` — https://developers.kaiten.ru/space-users/get-list-of-users
       - name: limit
         in: query
         schema:

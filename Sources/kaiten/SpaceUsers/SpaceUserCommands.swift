@@ -26,7 +26,13 @@ struct ListSpaceUsers: AsyncParsableCommand {
   @Option(name: .long, help: "Return only members inactive in the company")
   var inactive: Bool?
 
-  @Option(name: .long, help: "Maximum number of users to return (1-500, default 100)")
+  @Option(
+    name: .long,
+    help: """
+      Maximum number of users to return (1-500, default 100). Pages often come back shorter \
+      while more users remain; only an empty page is the last one. Which users a cursor walk \
+      returns can vary with the page size
+      """)
   var limit: Int?
 
   @Option(

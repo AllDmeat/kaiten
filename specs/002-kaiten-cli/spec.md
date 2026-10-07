@@ -251,6 +251,13 @@ stdout confirms it works.
   `--exclude-directly-added-members-by-entity-uid` alongside the existing
   `--type`, `--query`, `--ids`, `--limit`, `--offset` and
   `--include-inactive`.
+- **FR-026**: Subcommands over list endpoints that the API pages (SDK
+  FR-035) MUST expose the endpoint's pagination options — `--limit` and
+  `--offset`, or `--limit` and `--last-user-id` for `list-space-users` — and
+  their help MUST state the default page size, so a truncated result is
+  never silent. They keep printing a plain array. `list-custom-properties
+  --include-values true` MUST fail with a validation error instead of
+  forwarding a value the API rejects.
 - **FR-027**: `get-private-card-file`, `get-comment-file` and
   `get-custom-property-file` MUST print the full file metadata the API
   returns, not only the signed URL, and accept `--download`. The

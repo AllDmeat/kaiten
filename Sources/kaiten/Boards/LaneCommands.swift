@@ -37,6 +37,15 @@ struct CreateLane: AsyncParsableCommand {
   @Option(name: .long, help: "Row count (height)")
   var rowCount: Int?
 
+  @Option(name: .long, help: "Days without movement after which a card is marked stale")
+  var lastMovedWarningAfterDays: Int?
+
+  @Option(name: .long, help: "Hours without movement after which a card is marked stale")
+  var lastMovedWarningAfterHours: Int?
+
+  @Option(name: .long, help: "Minutes without movement after which a card is marked stale")
+  var lastMovedWarningAfterMinutes: Int?
+
   func run() async throws {
     let client = try await global.makeClient()
     let lane = try await client.createLane(
@@ -45,7 +54,10 @@ struct CreateLane: AsyncParsableCommand {
       sortOrder: sortOrder,
       wipLimit: wipLimit,
       wipLimitType: try parseWipLimitType(wipLimitType),
-      rowCount: rowCount
+      rowCount: rowCount,
+      lastMovedWarningAfterDays: lastMovedWarningAfterDays,
+      lastMovedWarningAfterHours: lastMovedWarningAfterHours,
+      lastMovedWarningAfterMinutes: lastMovedWarningAfterMinutes
     )
     try printJSON(lane, expand: global.expandedFields)
   }
@@ -80,6 +92,15 @@ struct UpdateLane: AsyncParsableCommand {
   @Option(name: .long, help: "Row count (height)")
   var rowCount: Int?
 
+  @Option(name: .long, help: "Days without movement after which a card is marked stale")
+  var lastMovedWarningAfterDays: Int?
+
+  @Option(name: .long, help: "Hours without movement after which a card is marked stale")
+  var lastMovedWarningAfterHours: Int?
+
+  @Option(name: .long, help: "Minutes without movement after which a card is marked stale")
+  var lastMovedWarningAfterMinutes: Int?
+
   @Option(name: .long, help: "Condition: 1=live, 2=archived")
   var condition: Int?
 
@@ -93,7 +114,10 @@ struct UpdateLane: AsyncParsableCommand {
       wipLimit: wipLimit,
       wipLimitType: try parseWipLimitType(wipLimitType),
       rowCount: rowCount,
-      condition: try parseLaneCondition(condition)
+      condition: try parseLaneCondition(condition),
+      lastMovedWarningAfterDays: lastMovedWarningAfterDays,
+      lastMovedWarningAfterHours: lastMovedWarningAfterHours,
+      lastMovedWarningAfterMinutes: lastMovedWarningAfterMinutes
     )
     try printJSON(lane, expand: global.expandedFields)
   }

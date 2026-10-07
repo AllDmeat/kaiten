@@ -262,6 +262,22 @@ stdout confirms it works.
   for files uploaded without restricted access, and the help of
   `attach-card-file` states that Kaiten deprecated that upload (SDK
   FR-037).
+- **FR-028**: Column, subcolumn and lane subcommands MUST expose the
+  settings of SDK FR-038. `create-lane` and `update-lane` take
+  `--last-moved-warning-after-days`, `--last-moved-warning-after-hours`
+  and `--last-moved-warning-after-minutes`. `create-column`,
+  `update-column`, `create-subcolumn` and `update-subcolumn` take those
+  three plus `--archive-after-days`, `--card-hide-after-days`, `--rules`
+  and `--external-id`; the subcolumn subcommands also take `--col-count`.
+  The two update subcommands add `--prev-column-id`, `--next-column-id`
+  and `--pause-sla`. On the updates, `--card-hide-after-days`,
+  `--prev-column-id` and `--next-column-id` are string options: an empty
+  string `""` sends JSON `null` (turning card hiding off, or moving the
+  column to the beginning/end), a number sends that value, omitting the
+  option leaves the field unchanged, and any other input MUST fail with
+  a validation error before the request. On create,
+  `--card-hide-after-days` is an integer option. `--wip-limit` keeps its
+  integer form.
 
 ### Non-Functional Requirements
 

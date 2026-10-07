@@ -13,3 +13,4 @@ typeOverrides:
   schemas:
     NullableString: ExplicitNullString
     NullableNumber: ExplicitNullNumber
+    NullableInteger: ExplicitNullInteger

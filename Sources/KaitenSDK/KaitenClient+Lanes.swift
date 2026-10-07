@@ -41,6 +41,9 @@ extension KaitenClient {
   ///   - wipLimit: An optional WIP limit.
   ///   - wipLimitType: An optional WIP limit type.
   ///   - rowCount: An optional row count.
+  ///   - lastMovedWarningAfterDays: Days without movement after which a card is marked stale.
+  ///   - lastMovedWarningAfterHours: Hours without movement after which a card is marked stale.
+  ///   - lastMovedWarningAfterMinutes: Minutes without movement after which a card is marked stale.
   /// - Returns: The created lane.
   /// - Throws:
   ///   - ``KaitenError/notFound(resource:id:)`` if the board does not exist.
@@ -54,7 +57,10 @@ extension KaitenClient {
     sortOrder: Double? = nil,
     wipLimit: Int? = nil,
     wipLimitType: WipLimitType? = nil,
-    rowCount: Int? = nil
+    rowCount: Int? = nil,
+    lastMovedWarningAfterDays: Int? = nil,
+    lastMovedWarningAfterHours: Int? = nil,
+    lastMovedWarningAfterMinutes: Int? = nil
   ) async throws(KaitenError) -> Components.Schemas.Lane {
     let response = try await call {
       try await client.create_lane(
@@ -65,7 +71,10 @@ extension KaitenClient {
             sort_order: sortOrder,
             wip_limit: wipLimit,
             wip_limit_type: wipLimitType?.rawValue,
-            row_count: rowCount
+            row_count: rowCount,
+            last_moved_warning_after_days: lastMovedWarningAfterDays,
+            last_moved_warning_after_hours: lastMovedWarningAfterHours,
+            last_moved_warning_after_minutes: lastMovedWarningAfterMinutes
           )))
     }
     return try decodeResponse(
@@ -84,6 +93,9 @@ extension KaitenClient {
   ///   - wipLimitType: The updated WIP limit type.
   ///   - rowCount: The updated row count.
   ///   - condition: The updated lane condition.
+  ///   - lastMovedWarningAfterDays: Days without movement after which a card is marked stale.
+  ///   - lastMovedWarningAfterHours: Hours without movement after which a card is marked stale.
+  ///   - lastMovedWarningAfterMinutes: Minutes without movement after which a card is marked stale.
   /// - Returns: The updated lane.
   /// - Throws:
   ///   - ``KaitenError/notFound(resource:id:)`` if the lane does not exist.
@@ -99,7 +111,10 @@ extension KaitenClient {
     wipLimit: Int? = nil,
     wipLimitType: WipLimitType? = nil,
     rowCount: Int? = nil,
-    condition: LaneCondition? = nil
+    condition: LaneCondition? = nil,
+    lastMovedWarningAfterDays: Int? = nil,
+    lastMovedWarningAfterHours: Int? = nil,
+    lastMovedWarningAfterMinutes: Int? = nil
   ) async throws(KaitenError) -> Components.Schemas.Lane {
     let response = try await call {
       try await client.update_lane(
@@ -111,6 +126,9 @@ extension KaitenClient {
             wip_limit: wipLimit,
             wip_limit_type: wipLimitType?.rawValue,
             row_count: rowCount,
+            last_moved_warning_after_days: lastMovedWarningAfterDays,
+            last_moved_warning_after_hours: lastMovedWarningAfterHours,
+            last_moved_warning_after_minutes: lastMovedWarningAfterMinutes,
             condition: condition?.rawValue
           )))
     }

@@ -23,6 +23,66 @@ func parseWipLimitType(_ rawValue: Int?) throws -> WipLimitType? {
   return type
 }
 
+/// Maps an option that can clear a nullable integer field:
+/// absent → leave unchanged, `""` → send JSON null, a number → send it.
+func parseNullableInt(_ raw: String?, option: String) throws -> Int?? {
+  try raw.map { raw in
+    if raw.isEmpty { return nil }
+    guard let value = Int(raw) else {
+      throw ValidationError("Invalid \(option) value: '\(raw)'")
+    }
+    return value
+  }
+}
+
+/// Settings shared by columns and subcolumns on create and update.
+struct ColumnSettingsOptions: ParsableArguments {
+  @Option(name: .long, help: "Days without movement after which a card is marked stale")
+  var lastMovedWarningAfterDays: Int?
+
+  @Option(name: .long, help: "Hours without movement after which a card is marked stale")
+  var lastMovedWarningAfterHours: Int?
+
+  @Option(name: .long, help: "Minutes without movement after which a card is marked stale")
+  var lastMovedWarningAfterMinutes: Int?
+
+  @Option(
+    name: .long,
+    help: "Days after which cards are archived automatically. Honoured only by done columns.")
+  var archiveAfterDays: Int?
+
+  @Option(
+    name: .long,
+    help: "Bit mask of column rules: 1=checklists must be checked, 2=display FIFO order")
+  var rules: Int?
+
+  @Option(name: .long, help: "External ID, not shown in the web interface")
+  var externalId: String?
+}
+
+/// Options accepted only by column and subcolumn updates.
+struct ColumnUpdateOptions: ParsableArguments {
+  @Option(
+    name: .long,
+    help: "Hide cards not moved for the last N days. Pass empty string \"\" to turn hiding off.")
+  var cardHideAfterDays: String?
+
+  @Option(
+    name: .long,
+    help:
+      "Column ID to move this column before. Pass empty string \"\" to move it to the beginning."
+  )
+  var prevColumnId: String?
+
+  @Option(
+    name: .long,
+    help: "Column ID to move this column after. Pass empty string \"\" to move it to the end.")
+  var nextColumnId: String?
+
+  @Option(name: .long, help: "Pause the SLA timer in this column (true or false)")
+  var pauseSla: Bool?
+}
+
 struct CreateColumn: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "create-column",
@@ -52,6 +112,11 @@ struct CreateColumn: AsyncParsableCommand {
   @Option(name: .long, help: "Number of columns to display side by side")
   var colCount: Int?
 
+  @Option(name: .long, help: "Hide cards not moved for the last N days")
+  var cardHideAfterDays: Int?
+
+  @OptionGroup var settings: ColumnSettingsOptions
+
   func run() async throws {
     let client = try await global.makeClient()
     let column = try await client.createColumn(
@@ -61,7 +126,14 @@ struct CreateColumn: AsyncParsableCommand {
       type: try parseColumnType(columnType),
       wipLimit: wipLimit,
       wipLimitType: try parseWipLimitType(wipLimitType),
-      colCount: colCount
+      colCount: colCount,
+      lastMovedWarningAfterDays: settings.lastMovedWarningAfterDays,
+      lastMovedWarningAfterHours: settings.lastMovedWarningAfterHours,
+      lastMovedWarningAfterMinutes: settings.lastMovedWarningAfterMinutes,
+      archiveAfterDays: settings.archiveAfterDays,
+      cardHideAfterDays: cardHideAfterDays,
+      rules: settings.rules,
+      externalId: settings.externalId
     )
     try printJSON(column, expand: global.expandedFields)
   }
@@ -99,6 +171,10 @@ struct UpdateColumn: AsyncParsableCommand {
   @Option(name: .long, help: "Number of columns to display side by side")
   var colCount: Int?
 
+  @OptionGroup var settings: ColumnSettingsOptions
+
+  @OptionGroup var update: ColumnUpdateOptions
+
   func run() async throws {
     let client = try await global.makeClient()
     let column = try await client.updateColumn(
@@ -109,7 +185,18 @@ struct UpdateColumn: AsyncParsableCommand {
       type: try parseColumnType(columnType),
       wipLimit: wipLimit,
       wipLimitType: try parseWipLimitType(wipLimitType),
-      colCount: colCount
+      colCount: colCount,
+      lastMovedWarningAfterDays: settings.lastMovedWarningAfterDays,
+      lastMovedWarningAfterHours: settings.lastMovedWarningAfterHours,
+      lastMovedWarningAfterMinutes: settings.lastMovedWarningAfterMinutes,
+      archiveAfterDays: settings.archiveAfterDays,
+      cardHideAfterDays: try parseNullableInt(
+        update.cardHideAfterDays, option: "--card-hide-after-days"),
+      rules: settings.rules,
+      externalId: settings.externalId,
+      prevColumnId: try parseNullableInt(update.prevColumnId, option: "--prev-column-id"),
+      nextColumnId: try parseNullableInt(update.nextColumnId, option: "--next-column-id"),
+      pauseSla: update.pauseSla
     )
     try printJSON(column, expand: global.expandedFields)
   }
@@ -181,13 +268,29 @@ struct CreateSubcolumn: AsyncParsableCommand {
   @Option(name: .long, help: "Subcolumn type: 1=queue, 2=in progress, 3=done")
   var columnType: Int?
 
+  @Option(name: .long, help: "Number of columns to display side by side")
+  var colCount: Int?
+
+  @Option(name: .long, help: "Hide cards not moved for the last N days")
+  var cardHideAfterDays: Int?
+
+  @OptionGroup var settings: ColumnSettingsOptions
+
   func run() async throws {
     let client = try await global.makeClient()
     let subcolumn = try await client.createSubcolumn(
       columnId: columnId,
       title: title,
       sortOrder: sortOrder,
-      type: try parseColumnType(columnType)
+      type: try parseColumnType(columnType),
+      colCount: colCount,
+      lastMovedWarningAfterDays: settings.lastMovedWarningAfterDays,
+      lastMovedWarningAfterHours: settings.lastMovedWarningAfterHours,
+      lastMovedWarningAfterMinutes: settings.lastMovedWarningAfterMinutes,
+      archiveAfterDays: settings.archiveAfterDays,
+      cardHideAfterDays: cardHideAfterDays,
+      rules: settings.rules,
+      externalId: settings.externalId
     )
     try printJSON(subcolumn, expand: global.expandedFields)
   }
@@ -216,6 +319,13 @@ struct UpdateSubcolumn: AsyncParsableCommand {
   @Option(name: .long, help: "Subcolumn type: 1=queue, 2=in progress, 3=done")
   var columnType: Int?
 
+  @Option(name: .long, help: "Number of columns to display side by side")
+  var colCount: Int?
+
+  @OptionGroup var settings: ColumnSettingsOptions
+
+  @OptionGroup var update: ColumnUpdateOptions
+
   func run() async throws {
     let client = try await global.makeClient()
     let subcolumn = try await client.updateSubcolumn(
@@ -223,7 +333,19 @@ struct UpdateSubcolumn: AsyncParsableCommand {
       id: id,
       title: title,
       sortOrder: sortOrder,
-      type: try parseColumnType(columnType)
+      type: try parseColumnType(columnType),
+      colCount: colCount,
+      lastMovedWarningAfterDays: settings.lastMovedWarningAfterDays,
+      lastMovedWarningAfterHours: settings.lastMovedWarningAfterHours,
+      lastMovedWarningAfterMinutes: settings.lastMovedWarningAfterMinutes,
+      archiveAfterDays: settings.archiveAfterDays,
+      cardHideAfterDays: try parseNullableInt(
+        update.cardHideAfterDays, option: "--card-hide-after-days"),
+      rules: settings.rules,
+      externalId: settings.externalId,
+      prevColumnId: try parseNullableInt(update.prevColumnId, option: "--prev-column-id"),
+      nextColumnId: try parseNullableInt(update.nextColumnId, option: "--next-column-id"),
+      pauseSla: update.pauseSla
     )
     try printJSON(subcolumn, expand: global.expandedFields)
   }

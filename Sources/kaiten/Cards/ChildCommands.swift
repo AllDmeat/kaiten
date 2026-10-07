@@ -9,8 +9,7 @@ struct ListCardChildren: AsyncParsableCommand {
     commandName: "list-card-children",
     abstract: "List children of a card",
     discussion: """
-      Enumerates every child of a card, including the ones the card's own `children_ids` and \
-      `children_count` omit.
+      Includes the children the card's own `children_ids` and `children_count` omit.
       """
   )
 
@@ -19,9 +18,16 @@ struct ListCardChildren: AsyncParsableCommand {
   @Option(name: .long, help: "Card ID")
   var cardId: Int
 
+  @Option(name: .long, help: "Maximum number of children to return (1-100, default 100)")
+  var limit: Int?
+
+  @Option(name: .long, help: "Number of children to skip")
+  var offset: Int?
+
   func run() async throws {
     let client = try await global.makeClient()
-    let children = try await client.listCardChildren(cardId: cardId)
+    let children = try await client.listCardChildren(
+      cardId: cardId, limit: limit, offset: offset)
     try printJSON(children, expand: global.expandedFields)
   }
 }

@@ -4,23 +4,31 @@ import OpenAPIRuntime
 // MARK: - Group Users
 
 extension KaitenClient {
-  /// Lists users that belong to a company group.
+  /// Lists users that belong to a company group, one page at a time, ordered by user id.
   ///
-  /// - Parameter groupUid: The group UID.
+  /// - Parameters:
+  ///   - groupUid: The group UID.
+  ///   - limit: Maximum number of users to return (1–100). The API returns 100 when omitted.
+  ///   - offset: Number of users to skip.
   /// - Returns: An array of group users. Returns an empty array if the group has no users.
   /// - Throws:
+  ///   - ``KaitenError/invalidPaginationRange(offset:limit:)`` if pagination parameters are out of range.
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403), not found (404)
   ///     or other undocumented HTTP status codes. A 404 is reported as `unexpectedResponse` rather
   ///     than ``KaitenError/notFound(resource:id:)`` because groups are addressed by string UID.
-  public func listGroupUsers(groupUid: String) async throws(KaitenError) -> [Components.Schemas
-    .GroupUser]
-  {
+  public func listGroupUsers(
+    groupUid: String,
+    limit: Int? = nil,
+    offset: Int? = nil
+  ) async throws(KaitenError) -> [Components.Schemas.GroupUser] {
+    try validatePagination(offset: offset ?? 0, limit: limit ?? 100)
     guard
       let response = try await callList({
-        try await client.list_group_users(path: .init(group_uid: groupUid))
+        try await client.list_group_users(
+          path: .init(group_uid: groupUid), query: .init(limit: limit, offset: offset))
       })
     else {
       return []

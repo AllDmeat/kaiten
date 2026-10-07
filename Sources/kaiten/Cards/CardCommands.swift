@@ -578,9 +578,16 @@ struct GetCardComments: AsyncParsableCommand {
   @Option(name: .long, help: "Card ID")
   var cardId: Int
 
+  @Option(name: .long, help: "Maximum number of comments to return (1-100, default 100)")
+  var limit: Int?
+
+  @Option(name: .long, help: "Number of comments to skip")
+  var offset: Int?
+
   func run() async throws {
     let client = try await global.makeClient()
-    let comments = try await client.getCardComments(cardId: cardId)
+    let comments = try await client.getCardComments(
+      cardId: cardId, limit: limit, offset: offset)
     try printJSON(comments, expand: global.expandedFields)
   }
 }

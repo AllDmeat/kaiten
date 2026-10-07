@@ -4,10 +4,10 @@ import KaitenSDK
 struct ListCardAllowedUsers: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "list-card-allowed-users",
-    abstract: "List users with access to a card",
+    abstract: "List users with access to a card, ordered by user id",
     discussion: """
-      The API accepts --search, --order-by, --limit and --offset but has been observed to \
-      ignore them: the full list is returned regardless.
+      The API accepts --search and --order-by but has been observed to ignore them: the list \
+      is not filtered and stays ordered by id.
       """
   )
 
@@ -30,10 +30,10 @@ struct ListCardAllowedUsers: AsyncParsableCommand {
   @Option(name: .long, help: "Filter by role")
   var role: Int?
 
-  @Option(name: .long, help: "Maximum amount of users in response")
+  @Option(name: .long, help: "Maximum number of users to return (1-100, default 100)")
   var limit: Int?
 
-  @Option(name: .long, help: "Number of records to skip")
+  @Option(name: .long, help: "Number of users to skip")
   var offset: Int?
 
   func run() async throws {

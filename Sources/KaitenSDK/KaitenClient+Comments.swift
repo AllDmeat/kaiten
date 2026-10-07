@@ -55,21 +55,30 @@ extension KaitenClient {
     }
   }
 
-  /// Fetches all comments on a card.
+  /// Fetches comments on a card, one page at a time.
   ///
-  /// - Parameter cardId: The card identifier.
+  /// - Parameters:
+  ///   - cardId: The card identifier.
+  ///   - limit: Maximum number of comments to return (1–100). The API returns 100 when omitted.
+  ///   - offset: Number of comments to skip.
   /// - Returns: An array of comments. Returns an empty array if the card has no comments.
   /// - Throws:
+  ///   - ``KaitenError/invalidPaginationRange(offset:limit:)`` if pagination parameters are out of range.
   ///   - ``KaitenError/notFound(resource:id:)`` if the card does not exist.
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403) or other undocumented HTTP status codes.
-  public func getCardComments(cardId: Int) async throws(KaitenError) -> [Components.Schemas.Comment]
-  {
+  public func getCardComments(
+    cardId: Int,
+    limit: Int? = nil,
+    offset: Int? = nil
+  ) async throws(KaitenError) -> [Components.Schemas.Comment] {
+    try validatePagination(offset: offset ?? 0, limit: limit ?? 100)
     guard
       let response = try await callList({
-        try await client.retrieve_card_comments(path: .init(card_id: cardId))
+        try await client.retrieve_card_comments(
+          path: .init(card_id: cardId), query: .init(limit: limit, offset: offset))
       })
     else {
       return []

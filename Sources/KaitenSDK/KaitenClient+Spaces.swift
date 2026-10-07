@@ -4,16 +4,28 @@ import OpenAPIRuntime
 // MARK: - Spaces
 
 extension KaitenClient {
-  /// Lists all spaces visible to the authenticated user.
+  /// Lists spaces visible to the authenticated user, one page at a time.
   ///
+  /// - Parameters:
+  ///   - limit: Maximum number of spaces to return (1–100). The API returns 100 when omitted.
+  ///   - offset: Number of spaces to skip.
   /// - Returns: An array of spaces. Returns an empty array if no spaces are available.
   /// - Throws:
+  ///   - ``KaitenError/invalidPaginationRange(offset:limit:)`` if pagination parameters are out of range.
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for undocumented HTTP status codes.
-  public func listSpaces() async throws(KaitenError) -> [Components.Schemas.Space] {
-    guard let response = try await callList({ try await client.retrieve_list_of_spaces() }) else {
+  public func listSpaces(
+    limit: Int? = nil,
+    offset: Int? = nil
+  ) async throws(KaitenError) -> [Components.Schemas.Space] {
+    try validatePagination(offset: offset ?? 0, limit: limit ?? 100)
+    guard
+      let response = try await callList({
+        try await client.retrieve_list_of_spaces(query: .init(limit: limit, offset: offset))
+      })
+    else {
       return []
     }
     return try decodeResponse(response.toCase()) { try $0.json }

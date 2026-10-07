@@ -54,7 +54,7 @@ extension KaitenError: LocalizedError {
     case .invalidPagination(let pageSize):
       "Invalid pageSize: \(pageSize). pageSize must be greater than 0"
     case .invalidPaginationRange(let offset, let limit):
-      "Invalid pagination: offset=\(offset), limit=\(limit). offset must be >= 0 and limit must be in 1...100"
+      "Invalid pagination: offset=\(offset), limit=\(limit). offset must be >= 0 and limit must be between 1 and the endpoint's documented cap"
     case .unexpectedResponse(let statusCode, let body):
       "Unexpected HTTP response: \(statusCode)" + (body.map { ": \($0)" } ?? "")
     }

@@ -4,7 +4,11 @@ import KaitenSDK
 struct ListSprints: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "list-sprints",
-    abstract: "List sprints"
+    abstract: "List sprints",
+    discussion: """
+      Kaiten deprecated sprints: starting new sprints is unavailable since 2026-10-01. \
+      Existing sprints can still be finished and read; iterations replace them.
+      """
   )
 
   @OptionGroup var global: GlobalOptions

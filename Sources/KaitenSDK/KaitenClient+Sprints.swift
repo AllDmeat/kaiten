@@ -6,6 +6,9 @@ import OpenAPIRuntime
 extension KaitenClient {
   /// Lists sprints.
   ///
+  /// Kaiten deprecated sprints: starting new sprints is unavailable since 2026-10-01. Existing
+  /// sprints can still be finished and read; iterations replace them.
+  ///
   /// - Parameters:
   ///   - active: Filter by active status.
   ///   - limit: Maximum number of sprints to return.
@@ -16,6 +19,11 @@ extension KaitenClient {
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403) or other undocumented HTTP status codes.
+  @available(
+    *, deprecated,
+    message:
+      "Kaiten deprecated sprints: new sprints cannot be started since 2026-10-01. Use iterations."
+  )
   public func listSprints(
     active: Bool? = nil, limit: Int? = nil, offset: Int? = nil
   ) async throws(KaitenError) -> [Components.Schemas.Sprint] {
@@ -31,6 +39,9 @@ extension KaitenClient {
 
   /// Gets a sprint summary by ID.
   ///
+  /// Kaiten deprecated sprints: starting new sprints is unavailable since 2026-10-01. Existing
+  /// sprints can still be finished and read; iterations replace them.
+  ///
   /// - Parameters:
   ///   - id: The sprint identifier.
   ///   - excludeDeletedCards: Whether to exclude deleted cards from the summary.
@@ -41,6 +52,11 @@ extension KaitenClient {
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403) or other undocumented HTTP status codes.
+  @available(
+    *, deprecated,
+    message:
+      "Kaiten deprecated sprints: new sprints cannot be started since 2026-10-01. Use iterations."
+  )
   public func getSprintSummary(
     id: Int, excludeDeletedCards: Bool? = nil
   ) async throws(KaitenError) -> Components.Schemas.SprintSummary {

@@ -24,13 +24,13 @@ struct ListCustomPropertySelectValues: AsyncParsableCommand {
   @Option(name: .long, help: "Custom property ID")
   var propertyId: Int
 
-  @Option(name: .long, help: "Enable v2 search filtering")
+  @Option(name: .long, help: "Deprecated: the API ignores it, so it is not sent")
   var v2SelectSearch: Bool?
 
-  @Option(name: .long, help: "Filter by select value (requires v2-select-search)")
+  @Option(name: .long, help: "Filter by select value")
   var query: String?
 
-  @Option(name: .long, help: "Field to sort by (requires v2-select-search)")
+  @Option(name: .long, help: "Field to sort by")
   var orderBy: String?
 
   @Option(name: .long, help: "Comma-separated value IDs to filter by")
@@ -39,10 +39,10 @@ struct ListCustomPropertySelectValues: AsyncParsableCommand {
   @Option(name: .long, help: "Comma-separated conditions to filter by")
   var conditions: String?
 
-  @Option(name: .long, help: "Offset for pagination (requires v2-select-search)")
+  @Option(name: .long, help: "Offset for pagination")
   var offset: Int?
 
-  @Option(name: .long, help: "Limit for pagination (requires v2-select-search, default: 100)")
+  @Option(name: .long, help: "Limit for pagination (default: 100)")
   var limit: Int?
 
   func run() async throws {
@@ -51,7 +51,6 @@ struct ListCustomPropertySelectValues: AsyncParsableCommand {
     let parsedConditions = try parseStringCSV(conditions, fieldName: "conditions")
     let values = try await client.listCustomPropertySelectValues(
       propertyId: propertyId,
-      v2SelectSearch: v2SelectSearch,
       query: query,
       orderBy: orderBy,
       ids: parsedIds,

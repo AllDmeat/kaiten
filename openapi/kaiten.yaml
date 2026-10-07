@@ -1629,43 +1629,44 @@ paths:
         description: CustomProperty ID
       - name: v2_select_search
         in: query
+        deprecated: true
         schema:
           type: boolean
-        description: Enable additional filtering
+        description: Deprecated parameter with no effect
       - name: query
         in: query
         schema:
           type: string
-        description: Filter by select value (requires v2_select_search)
+        description: Filter by select value
       - name: order_by
         in: query
         schema:
           type: string
-        description: Field to sort by (requires v2_select_search)
+        description: Field to sort by
       - name: ids
         in: query
         schema:
           type: array
           items:
             type: integer
-        description: Array of IDs to filter by (requires v2_select_search)
+        description: Array of IDs to filter by
       - name: conditions
         in: query
         schema:
           type: array
           items:
             type: string
-        description: Array of conditions to filter by (requires v2_select_search)
+        description: Array of conditions to filter by
       - name: offset
         in: query
         schema:
           type: integer
-        description: Number of records to skip (requires v2_select_search)
+        description: Number of records to skip
       - name: limit
         in: query
         schema:
           type: integer
-        description: Maximum amount of values in response (requires v2_select_search, default 100)
+        description: Maximum amount of values in response (default 100)
       responses:
         '200':
           description: success
@@ -3739,6 +3740,10 @@ paths:
     get:
       summary: List sprints
       operationId: list_sprints
+      deprecated: true
+      description: >-
+        Deprecated by Kaiten: starting new sprints is unavailable since 2026-10-01. Existing
+        sprints can still be finished and read; iterations replace sprints.
       parameters:
       - name: active
         in: query
@@ -3772,6 +3777,10 @@ paths:
     get:
       summary: Get sprint summary
       operationId: get_sprint_summary
+      deprecated: true
+      description: >-
+        Deprecated by Kaiten: starting new sprints is unavailable since 2026-10-01. Existing
+        sprints can still be finished and read; iterations replace sprints.
       parameters:
       - name: id
         in: path
@@ -8284,10 +8293,11 @@ components:
             $ref: '#/components/schemas/Lane'
           description: Board lanes
         cards:
+          deprecated: true
           type: array
           items:
             $ref: '#/components/schemas/Card'
-          description: Board cards
+          description: Board cards. Deprecated by Kaiten; capped at 100 cards since 2026-10-01 and no longer returned from 2026-11-01. Use GET /cards with board_id, limit and offset.
         cards_deprecation_message:
           type: string
           description: Optional deprecation message returned when cards are excluded from the response
@@ -8443,10 +8453,11 @@ components:
             $ref: '#/components/schemas/Lane'
           description: Board lanes
         cards:
+          deprecated: true
           type: array
           items:
             $ref: '#/components/schemas/Card'
-          description: Board cards
+          description: Board cards. Deprecated by Kaiten; capped at 100 cards since 2026-10-01 and no longer returned from 2026-11-01. Use GET /cards with board_id, limit and offset.
         cards_deprecation_message:
           type: string
           description: Optional deprecation message returned when cards are excluded from the response
@@ -9887,17 +9898,19 @@ components:
           - string
           - 'null'
           description: Card type description template
-        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` (observed on the type embedded in cards) — https://developers.kaiten.ru/cards/retrieve-card-list
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` (observed on the type embedded in cards and on system types from GET /card-types) — https://developers.kaiten.ru/cards/retrieve-card-list
         company_id:
           type:
           - integer
           - 'null'
-          description: Company id
+          description: Company id; null for system card types
         properties:
+          deprecated: true
+          # DOC_MISMATCH: docs=deprecated, "will be removed after 31.01.2026", actual=still returned — https://developers.kaiten.ru/card-types/get-card-type
           type:
           - object
           - 'null'
-          description: Card type properties (preset and custom)
+          description: Card type properties (preset and custom). Deprecated by Kaiten; use card_properties instead.
         archived:
           type: boolean
           description: Archived flag
@@ -9905,7 +9918,10 @@ components:
           type: boolean
           description: Suggest fields flag
         card_properties:
-          type: array
+          # DOC_MISMATCH: docs=non-nullable `array`, actual=`array | null` — https://developers.kaiten.ru/card-types/get-card-type
+          type:
+          - array
+          - 'null'
           items:
             $ref: '#/components/schemas/CardTypeProperty'
           description: Array of card properties that will be suggested for filling in cards of this type
@@ -9998,6 +10014,7 @@ components:
           maximum: 25
           description: Color number
         properties:
+          deprecated: true
           type: object
           description: Properties of the card suggested for filling - old format, deprecated, use card_properties instead
         card_properties:
@@ -10027,6 +10044,7 @@ components:
           maximum: 25
           description: Color number
         properties:
+          deprecated: true
           type: object
           description: Properties of the card suggested for filling - old format, deprecated, use card_properties instead
         card_properties:
@@ -12208,6 +12226,9 @@ components:
         id:
           type: integer
           description: Sprint ID
+        uid:
+          type: string
+          description: Sprint UID
         board_id:
           type: integer
           description: Board ID
@@ -12225,9 +12246,23 @@ components:
         committed:
           type: integer
           description: Number of committed cards
+        children_committed:
+          type: integer
+          description: Number of committed child cards
         velocity:
           type: number
           description: Sprint velocity
+        velocity_details:
+          type: object
+          additionalProperties: true
+          description: Velocity by members
+        children_velocity:
+          type: number
+          description: Velocity of child cards
+        children_velocity_details:
+          type: object
+          additionalProperties: true
+          description: Velocity details of child cards
         creator_id:
           type: integer
           description: Creator user ID
@@ -12286,9 +12321,17 @@ components:
         velocity:
           type: number
           description: Sprint velocity
+        velocity_details:
+          type: object
+          additionalProperties: true
+          description: Velocity by members
         children_velocity:
           type: number
           description: Velocity of child cards
+        children_velocity_details:
+          type: object
+          additionalProperties: true
+          description: Velocity details of child cards
         creator_id:
           type: integer
           description: Creator user ID
@@ -16088,6 +16131,7 @@ components:
           - 'null'
           description: Parent tree entity uid
         parent_group_id:
+          deprecated: true
           type:
           - string
           - 'null'
@@ -16529,6 +16573,7 @@ components:
           - 'null'
           description: Parent tree entity uid
         group_id:
+          deprecated: true
           type:
           - string
           - 'null'
@@ -16688,6 +16733,7 @@ components:
           - 'null'
           description: Parent tree entity uid
         group_id:
+          deprecated: true
           type:
           - string
           - 'null'
@@ -16839,6 +16885,7 @@ components:
           - 'null'
           description: Parent tree entity uid
         group_id:
+          deprecated: true
           type:
           - string
           - 'null'

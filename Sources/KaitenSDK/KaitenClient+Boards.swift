@@ -6,7 +6,11 @@ import OpenAPIRuntime
 extension KaitenClient {
   /// Fetches a board by its identifier.
   ///
-  /// Returns the full board object including columns, lanes, and cards.
+  /// Returns the full board object including columns and lanes.
+  ///
+  /// The response's `cards` is deprecated by Kaiten: it holds at most 100 cards since 2026-10-01
+  /// and is no longer returned from 2026-11-01. Page through a board's cards with
+  /// `listCards(boardId:)` or `allCards(boardId:)` instead.
   ///
   /// - Parameter id: The board identifier.
   /// - Returns: The full board object.

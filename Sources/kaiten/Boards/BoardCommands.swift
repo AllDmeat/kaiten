@@ -24,7 +24,11 @@ struct ListBoards: AsyncParsableCommand {
 struct GetBoard: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "get-board",
-    abstract: "Get a board by ID"
+    abstract: "Get a board by ID",
+    discussion: """
+      Kaiten deprecated card retrieval from this endpoint: `cards` holds at most 100 cards \
+      since 2026-10-01 and is no longer returned from 2026-11-01.
+      """
   )
 
   @OptionGroup var global: GlobalOptions

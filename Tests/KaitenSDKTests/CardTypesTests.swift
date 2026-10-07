@@ -101,6 +101,29 @@ struct CardTypesTests {
     #expect(type.card_properties?[1].required == true)
   }
 
+  @Test("deprecated properties still decodes")
+  @available(*, deprecated)
+  func getDeprecatedProperties() async throws {
+    let client = try makeClient(.returning(statusCode: 200, body: Self.cardTypeJSON))
+
+    let type = try await client.getCardType(id: 123)
+
+    #expect(type.properties?.value["id_101"] as? Bool == true)
+  }
+
+  @Test("null card_properties and company_id decode")
+  func getNullCardPropertiesAndCompany() async throws {
+    let json = """
+      {"id": 1, "name": "Card", "color": 3, "letter": "C", "company_id": null, "properties": null, "card_properties": null}
+      """
+    let client = try makeClient(.returning(statusCode: 200, body: json))
+
+    let type = try await client.getCardType(id: 1)
+
+    #expect(type.company_id == nil)
+    #expect(type.card_properties == nil)
+  }
+
   @Test("undocumented regular property decodes as unknown")
   func getUnknownRegularProperty() async throws {
     let json = """
@@ -176,6 +199,43 @@ struct CardTypesTests {
     #expect(sentProperties.first?["required"] as? Bool == false)
   }
 
+  @Test("create without properties does not send it")
+  func createOmitsProperties() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: Self.cardTypeJSON)
+    let client = try makeClient(transport)
+
+    _ = try await client.createCardType(letter: "B", name: "Bug", color: 7)
+
+    let recorded = try #require(transport.recordedRequests.first)
+    let body = try #require(recorded.body)
+    var bytes: [UInt8] = []
+    for try await chunk in body { bytes.append(contentsOf: chunk) }
+    let sent = try #require(
+      try JSONSerialization.jsonObject(with: Data(bytes)) as? [String: Any])
+    #expect(sent["properties"] == nil)
+  }
+
+  @Test("create (deprecated) still sends properties")
+  @available(*, deprecated)
+  func createSendsDeprecatedProperties() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: Self.cardTypeJSON)
+    let client = try makeClient(transport)
+
+    _ = try await client.createCardType(
+      letter: "B", name: "Bug", color: 7,
+      properties: try .init(unvalidatedValue: ["due_date": true]))
+
+    let recorded = try #require(transport.recordedRequests.first)
+    let body = try #require(recorded.body)
+    var bytes: [UInt8] = []
+    for try await chunk in body { bytes.append(contentsOf: chunk) }
+    let sent = try #require(
+      try JSONSerialization.jsonObject(with: Data(bytes)) as? [String: Any])
+    let properties = try #require(sent["properties"] as? [String: Any])
+    #expect(properties["due_date"] as? Bool == true)
+    #expect(sent["letter"] as? String == "B")
+  }
+
   @Test("400 validation error throws unexpectedResponse")
   func createValidationError() async throws {
     let client = try makeClient(.returning(statusCode: 400))
@@ -198,6 +258,26 @@ struct CardTypesTests {
     let recorded = try #require(transport.recordedRequests.first)
     #expect(recorded.request.method == .patch)
     #expect(recorded.request.path == "/card-types/123")
+  }
+
+  @Test("update (deprecated) still sends properties")
+  @available(*, deprecated)
+  func updateSendsDeprecatedProperties() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: Self.cardTypeJSON)
+    let client = try makeClient(transport)
+
+    _ = try await client.updateCardType(
+      id: 123, properties: try .init(unvalidatedValue: ["due_date": false]))
+
+    let recorded = try #require(transport.recordedRequests.first)
+    #expect(recorded.request.path == "/card-types/123")
+    let body = try #require(recorded.body)
+    var bytes: [UInt8] = []
+    for try await chunk in body { bytes.append(contentsOf: chunk) }
+    let sent = try #require(
+      try JSONSerialization.jsonObject(with: Data(bytes)) as? [String: Any])
+    let properties = try #require(sent["properties"] as? [String: Any])
+    #expect(properties["due_date"] as? Bool == false)
   }
 
   @Test("404 throws notFound")

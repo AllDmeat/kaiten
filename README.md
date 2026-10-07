@@ -1269,7 +1269,7 @@ Available auto-pagination methods:
 | `allSpaces(pageSize:)` | All spaces |
 | `allSpaceUsers(spaceId:includeInheritedAccess:inactive:pageSize:)` | All users of a space (cursor-paged by `last_user_id`) |
 | `allCardComments(cardId:pageSize:)` | All comments on a card |
-| `allCardChildren(cardId:pageSize:)` | All children of a card |
+| `allCardChildren(cardId:brokenApi:pageSize:)` | All children of a card |
 | `allCardTimeLogs(cardId:forDate:personal:pageSize:)` | All time logs on a card |
 | `allCardAllowedUsers(cardId:type:role:pageSize:)` | All users with access to a card |
 | `allGroupUsers(groupUid:pageSize:)` | All users in a company group |

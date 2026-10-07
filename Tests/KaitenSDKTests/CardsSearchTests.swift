@@ -287,6 +287,27 @@ struct CardsSearchTests {
     #expect(transport.recordedRequests.first?.request.path == "/cards/1/children?broken_api=false")
   }
 
+  @Test("allCardChildren sends broken_api with every page")
+  func allCardChildrenBrokenApi() async throws {
+    let transport = MockClientTransport { request, _, _, _ in
+      let path = request.path ?? ""
+      return self.response(path.contains("offset=0") ? #"[{"id": 1}, {"id": 2}]"# : "[]")
+    }
+    let client = try makeClient(transport)
+
+    var count = 0
+    for try await _ in client.allCardChildren(cardId: 1, brokenApi: true, pageSize: 2) {
+      count += 1
+    }
+
+    #expect(count == 2)
+    #expect(transport.recordedRequests.count == 2)
+    #expect(
+      transport.recordedRequests.allSatisfy {
+        ($0.request.path ?? "").contains("broken_api=true")
+      })
+  }
+
   // MARK: - Request attributes
 
   @Test("createCard sends service_id")

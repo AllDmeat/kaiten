@@ -263,14 +263,18 @@ extension KaitenClient {
   ///
   /// - Parameters:
   ///   - cardId: The card identifier.
+  ///   - brokenApi: Representation of user-type custom property values: `true` returns user
+  ///     UID strings, `false` integer user ids (optional). Sent with every page.
   ///   - pageSize: Number of children per page (1–100, default `100`).
   /// - Returns: An `AsyncThrowingStream` of all card children.
   public func allCardChildren(
     cardId: Int,
+    brokenApi: Bool? = nil,
     pageSize: Int = 100
   ) -> AsyncThrowingStream<Components.Schemas.CardChild, Error> {
     allPages(pageSize: pageSize) { [self] offset, limit in
-      try await self.listCardChildren(cardId: cardId, limit: limit, offset: offset)
+      try await self.listCardChildren(
+        cardId: cardId, limit: limit, offset: offset, brokenApi: brokenApi)
     }
   }
 

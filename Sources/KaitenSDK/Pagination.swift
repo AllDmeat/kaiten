@@ -145,18 +145,30 @@ extension KaitenClient {
   ///   - type: Type of users to return.
   ///   - query: Search query.
   ///   - includeInactive: Include inactive users.
+  ///   - accessTypePermissions: `member` excludes guests before pagination; `guest` applies
+  ///     to the `all` and `domain` types.
+  ///   - excludeMembersByEntityUid: Excludes direct, group and inherited members of the entity
+  ///     with this UID.
+  ///   - excludeDirectlyAddedMembersByEntityUid: Excludes users invited directly to the entity
+  ///     with this UID.
   ///   - pageSize: Number of users per page (default `100`).
   /// - Returns: An `AsyncThrowingStream` of all users.
   public func allUsers(
     type: String? = nil,
     query: String? = nil,
     includeInactive: Bool? = nil,
+    accessTypePermissions: String? = nil,
+    excludeMembersByEntityUid: String? = nil,
+    excludeDirectlyAddedMembersByEntityUid: String? = nil,
     pageSize: Int = 100
   ) -> AsyncThrowingStream<Components.Schemas.User, Error> {
     allPages(pageSize: pageSize) { [self] offset, limit in
       try await self.listUsers(
         type: type, query: query, limit: limit,
-        offset: offset, includeInactive: includeInactive
+        offset: offset, includeInactive: includeInactive,
+        accessTypePermissions: accessTypePermissions,
+        excludeMembersByEntityUid: excludeMembersByEntityUid,
+        excludeDirectlyAddedMembersByEntityUid: excludeDirectlyAddedMembersByEntityUid
       )
     }
   }

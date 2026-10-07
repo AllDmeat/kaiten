@@ -27,6 +27,23 @@ struct ListUsers: AsyncParsableCommand {
   @Flag(name: .long, help: "Include inactive users")
   var includeInactive: Bool = false
 
+  @Option(
+    name: .long,
+    help:
+      "member excludes guests before pagination for the all, domain and shared types (for shared, only users with paid access, even with --include-inactive); guest applies to the all and domain types"
+  )
+  var accessTypePermissions: String?
+
+  @Option(
+    name: .long,
+    help:
+      "Exclude direct, group and inherited members of the entity with this UID before pagination; access for everyone alone does not count as membership"
+  )
+  var excludeMembersByEntityUid: String?
+
+  @Option(name: .long, help: "Exclude users invited directly to the entity with this UID")
+  var excludeDirectlyAddedMembersByEntityUid: String?
+
   func run() async throws {
     let client = try await global.makeClient()
     let users = try await client.listUsers(
@@ -35,7 +52,10 @@ struct ListUsers: AsyncParsableCommand {
       ids: ids,
       limit: limit,
       offset: offset,
-      includeInactive: includeInactive ? true : nil
+      includeInactive: includeInactive ? true : nil,
+      accessTypePermissions: accessTypePermissions,
+      excludeMembersByEntityUid: excludeMembersByEntityUid,
+      excludeDirectlyAddedMembersByEntityUid: excludeDirectlyAddedMembersByEntityUid
     )
     try printJSON(users, expand: global.expandedFields)
   }

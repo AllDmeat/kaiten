@@ -22,6 +22,8 @@ public enum KaitenError: Error, Sendable {
   case invalidPagination(pageSize: Int)
   /// Invalid pagination range was provided.
   case invalidPaginationRange(offset: Int, limit: Int)
+  /// Two arguments that cannot be combined were both provided; no request was sent.
+  case conflictingArguments(String, String)
   /// The API returned an unexpected HTTP status code.
   case unexpectedResponse(statusCode: Int, body: String? = nil)
 }
@@ -55,6 +57,8 @@ extension KaitenError: LocalizedError {
       "Invalid pageSize: \(pageSize). pageSize must be greater than 0"
     case .invalidPaginationRange(let offset, let limit):
       "Invalid pagination: offset=\(offset), limit=\(limit). offset must be >= 0 and limit must be between 1 and the endpoint's documented cap"
+    case .conflictingArguments(let first, let second):
+      "Conflicting arguments: \(first) and \(second) cannot be combined"
     case .unexpectedResponse(let statusCode, let body):
       "Unexpected HTTP response: \(statusCode)" + (body.map { ": \($0)" } ?? "")
     }

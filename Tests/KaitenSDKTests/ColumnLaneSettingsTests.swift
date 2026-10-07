@@ -230,4 +230,94 @@ struct ColumnLaneSettingsTests {
     ])
     #expect(command.lastMovedWarningAfterHours == 6)
   }
+
+  @Test("updateColumn and updateLane send a WIP limit value")
+  func wipLimitValue() async throws {
+    let columns = MockClientTransport.returning(statusCode: 200, body: columnJSON)
+    _ = try await makeClient(columns).updateColumn(boardId: 10, id: 100, wipLimit: 5)
+    #expect(try await sentBody(columns)["wip_limit"] as? Int == 5)
+
+    let lanes = MockClientTransport.returning(statusCode: 200, body: laneJSON)
+    _ = try await makeClient(lanes).updateLane(boardId: 10, id: 200, wipLimit: 5)
+    #expect(try await sentBody(lanes)["wip_limit"] as? Int == 5)
+  }
+
+  @Test("an absent WIP limit, including an Int? variable holding nil, is not sent")
+  func wipLimitAbsent() async throws {
+    let unchanged: Int? = nil
+    let columns = MockClientTransport.returning(statusCode: 200, body: columnJSON)
+    _ = try await makeClient(columns).updateColumn(
+      boardId: 10, id: 100, title: "T", wipLimit: unchanged)
+    let columnJSON = try await sentBody(columns)
+    #expect(columnJSON["title"] as? String == "T")
+    #expect(columnJSON.keys.contains("wip_limit") == false)
+
+    let lanes = MockClientTransport.returning(statusCode: 200, body: laneJSON)
+    _ = try await makeClient(lanes).updateLane(
+      boardId: 10, id: 200, title: "T", wipLimit: unchanged)
+    #expect(try await sentBody(lanes).keys.contains("wip_limit") == false)
+  }
+
+  @Test("clearWipLimit sends wip_limit null and keeps the other fields")
+  func wipLimitClear() async throws {
+    let columns = MockClientTransport.returning(statusCode: 200, body: columnJSON)
+    _ = try await makeClient(columns).updateColumn(
+      boardId: 10, id: 100, title: "T", clearWipLimit: true, wipLimitType: .cardCount)
+    let columnJSON = try await sentBody(columns)
+    #expect(columnJSON["wip_limit"] is NSNull)
+    let request = try #require(columns.recordedRequests.first)
+    let sent = try await Data(collecting: #require(request.body), upTo: 1024 * 1024)
+    #expect(request.request.headerFields[.contentLength] == String(sent.count))
+    #expect(columnJSON["title"] as? String == "T")
+    #expect(columnJSON["wip_limit_type"] as? Int == 1)
+
+    let lanes = MockClientTransport.returning(statusCode: 200, body: laneJSON)
+    _ = try await makeClient(lanes).updateLane(
+      boardId: 10, id: 200, clearWipLimit: true)
+    #expect(try await sentBody(lanes)["wip_limit"] is NSNull)
+  }
+
+  @Test("the explicit null does not leak into later requests")
+  func wipLimitClearDoesNotLeak() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: columnJSON)
+    let client = try makeClient(transport)
+    _ = try await client.updateColumn(boardId: 10, id: 100, clearWipLimit: true)
+    _ = try await client.updateColumn(boardId: 10, id: 100, title: "T")
+    let req = try #require(transport.recordedRequests.last)
+    let data = try await Data(collecting: #require(req.body), upTo: 1024 * 1024)
+    let json = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+    #expect(json.keys.contains("wip_limit") == false)
+  }
+
+  @Test("wipLimit together with clearWipLimit fails before any request")
+  func wipLimitConflict() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: columnJSON)
+    let client = try makeClient(transport)
+    let columnError = await #expect(throws: KaitenError.self) {
+      _ = try await client.updateColumn(boardId: 10, id: 100, wipLimit: 3, clearWipLimit: true)
+    }
+    let laneError = await #expect(throws: KaitenError.self) {
+      _ = try await client.updateLane(boardId: 10, id: 200, wipLimit: 3, clearWipLimit: true)
+    }
+    for error in [columnError, laneError] {
+      guard case .conflictingArguments("wipLimit", "clearWipLimit") = error else {
+        Issue.record("unexpected error: \(String(describing: error))")
+        continue
+      }
+    }
+    #expect(transport.recordedRequests.isEmpty)
+  }
+
+  @Test("update-column and update-lane take an empty --wip-limit and reject other text")
+  func wipLimitCLIOption() async throws {
+    #expect(
+      try UpdateColumn.parse(["--board-id", "10", "--id", "100", "--wip-limit", ""]).wipLimit
+        == "")
+    #expect(
+      try UpdateLane.parse(["--board-id", "10", "--id", "200", "--wip-limit", "4"]).wipLimit
+        == "4")
+    let invalid = try UpdateLane.parse(["--board-id", "10", "--id", "200", "--wip-limit", "x"])
+    await #expect(throws: ValidationError.self) { try await invalid.run() }
+    #expect(try UpdateLane.parse(["--board-id", "10", "--id", "200"]).wipLimit == nil)
+  }
 }

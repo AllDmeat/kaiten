@@ -284,7 +284,7 @@ stdout confirms it works.
   option leaves the field unchanged, and any other input MUST fail with
   a validation error before the request. On create,
   `--card-hide-after-days` is an integer option. `--wip-limit` keeps its
-  integer form.
+  integer form on create.
 - **FR-030**: Space and board subcommands MUST expose every request
   attribute their SDK methods accept: `create-space --work-calendar-id`;
   `update-space --hidden-card-type-uids` (comma-separated) and `--settings`
@@ -295,6 +295,11 @@ stdout confirms it works.
   `--move-from-space-id` and `--card-properties` (JSON array). JSON options
   follow FR-024. An empty `--columns` or `--lanes` array MUST fail locally
   with a validation error, because the API rejects it.
+- **FR-035**: `update-column` and `update-lane` take `--wip-limit` as a
+  string option following FR-028: an empty string `""` sends JSON `null`
+  and removes the WIP limit (SDK FR-038), a number sets it, omitting the
+  option leaves it unchanged, and any other input MUST fail with a
+  validation error before the request.
 
 ### Non-Functional Requirements
 

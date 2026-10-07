@@ -7,6 +7,10 @@
 //
 //   swift scripts/generate-response-mapping.swift
 //
+// Never edit ResponseMapping.swift by hand: change the configuration below and
+// regenerate. The Lint workflow fails when the committed file differs from the
+// generator's output.
+//
 // Each operation is described by its name and the set of error cases its
 // OpenAPI-generated Output enum contains (besides `.ok` and `.undocumented`,
 // which are always present).
@@ -242,6 +246,8 @@ let sections: [Section] = [
       name: "get_private_card_file",
       errors: [.found, .unauthorized, .forbidden, .notFound, .unprocessableContent]),
     Operation(
+      name: "update_private_card_file", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
+    Operation(
       name: "delete_private_card_file", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
   Section(mark: "Private Comment Files", operations: [
@@ -251,6 +257,8 @@ let sections: [Section] = [
     Operation(
       name: "get_comment_file",
       errors: [.found, .unauthorized, .forbidden, .notFound, .unprocessableContent]),
+    Operation(
+      name: "update_comment_file", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
     Operation(name: "delete_comment_file", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
   Section(mark: "Automations", operations: [
@@ -506,7 +514,11 @@ let sections: [Section] = [
     Operation(
       name: "attach_file_to_custom_property",
       errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
-    Operation(name: "get_custom_property_file", errors: [.unauthorized, .forbidden, .notFound]),
+    Operation(
+      name: "get_custom_property_file",
+      errors: [.unauthorized, .forbidden, .notFound, .unprocessableContent]),
+    Operation(
+      name: "update_custom_property_file", errors: [.badRequest, .unauthorized, .forbidden, .notFound]),
     Operation(name: "delete_custom_property_file", errors: [.unauthorized, .forbidden, .notFound]),
   ]),
   Section(mark: "Timesheet", operations: [
@@ -565,18 +577,21 @@ func generateExtension(_ op: Operation) -> String {
 
   cases.append("    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)")
 
-  // Determine if we need a line break in the signature
+  // Break the signature the way swift-format does at its 100-column limit,
+  // so the committed file is both generated and formatted.
   let signatureLine = "  func toCase() -> \(returnType)"
-  let needsLineBreak = signatureLine.count > 100
 
   var lines: [String] = []
   lines.append("extension \(typeName) {")
-  if needsLineBreak {
+  if signatureLine.count + 2 <= 100 {
+    lines.append("\(signatureLine) {")
+  } else if signatureLine.count <= 100 {
+    lines.append(signatureLine)
+    lines.append("  {")
+  } else {
     lines.append("  func toCase()")
     lines.append("    -> \(returnType)")
     lines.append("  {")
-  } else {
-    lines.append("  func toCase() -> \(returnType) {")
   }
   lines.append("    switch self {")
   lines.append(contentsOf: cases)

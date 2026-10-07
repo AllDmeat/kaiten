@@ -16,3 +16,15 @@ jobs:
 
       - name: Lint
         run: swift format lint --strict --recursive Sources/ Tests/
+
+  response-mapping:
+    name: ResponseMapping.swift matches its generator
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Regenerate
+        run: swift scripts/generate-response-mapping.swift
+
+      - name: Fail on drift
+        run: git diff --exit-code Sources/KaitenSDK/ResponseMapping.swift

@@ -7960,15 +7960,6 @@ components:
           - integer
           - 'null'
           description: Hide cards not moved for the last N days
-        # DOC_MISMATCH: not in docs, present in actual responses for columns embedded in a board (`array | null`) — https://developers.kaiten.ru/boards/get-board
-        policies:
-          type:
-          - array
-          - 'null'
-          items:
-            type: object
-            additionalProperties: true
-          description: Column policies. Returned only for columns embedded in a board.
         pause_sla:
           # DOC_MISMATCH: not in subcolumn docs, present in actual subcolumn responses — https://developers.kaiten.ru/subcolumn/get-list-of-subcolumns
           type: boolean
@@ -7987,6 +7978,15 @@ components:
           - string
           - 'null'
           description: Lock status
+        # DOC_MISMATCH: not in docs, present in actual responses for columns embedded in a board (`array | null`) — https://developers.kaiten.ru/boards/get-board
+        policies:
+          type:
+          - array
+          - 'null'
+          items:
+            type: object
+            additionalProperties: true
+          description: Column policies. Returned only for columns embedded in a board.
     Lane:
       type: object
       properties:

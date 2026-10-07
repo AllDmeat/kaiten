@@ -247,6 +247,44 @@ struct CardsSearchTests {
     #expect(transport.recordedRequests.allSatisfy { !($0.request.path ?? "").contains("offset=") })
   }
 
+  @Test("searchAllCards yields each card once when pages overlap")
+  func searchAllCardsDeduplicatesOverlap() async throws {
+    let transport = MockClientTransport { request, _, _, _ in
+      let path = request.path ?? ""
+      if path.contains("start_position=cursor-2") {
+        return self.response(#"{"result": [], "position": "cursor-3"}"#)
+      }
+      if path.contains("start_position=cursor-1") {
+        return self.response(#"{"result": [{"id": 2}, {"id": 3}], "position": "cursor-2"}"#)
+      }
+      return self.response(#"{"result": [{"id": 1}, {"id": 2}], "position": "cursor-1"}"#)
+    }
+    let client = try makeClient(transport)
+
+    var ids: [Int] = []
+    for try await card in client.searchAllCards(pageSize: 2) {
+      ids.append(try #require(card.id))
+    }
+
+    #expect(ids == [1, 2, 3])
+  }
+
+  @Test("searchAllCards stops when the cursor does not advance")
+  func searchAllCardsStopsOnRepeatedPosition() async throws {
+    let transport = MockClientTransport { _, _, _, _ in
+      self.response(#"{"result": [{"id": 1}, {"id": 2}], "position": "cursor-1"}"#)
+    }
+    let client = try makeClient(transport)
+
+    var ids: [Int] = []
+    for try await card in client.searchAllCards(pageSize: 2) {
+      ids.append(try #require(card.id))
+    }
+
+    #expect(ids == [1, 2])
+    #expect(transport.recordedRequests.count == 2)
+  }
+
   @Test("searchAllCards stops when a page carries no position")
   func searchAllCardsStopsWithoutPosition() async throws {
     let transport = MockClientTransport { _, _, _, _ in

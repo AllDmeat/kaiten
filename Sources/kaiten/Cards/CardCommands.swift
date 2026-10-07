@@ -285,7 +285,9 @@ struct SearchCards: AsyncParsableCommand {
     discussion: """
       Prints an object with `result` and an opaque `position` cursor; pass that value back via \
       --start-position to fetch the next page. Kaiten does not honour an offset with this \
-      search, so there is none; an exhausted search returns an empty `result`. \
+      search, so there is none. Consecutive pages overlap even when the cursor is passed back \
+      exactly, so a card can appear on more than one page. An exhausted search returns an empty \
+      `result`. \
       `children_ids` and `children_count` on each row come straight from Kaiten and undercount: \
       a card can have more children than either field admits.
       """

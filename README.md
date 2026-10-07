@@ -237,7 +237,10 @@ plain array exposed as a `Page`, while `searchCards` calls the same endpoint
 with `version=2` and returns a `result` list plus an opaque `position` cursor —
 pass it back as `startPosition` to fetch the next page. Kaiten does not honour
 `offset` with `version=2`, so the search pages by cursor only; an exhausted
-search answers with an empty `result`. `CardFilter` carries every documented
+search answers with an empty `result`. Consecutive pages overlap even when
+`position` is passed back exactly, so a card can appear on more than one page:
+`searchCards` returns each page as the API sends it, while `searchAllCards`
+yields each card once and stops when a page adds no new card. `CardFilter` carries every documented
 filter, including `projectIds`, the beta base64-encoded `filter` condition
 tree, and `brokenApi`.
 

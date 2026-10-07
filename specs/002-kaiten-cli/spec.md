@@ -291,7 +291,8 @@ stdout confirms it works.
   MUST wrap `searchCards` with the same filters plus `--start-position` and
   `--include-search-preview`; it prints the `result`/`position` object and
   takes no `--offset`, because Kaiten does not honour `offset` with
-  `version=2`. Trimming (FR-021) MUST reach through the `result` array of a
+  `version=2`. Its help MUST state that consecutive pages overlap, so a
+  card can appear on more than one page (per FR-022). Trimming (FR-021) MUST reach through the `result` array of a
   version=2 envelope as it does through a page's `items`; otherwise every
   row collapses to its id. `get-card` and `list-card-children` MUST expose
   `--broken-api`, `create-card` `--service-id`, and `update-card`

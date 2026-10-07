@@ -80,8 +80,9 @@ extension KaitenClient {
   /// and an opaque `position` cursor. Pass the returned
   /// ``Components/Schemas/CardSearchResponse/position`` as `startPosition` to fetch the next
   /// page. The API does not honour `offset` together with `version=2`, so this method pages by
-  /// cursor only. An exhausted search answers with an empty `result` and still carries a
-  /// `position`.
+  /// cursor only. Consecutive pages overlap even when `position` is passed back exactly, so a
+  /// card can appear on more than one page; this method returns each page as the API sends it.
+  /// An exhausted search answers with an empty `result` and still carries a `position`.
   ///
   /// - Parameters:
   ///   - boardId: Filter by board identifier (optional).
@@ -128,7 +129,9 @@ extension KaitenClient {
 
   /// Returns every card a version=2 search matches, following the `position` cursor.
   ///
-  /// Pagination stops on the first empty page or when the response carries no `position`.
+  /// Consecutive version=2 pages overlap, so each card is yielded once, the first time its id
+  /// appears. Pagination stops on an empty page, on a response without `position`, and on a
+  /// page that adds no card not already yielded — which also ends a cursor that stops advancing.
   ///
   /// - Parameters:
   ///   - boardId: Filter by board identifier (optional).
@@ -145,16 +148,25 @@ extension KaitenClient {
     AsyncThrowingStream { continuation in
       let task = Task { [self] in
         var position: String?
+        var seenIds: Set<Int> = []
         do {
           while !Task.isCancelled {
             let page = try await searchCards(
               boardId: boardId, columnId: columnId, laneId: laneId, startPosition: position,
               includeSearchPreview: includeSearchPreview, limit: pageSize, filter: filter)
-            let items = page.result ?? []
-            for item in items {
+            var addedNewCard = false
+            for item in page.result ?? [] {
+              // A card without an id cannot be deduplicated; it is passed through but does not
+              // count as progress.
+              guard let id = item.id else {
+                continuation.yield(item)
+                continue
+              }
+              guard seenIds.insert(id).inserted else { continue }
+              addedNewCard = true
               continuation.yield(item)
             }
-            guard !items.isEmpty, let next = page.position else { break }
+            guard addedNewCard, let next = page.position else { break }
             position = next
           }
           continuation.finish()

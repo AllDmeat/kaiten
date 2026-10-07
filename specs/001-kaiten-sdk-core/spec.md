@@ -190,6 +190,7 @@ A developer requests all spaces and boards — for navigation.
 - **NFR-007**: All public types (structs, enums, protocols) and methods MUST have Swift doc comments (`///`) following DocC conventions. Doc comments MUST include `- Parameter`, `- Returns`, and `- Throws` tags where applicable.
 - **NFR-008**: SDK source files MUST be grouped by Kaiten API documentation domains (for example: cards, boards, spaces, users) to keep endpoint parity checks maintainable.
 - **NFR-009**: Retry behavior for rate limiting MUST use a bounded delay policy. Header-derived delays (for example `Retry-After` and `X-RateLimit-Reset`) MUST be clamped to a configurable upper bound to avoid unbounded blocking.
+- **NFR-010**: `Sources/KaitenSDK/ResponseMapping.swift` MUST be produced by `scripts/generate-response-mapping.swift` and never edited by hand. CI MUST fail when the committed file differs from the generator's output.
 
 ### Key Entities
 

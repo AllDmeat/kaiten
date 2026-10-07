@@ -14931,9 +14931,9 @@ components:
           - string
           - 'null'
           description: Service desk external recipients
-        # DOC_MISMATCH: not in docs, present in actual API responses (`integer`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
+        # DOC_MISMATCH: not in docs, present in actual API responses; typed `number` as on the card pages — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
         estimate_workload:
-          type: integer
+          type: number
           description: Estimated workload
         # DOC_MISMATCH: not in docs, present in actual API responses (`boolean`) — https://developers.kaiten.ru/checklists/retrieve-cards-with-checklist
         has_blocked_children:

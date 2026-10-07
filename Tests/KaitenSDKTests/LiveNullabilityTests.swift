@@ -122,6 +122,16 @@ struct LiveNullabilityTests {
     #expect(card.external_user_emails == "someone@example.com")
   }
 
+  @Test("Checklist card decodes fractional estimate_workload")
+  func checklistCardEstimateWorkload() async throws {
+    let cards = try await client(
+      """
+      [{"id": 42, "title": "Card", "estimate_workload": 2.5}]
+      """
+    ).listCardsWithChecklist(checklistId: 1, onlySharedCards: false)
+    #expect(cards[0].estimate_workload == 2.5)
+  }
+
   @Test("Card blocker decodes fts_version")
   func cardBlockerFtsVersion() async throws {
     let blockers = try await client(

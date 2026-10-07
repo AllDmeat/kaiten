@@ -7684,10 +7684,8 @@ components:
           description: Service desk external recipients
         external_user_emails:
           type:
-          - array
+          - string
           - 'null'
-          items:
-            type: string
           description: External user emails
         # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/cards/retrieve-card
         tag_ids:
@@ -7697,9 +7695,8 @@ components:
           items:
             type: integer
           description: Tag IDs
-        # DOC_MISMATCH: docs=`number`, actual=`integer` — https://developers.kaiten.ru/cards/retrieve-card
         estimate_workload:
-          type: integer
+          type: number
           description: Estimated workload
         parents_count:
           type: integer

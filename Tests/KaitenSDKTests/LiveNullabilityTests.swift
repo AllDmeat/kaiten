@@ -110,6 +110,18 @@ struct LiveNullabilityTests {
     #expect(automations[1].conditions == nil)
   }
 
+  @Test("Card decodes fractional estimate_workload and string external_user_emails")
+  func cardDocumentedTypes() async throws {
+    let card = try await client(
+      """
+      {"id": 42, "title": "Card", "estimate_workload": 1.5,
+        "external_user_emails": "someone@example.com"}
+      """
+    ).getCard(id: 42)
+    #expect(card.estimate_workload == 1.5)
+    #expect(card.external_user_emails == "someone@example.com")
+  }
+
   @Test("Card blocker decodes fts_version")
   func cardBlockerFtsVersion() async throws {
     let blockers = try await client(

@@ -41,7 +41,7 @@ struct AutomationsTests {
   func listSuccess() async throws {
     let json = """
       [{
-        "id": "5355bdb2-3b52-4d2e-9162-beee750c1f47",
+        "id": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
         "name": "Assign on create",
         "sort_order": 1.5,
         "space_uid": "space-uid",
@@ -55,9 +55,9 @@ struct AutomationsTests {
       """
     let client = try makeClient(.returning(statusCode: 200, body: json))
 
-    let automations = try await client.listAutomations(spaceId: 38155)
+    let automations = try await client.listAutomations(spaceId: 12)
     #expect(automations.count == 1)
-    #expect(automations[0].id == "5355bdb2-3b52-4d2e-9162-beee750c1f47")
+    #expect(automations[0].id == "dddddddd-dddd-4ddd-8ddd-dddddddddddd")
     #expect(automations[0].automationStatus == .active)
     #expect(automations[0].automationType == .onAction)
     #expect(automations[0].trigger?.triggerType == .cardCreated)
@@ -67,7 +67,7 @@ struct AutomationsTests {
   @Test("200 with empty body returns empty array")
   func listEmptyBody() async throws {
     let client = try makeClient(.returning(statusCode: 200, body: ""))
-    let automations = try await client.listAutomations(spaceId: 38155)
+    let automations = try await client.listAutomations(spaceId: 12)
     #expect(automations.isEmpty)
   }
 
@@ -84,13 +84,13 @@ struct AutomationsTests {
         "trigger": null,
         "conditions": null,
         "actions": [{"type": "complete_checklists", "data": {}}],
-        "tags": [{"id": 44771, "name": "iOS", "color": 3}],
+        "tags": [{"id": 34, "name": "iOS", "color": 3}],
         "brokenLogs": [{"id": "log-1", "status": "broken"}]
       }]
       """
     let client = try makeClient(.returning(statusCode: 200, body: json))
 
-    let automations = try await client.listAutomations(spaceId: 38155)
+    let automations = try await client.listAutomations(spaceId: 12)
     #expect(automations[0].trigger == nil)
     #expect(automations[0].conditions == nil)
     #expect(automations[0].automationType == .onDemand)
@@ -115,7 +115,7 @@ struct AutomationsTests {
       """
     let client = try makeClient(.returning(statusCode: 200, body: json))
 
-    let automations = try await client.listAutomations(spaceId: 38155)
+    let automations = try await client.listAutomations(spaceId: 12)
     #expect(automations[0].actions?.first?.actionType == .unknown("change_type"))
     #expect(automations[0].trigger?.triggerType == .unknown("some_new_trigger"))
     #expect(automations[0].automationStatus == .unknown("some_new_status"))
@@ -150,7 +150,7 @@ struct AutomationsTests {
     let client = try makeClient(transport)
 
     let automation = try await client.createAutomation(
-      spaceId: 38155,
+      spaceId: 12,
       type: .onDemand,
       actions: [.init(actionType: .completeChecklists)],
       name: "Button automation"
@@ -160,7 +160,7 @@ struct AutomationsTests {
 
     let recorded = try #require(transport.recordedRequests.first)
     #expect(recorded.request.method == .post)
-    #expect(recorded.request.path == "/spaces/38155/automations")
+    #expect(recorded.request.path == "/spaces/12/automations")
 
     let body = try #require(recorded.body)
     var bytes: [UInt8] = []
@@ -193,14 +193,14 @@ struct AutomationsTests {
     let client = try makeClient(transport)
 
     let automation = try await client.updateAutomation(
-      spaceId: 38155, automationUid: "uid-1", name: "Renamed")
+      spaceId: 12, automationUid: "uid-1", name: "Renamed")
 
     #expect(automation.name == "Renamed")
     #expect(automation.automationStatus == .disabled)
 
     let recorded = try #require(transport.recordedRequests.first)
     #expect(recorded.request.method == .patch)
-    #expect(recorded.request.path == "/spaces/38155/automations/uid-1")
+    #expect(recorded.request.path == "/spaces/12/automations/uid-1")
   }
 
   /// Automations are addressed by string UID, which ``KaitenError/notFound(resource:id:)``
@@ -220,11 +220,11 @@ struct AutomationsTests {
     let transport = MockClientTransport.returning(statusCode: 200)
     let client = try makeClient(transport)
 
-    try await client.deleteAutomation(spaceId: 38155, automationUid: "uid-1")
+    try await client.deleteAutomation(spaceId: 12, automationUid: "uid-1")
 
     let recorded = try #require(transport.recordedRequests.first)
     #expect(recorded.request.method == .delete)
-    #expect(recorded.request.path == "/spaces/38155/automations/uid-1")
+    #expect(recorded.request.path == "/spaces/12/automations/uid-1")
   }
 
   @Test("delete 403 throws unexpectedResponse")

@@ -317,7 +317,7 @@ struct CreateCard: AsyncParsableCommand {
   @Option(
     name: .long,
     help:
-      "Custom properties as a JSON object. Keys are \"id_<property-id>\"; values are an array of value IDs for select properties, a number for numeric ones, or null to clear. Example: '{\"id_299126\": [106915]}'"
+      "Custom properties as a JSON object. Keys are \"id_<property-id>\"; values are an array of value IDs for select properties, a number for numeric ones, or null to clear. Example: '{\"id_56\": [78]}'"
   )
   var properties: String?
 
@@ -460,7 +460,7 @@ struct UpdateCard: AsyncParsableCommand {
   @Option(
     name: .long,
     help:
-      "Custom properties as a JSON object. Keys are \"id_<property-id>\"; values are an array of value IDs for select properties, a number for numeric ones, or null to clear. Example: '{\"id_299126\": [106915]}'"
+      "Custom properties as a JSON object. Keys are \"id_<property-id>\"; values are an array of value IDs for select properties, a number for numeric ones, or null to clear. Example: '{\"id_56\": [78]}'"
   )
   var properties: String?
 

@@ -94,7 +94,7 @@ struct CLIValidationTests {
   func cardPropertiesAcceptsValues() throws {
     let parsed: Components.Schemas.UpdateCardRequest.propertiesPayload? =
       try parseCardProperties(
-        #"{"id_299126": [106915], "id_160": 7, "id_42": null}"#,
+        #"{"id_56": [78], "id_160": 7, "id_42": null}"#,
         fieldName: "properties"
       )
     #expect(parsed != nil)

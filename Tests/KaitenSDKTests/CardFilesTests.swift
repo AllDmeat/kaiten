@@ -9,50 +9,50 @@ import Testing
 /// only the legacy shape made `getCard` throw on every card carrying a private file, which
 /// is now the majority of recent uploads.
 ///
-/// All payloads below are verbatim responses from `GET /cards/{id}`.
+/// All payloads below follow the shape of `GET /cards/{id}` responses; every id is invented.
 @Suite("Card Files")
 struct CardFilesTests {
 
   // MARK: - Payloads
 
-  /// Card 66100735, a `type: 1` attachment. Note `mime_type`, `comment_id`,
+  /// A `type: 1` attachment. Note `mime_type`, `comment_id`,
   /// `custom_property_id` and `thumbnail_url` arriving as explicit JSON `null`.
   static let legacyAttachment = """
     {
-      "id": 59934975,
-      "url": "https://files.kaiten.ru/ef8b499b-f83a-4c26-8816-ab0586407017.MP4",
+      "id": 101,
+      "url": "https://files.kaiten.ru/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.MP4",
       "name": "IMG_3131 (1).MP4",
       "type": 1,
       "size": 7804333,
       "mime_type": null,
       "deleted": false,
-      "card_id": 66100735,
+      "card_id": 201,
       "external": false,
-      "author_id": 560196,
+      "author_id": 301,
       "comment_id": null,
       "sort_order": 1.0522156881732652,
       "card_cover": false,
       "created": "2026-06-15T10:02:53.223Z",
       "updated": "2026-06-15T10:02:53.223Z",
-      "uid": "05c48b07-8548-44cd-b8ab-c82941342858",
+      "uid": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
       "custom_property_id": null,
       "thumbnail_url": null
     }
     """
 
-  /// Card 55002297, a `type: 8` comment attachment — same shape, `comment_id` populated.
+  /// A `type: 8` comment attachment — same shape, `comment_id` populated.
   static let legacyCommentAttachment = """
     {
-      "id": 53886952,
-      "url": "https://files.kaiten.ru/9d1f6b04-2c8a-4a11-9f3e-1b7c2d5e8a90.png",
+      "id": 102,
+      "url": "https://files.kaiten.ru/cccccccc-cccc-4ccc-8ccc-cccccccccccc.png",
       "name": "screenshot.png",
       "type": 8,
       "size": 90092,
       "mime_type": null,
       "deleted": false,
-      "card_id": 55002297,
+      "card_id": 202,
       "external": false,
-      "author_id": 560196,
+      "author_id": 301,
       "comment_id": 71234567,
       "sort_order": 2.5,
       "card_cover": false,
@@ -64,16 +64,16 @@ struct CardFilesTests {
     }
     """
 
-  /// Card 68484284, a `type: 11` private file — the payload that broke `getCard`.
+  /// A `type: 11` private file — the payload that broke `getCard`.
   static let privateFile = """
     {
-      "id": "1818c668-3274-46c2-8f14-8702ce35f36e",
+      "id": "11111111-1111-4111-8111-111111111111",
       "name": "image.png",
       "size": "135369",
       "mime_type": "image/png",
-      "author_uid": "27ee7c96-bc0c-47ba-b990-c6f6bcf86ecb",
-      "card_uid": "d3249745-0ba5-4d8a-8185-613718ab49a0",
-      "company_uid": "c455e813-394b-4b73-a238-0fdfe312d8c0",
+      "author_uid": "22222222-2222-4222-8222-222222222222",
+      "card_uid": "33333333-3333-4333-8333-333333333333",
+      "company_uid": "44444444-4444-4444-8444-444444444444",
       "entity_type": "card",
       "created": "2026-08-07T11:55:35.863Z",
       "updated": "2026-08-07T11:55:35.863Z",
@@ -82,14 +82,14 @@ struct CardFilesTests {
           "size": 41704,
           "resize": "224x",
           "created": "2026-08-07T11:55:36.507Z",
-          "storage_key": "companies/c455e813/cards/d3249745/resizes/224x/e091e68c.png"
+          "storage_key": "companies/44444444/cards/33333333/resizes/224x/55555555.png"
         }
       ],
       "card_cover": false,
       "deleted": false,
       "type": 11,
-      "url": "/api/v1/cards/d3249745-0ba5-4d8a-8185-613718ab49a0/files/1818c668-3274-46c2-8f14-8702ce35f36e",
-      "card_id": 68484284
+      "url": "/api/v1/cards/33333333-3333-4333-8333-333333333333/files/11111111-1111-4111-8111-111111111111",
+      "card_id": 203
     }
     """
 
@@ -107,18 +107,18 @@ struct CardFilesTests {
     let file = try #require(entry.value1)
     #expect(entry.value2 == nil)
 
-    #expect(file.id == 59_934_975)
+    #expect(file.id == 101)
     #expect(file.name == "IMG_3131 (1).MP4")
     #expect(file._type == 1)
     #expect(file.size == 7_804_333)
-    #expect(file.card_id == 66_100_735)
-    #expect(file.author_id == 560_196)
+    #expect(file.card_id == 201)
+    #expect(file.author_id == 301)
     #expect(file.external == false)
     #expect(file.card_cover == false)
     #expect(file.deleted == false)
     #expect(file.sort_order == 1.0522156881732652)
-    #expect(file.uid == "05c48b07-8548-44cd-b8ab-c82941342858")
-    #expect(file.url == "https://files.kaiten.ru/ef8b499b-f83a-4c26-8816-ab0586407017.MP4")
+    #expect(file.uid == "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb")
+    #expect(file.url == "https://files.kaiten.ru/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.MP4")
     #expect(file.created == "2026-06-15T10:02:53.223Z")
     #expect(file.updated == "2026-06-15T10:02:53.223Z")
   }
@@ -147,11 +147,11 @@ struct CardFilesTests {
   @Test("nullable size on a legacy attachment decodes to nil")
   func legacyNullSize() throws {
     let json = """
-      {"id": 61308055, "type": 1, "size": null, "card_id": 67495212, "name": "note.txt"}
+      {"id": 103, "type": 1, "size": null, "card_id": 204, "name": "note.txt"}
       """
     let file = try #require(try Self.decodeEntry(json).value1)
 
-    #expect(file.id == 61_308_055)
+    #expect(file.id == 103)
     #expect(file.size == nil)
   }
 
@@ -181,22 +181,22 @@ struct CardFilesTests {
     let file = try #require(entry.value2)
     #expect(entry.value1 == nil)
 
-    #expect(file.id == "1818c668-3274-46c2-8f14-8702ce35f36e")
+    #expect(file.id == "11111111-1111-4111-8111-111111111111")
     #expect(file.name == "image.png")
     #expect(file._type == 11)
     #expect(file.size == "135369")
     #expect(file.mime_type == "image/png")
-    #expect(file.author_uid == "27ee7c96-bc0c-47ba-b990-c6f6bcf86ecb")
-    #expect(file.card_uid == "d3249745-0ba5-4d8a-8185-613718ab49a0")
-    #expect(file.company_uid == "c455e813-394b-4b73-a238-0fdfe312d8c0")
+    #expect(file.author_uid == "22222222-2222-4222-8222-222222222222")
+    #expect(file.card_uid == "33333333-3333-4333-8333-333333333333")
+    #expect(file.company_uid == "44444444-4444-4444-8444-444444444444")
     #expect(file.entity_type == "card")
-    #expect(file.card_id == 68_484_284)
+    #expect(file.card_id == 203)
     #expect(file.card_cover == false)
     #expect(file.deleted == false)
     #expect(file.created == "2026-08-07T11:55:35.863Z")
     #expect(
       file.url
-        == "/api/v1/cards/d3249745-0ba5-4d8a-8185-613718ab49a0/files/1818c668-3274-46c2-8f14-8702ce35f36e"
+        == "/api/v1/cards/33333333-3333-4333-8333-333333333333/files/11111111-1111-4111-8111-111111111111"
     )
   }
 
@@ -209,32 +209,32 @@ struct CardFilesTests {
     #expect(resizes[0].size == 41704)
     #expect(resizes[0].resize == "224x")
     #expect(resizes[0].created == "2026-08-07T11:55:36.507Z")
-    #expect(resizes[0].storage_key == "companies/c455e813/cards/d3249745/resizes/224x/e091e68c.png")
+    #expect(resizes[0].storage_key == "companies/44444444/cards/33333333/resizes/224x/55555555.png")
   }
 
   @Test("private file attached to a comment carries comment_uid and entity_type")
   func privateCommentFile() throws {
     let json = """
       {
-        "id": "d19ceb87-ac73-4e8b-9834-3f461ee08319",
+        "id": "66666666-6666-4666-8666-666666666666",
         "name": "IMG_4064.HEIC",
         "size": "1818065",
         "mime_type": "image/heic",
-        "author_uid": "7853defd-c8bf-43f6-bea5-b457fd935f0b",
-        "card_uid": "0f156403-c6ed-43d5-a764-79b59fd6b578",
-        "comment_id": 75078936,
-        "comment_uid": "a2a9de0b-c6b3-401d-a0e1-95becdb91eee",
+        "author_uid": "77777777-7777-4777-8777-777777777777",
+        "card_uid": "88888888-8888-4888-8888-888888888888",
+        "comment_id": 401,
+        "comment_uid": "99999999-9999-4999-8999-999999999999",
         "entity_type": "comment",
         "resizes": [],
         "type": 11,
-        "card_id": 68495047
+        "card_id": 205
       }
       """
     let file = try #require(try Self.decodeEntry(json).value2)
 
     #expect(file.entity_type == "comment")
-    #expect(file.comment_id == 75_078_936)
-    #expect(file.comment_uid == "a2a9de0b-c6b3-401d-a0e1-95becdb91eee")
+    #expect(file.comment_id == 401)
+    #expect(file.comment_uid == "99999999-9999-4999-8999-999999999999")
     #expect(file.resizes?.isEmpty == true)
   }
 
@@ -243,19 +243,19 @@ struct CardFilesTests {
   @Test("one card carrying both shapes decodes each into its own branch")
   func mixedArray() async throws {
     let json = """
-      {"id": 68484284, "title": "Mixed", "files": [\(Self.legacyAttachment), \(Self.privateFile)]}
+      {"id": 203, "title": "Mixed", "files": [\(Self.legacyAttachment), \(Self.privateFile)]}
       """
     let transport = MockClientTransport.returning(statusCode: 200, body: json)
     let client = try KaitenClient(
       baseURL: "https://test.kaiten.ru/api/latest", token: "t", transport: transport)
 
-    let card = try await client.getCard(id: 68_484_284)
+    let card = try await client.getCard(id: 203)
     let files = try #require(card.files)
     #expect(files.count == 2)
 
-    #expect(files[0].value1?.id == 59_934_975)
+    #expect(files[0].value1?.id == 101)
     #expect(files[0].value2 == nil)
-    #expect(files[1].value2?.id == "1818c668-3274-46c2-8f14-8702ce35f36e")
+    #expect(files[1].value2?.id == "11111111-1111-4111-8111-111111111111")
     #expect(files[1].value1 == nil)
   }
 
@@ -264,13 +264,13 @@ struct CardFilesTests {
   @Test("getCard on a card with a private file no longer throws")
   func getCardWithPrivateFileSucceeds() async throws {
     let json = """
-      {"id": 68484284, "title": "[Android] change_variant", "files": [\(Self.privateFile)]}
+      {"id": 203, "title": "Private only", "files": [\(Self.privateFile)]}
       """
     let transport = MockClientTransport.returning(statusCode: 200, body: json)
     let client = try KaitenClient(
       baseURL: "https://test.kaiten.ru/api/latest", token: "t", transport: transport)
 
-    let card = try await client.getCard(id: 68_484_284)
+    let card = try await client.getCard(id: 203)
     #expect(card.files?.count == 1)
     #expect(card.files?.first?.value2?.name == "image.png")
   }

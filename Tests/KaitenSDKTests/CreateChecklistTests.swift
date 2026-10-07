@@ -10,7 +10,7 @@ struct CreateChecklistTests {
   @Test("200 returns created Checklist")
   func success() async throws {
     let json = """
-      {"id": 100, "name": "Test checklist", "uid": "b5971c69-571a-43dc-81e6-31987f2d5254", "card_id": 42, "checklist_id": 100, "sort_order": 1.5, "policy_id": null, "fts_version": "-574871004", "deleted": false, "created": "2026-02-18T03:13:03Z", "updated": "2026-02-18T03:13:03Z"}
+      {"id": 100, "name": "Test checklist", "uid": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee", "card_id": 42, "checklist_id": 100, "sort_order": 1.5, "policy_id": null, "fts_version": "-574871004", "deleted": false, "created": "2026-02-18T03:13:03Z", "updated": "2026-02-18T03:13:03Z"}
       """
     let transport = MockClientTransport.returning(statusCode: 200, body: json)
     let client = try KaitenClient(

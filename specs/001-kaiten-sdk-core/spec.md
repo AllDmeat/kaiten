@@ -195,7 +195,7 @@ A developer retrieves, creates, updates and removes the available select options
 
 **Why this priority**: Select values are needed for setting custom properties on cards — a key automation scenario.
 
-**Independent Test**: Call `client.listCustomPropertySelectValues(propertyId: 299126)`, receive an array of select values.
+**Independent Test**: Call `client.listCustomPropertySelectValues(propertyId: 56)`, receive an array of select values.
 
 **Acceptance Scenarios**:
 

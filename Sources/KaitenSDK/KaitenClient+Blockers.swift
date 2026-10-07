@@ -63,6 +63,9 @@ extension KaitenClient {
   ///   - blockerId: The blocker identifier.
   ///   - reason: The updated reason for the blocker.
   ///   - blockerCardId: The updated identifier of the blocking card.
+  ///   - dueDate: The block deadline in ISO 8601 format. Pass `.some(nil)` to clear it;
+  ///     `nil` leaves it unchanged.
+  ///   - dueDateTimePresent: Whether the deadline is specified up to hours and minutes.
   /// - Returns: The updated card blocker.
   /// - Throws:
   ///   - ``KaitenError/notFound(resource:id:)`` if the blocker does not exist.
@@ -71,12 +74,19 @@ extension KaitenClient {
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403) or other undocumented HTTP status codes.
   public func updateCardBlocker(
-    cardId: Int, blockerId: Int, reason: String? = nil, blockerCardId: Int? = nil
+    cardId: Int, blockerId: Int, reason: String? = nil, blockerCardId: Int? = nil,
+    dueDate: String?? = .none, dueDateTimePresent: Bool? = nil
   ) async throws(KaitenError) -> Components.Schemas.CardBlocker {
     let response = try await call {
       try await client.update_card_blocker(
         path: .init(card_id: cardId, id: blockerId),
-        body: .json(.init(reason: reason, blocker_card_id: blockerCardId))
+        body: .json(
+          .init(
+            reason: reason,
+            blocker_card_id: blockerCardId,
+            due_date: dueDate.map { $0.map(ExplicitNullString.value) ?? .null },
+            due_date_time_present: dueDateTimePresent
+          ))
       )
     }
     return try decodeResponse(response.toCase(), notFoundResource: ("blocker", blockerId)) {

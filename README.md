@@ -220,7 +220,7 @@ The SDK provides typed errors, retries `429 Too Many Requests` responses automat
 | `removeCardTag(...)` | Remove a tag from a card |
 | `listCardBlockers(...)` | List card blockers |
 | `createCardBlocker(...)` | Create a card blocker |
-| `updateCardBlocker(...)` | Update a card blocker |
+| `updateCardBlocker(cardId:blockerId:reason:blockerCardId:dueDate:dueDateTimePresent:)` | Update a card blocker |
 | `deleteCardBlocker(...)` | Delete a card blocker |
 | `getCardLocationHistory(...)` | Get card location history |
 | `getCardBaselines(...)` | Get card baselines |
@@ -234,7 +234,7 @@ The SDK provides typed errors, retries `429 Too Many Requests` responses automat
 
 | Method | Description |
 |--------|-------------|
-| `createChecklist(...)` | Create a checklist on a card |
+| `createChecklist(cardId:name:sortOrder:itemsSourceChecklistId:excludeItemIds:sourceShareId:)` | Create a checklist on a card, optionally copying items from another checklist |
 | `getChecklist(...)` | Get a checklist |
 | `updateChecklist(...)` | Update a checklist |
 | `removeChecklist(...)` | Remove a checklist |
@@ -431,7 +431,7 @@ CLI: `get-space-board --space-id <id> --id <id>`,
 |--------|-------------|
 | `listCustomProperties(offset:limit:query:...)` | List custom property definitions (paginated). The `includeValues:` overload is deprecated: the public API rejects `true` with HTTP 400 |
 | `getCustomProperty(id:)` | Get a single custom property definition |
-| `createCustomProperty(name:type:...)` | Create a custom property definition |
+| `createCustomProperty(name:type:...:directoryId:formula:formulaSourceCard:)` | Create a custom property definition |
 | `updateCustomProperty(id:...)` | Update a custom property definition |
 | `removeCustomProperty(id:)` | Remove a custom property definition |
 | `listCustomPropertySelectValues(propertyId:)` | List select values for a custom property |
@@ -458,10 +458,12 @@ CLI: `get-space-board --space-id <id> --id <id>`,
 Property discriminators are exposed as Swift enums (`CustomPropertyType`,
 `CustomPropertyCondition`, `CustomPropertyVoteVariant`,
 `CustomPropertyValuesType`). Each has an `unknown(String)` case that preserves
-values the documentation does not list. The `data` and `fields_settings`
-payloads stay free-form JSON — their shape depends on the property type.
+values the documentation does not list. The `data`, `fields_settings` and
+`formula_source_card` payloads stay free-form JSON — their shape depends on the
+property type.
 
-CLI: `create-custom-property --name <name> [--type <type>] ...`,
+CLI: `create-custom-property --name <name> [--type <type>] ...` with
+`--directory-id`, `--formula`, `--formula-source-card <json>`,
 `update-custom-property --id <id> [--name <name>] [--condition <condition>] ...`,
 `remove-custom-property --id <id>`.
 
@@ -716,7 +718,7 @@ CLI: `create-space-template-checklist-item --space-uid <uid>
 
 | Method | Description |
 |--------|-------------|
-| `getCardIterationsHistory(cardUid:)` | Get the iterations history of a card |
+| `getCardIterationsHistory(cardUid:withDetails:)` | Get the iterations history of a card |
 | `listIterations(spaceUid:status:withData:limit:offset:order:)` | List iterations of a space |
 | `createIteration(spaceUid:title:goal:startDate:finishDate:)` | Create an iteration |
 | `getIteration(spaceUid:id:)` | Get an iteration by ID |
@@ -766,7 +768,7 @@ for iteration in iterations {
 }
 ```
 
-CLI: `get-card-iterations-history --card-uid <uid>`,
+CLI: `get-card-iterations-history --card-uid <uid>` with `--with-details`,
 `list-iterations --space-uid <uid>` with `--status`, `--with-data`, `--limit`,
 `--offset`, `--order`;
 `create-iteration --space-uid <uid> --title <title>` with `--goal`,
@@ -855,7 +857,7 @@ CLI: `kaiten list-audit-logs` with `--from`, `--to`, `--author-id`,
 | `listCustomDirectories(includeFields:includeAuthor:includeRecordsCount:query:conditions:offset:limit:)` | List custom directories in the company |
 | `createCustomDirectory(name:description:multiSelect:allowEditing:displayFieldIndex:fields:)` | Create a custom directory |
 | `getCustomDirectory(directoryId:)` | Get a custom directory |
-| `updateCustomDirectory(directoryId:name:description:condition:multiSelect:allowEditing:fields:)` | Update a custom directory |
+| `updateCustomDirectory(directoryId:name:description:condition:multiSelect:allowEditing:fields:expectedFieldIds:)` | Update a custom directory |
 | `deleteCustomDirectory(directoryId:)` | Delete a custom directory (soft delete, condition becomes `removed`) |
 
 The custom-directories API is documented as beta: parameters, attributes and
@@ -886,7 +888,7 @@ CLI: `list-custom-directories` with `--include-fields`, `--include-author`,
 `get-custom-directory --directory-id <id>`;
 `update-custom-directory --directory-id <id>` with `--name`, `--description`,
 `--clear-description`, `--condition`, `--multi-select`, `--allow-editing`,
-`--fields <json>`; `delete-custom-directory --directory-id <id>`.
+`--fields <json>`, `--expected-field-ids`; `delete-custom-directory --directory-id <id>`.
 
 ### Custom Directory Fields
 

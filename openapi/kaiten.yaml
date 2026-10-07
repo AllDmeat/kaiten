@@ -4945,6 +4945,11 @@ paths:
         schema:
           type: string
         description: Card UID
+      - name: with_details
+        in: query
+        schema:
+          type: boolean
+        description: 'Include iteration metadata and event authors (iteration, addedBy, removedBy) and exclude removed iterations. Requires iteration.read in addition to access to the card. Default: false'
       responses:
         '200':
           description: success
@@ -4959,7 +4964,7 @@ paths:
         '402':
           description: Feature is not supported by tariff
         '403':
-          description: Forbidden
+          description: Forbidden, or with_details=true was requested without iteration.read
         '404':
           description: Card not found
   /spaces/{space_uid}/iterations:
@@ -5880,6 +5885,8 @@ paths:
                 $ref: '#/components/schemas/CustomDirectory'
         '400':
           description: Validation error
+        '409':
+          description: The current field ids differ from expected_field_ids (code 16). Reload the directory before retrying
         '401':
           description: Invalid token
         '404':
@@ -8564,19 +8571,32 @@ components:
         uid:
           type: string
           description: Custom property UID
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/custom-properties/get-list-of-properties
         import_uid:
           type:
           - string
           - 'null'
           description: Import UID
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/custom-properties/get-list-of-properties
         is_used_as_progress:
           type: boolean
           description: Whether property is used as progress indicator
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only as null) — https://developers.kaiten.ru/custom-properties/get-list-of-properties
         calculation_method:
           type:
           - string
           - 'null'
           description: Calculation method
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only as null) — https://developers.kaiten.ru/custom-properties/get-list-of-properties
+        directory_id:
+          type:
+          - string
+          - 'null'
+          description: ID of the custom directory linked to a property of type directory
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/custom-properties/get-list-of-properties
+        fts_version:
+          type: string
+          description: Full-text search version
     CustomPropertySelectValue:
       type: object
       properties:
@@ -8738,7 +8758,7 @@ components:
           description: Custom property name
         type:
           type: string
-          description: 'Validation for value by provided type. Documented values: string, number, date, email, phone, checkbox, select, formula, url, collective_score, vote, collective_vote, catalog, user, attachment. Defaults to string. Map to the CustomPropertyType Swift enum, which preserves unknown values.'
+          description: 'Validation for value by provided type. Documented values: string, number, date, email, phone, checkbox, select, formula, url, collective_score, vote, collective_vote, catalog, user, attachment, directory. Defaults to string. Map to the CustomPropertyType Swift enum, which preserves unknown values.'
         show_on_facade:
           type: boolean
           description: Should show property on card's facade
@@ -8783,6 +8803,16 @@ components:
           type: object
           additionalProperties: true
           description: Field settings for catalog type. Keys are field UIDs
+        directory_id:
+          type: string
+          description: ID of an existing custom directory in the same company. Required for type directory; links the property to the directory, it does not create one
+        formula:
+          type: string
+          description: Formula for calculation
+        formula_source_card:
+          type: object
+          additionalProperties: true
+          description: Card data from which are used to calculate the formula. The Kaiten documentation does not describe the fields of this object
     UpdateCustomPropertyRequest:
       type: object
       properties:
@@ -8945,8 +8975,11 @@ components:
         author_id:
           type: integer
           description: Author ID
+        # DOC_MISMATCH: docs=non-nullable `string`, actual=`string | null` — https://developers.kaiten.ru/card-comments/retrieve-card-comments
         email_addresses_to:
-          type: string
+          type:
+          - string
+          - 'null'
           description: Mail addresses to send comment
         internal:
           type: boolean
@@ -8973,6 +9006,16 @@ components:
         created:
           type: string
           description: Create date
+        author:
+          $ref: '#/components/schemas/UserSummary'
+          description: Author info
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only as null) — https://developers.kaiten.ru/card-comments/retrieve-card-comments
+        meta:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Comment metadata. Not described by the Kaiten documentation
     MemberDetailed:
       type: object
       properties:
@@ -10009,6 +10052,19 @@ components:
         sort_order:
           type: number
           description: Position
+        items_source_checklist_id:
+          type: integer
+          minimum: 1
+          description: Checklist id to copy list items from
+        exclude_item_ids:
+          type: array
+          items:
+            type: integer
+          description: Ids of list items not to copy from items_source_checklist_id
+        source_share_id:
+          type: integer
+          minimum: 1
+          description: Share checklist id
     Checklist:
       type: object
       properties:
@@ -10053,6 +10109,9 @@ components:
         total_items:
           type: integer
           description: Total items count (present in list-cards)
+        deleted:
+          type: boolean
+          description: Flag indicating that the checklist is deleted (present in the create response)
         created:
           type: string
           description: Create date
@@ -11263,6 +11322,315 @@ components:
         space_id:
           type: integer
           description: Space id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        uid:
+          type: string
+          description: Card UID
+        archived:
+          type: boolean
+          description: Archived flag
+        asap:
+          type: boolean
+          description: ASAP flag
+        due_date:
+          type:
+          - string
+          - 'null'
+          description: Due date
+        due_date_time_present:
+          type: boolean
+          description: Whether due date includes time
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        sort_order:
+          type: number
+          description: Sort order in column
+        version:
+          type: integer
+          description: Card version
+        updater_id:
+          type: integer
+          description: Last updater user ID
+        size:
+          type:
+          - number
+          - 'null'
+          description: Card size
+        size_unit:
+          type:
+          - string
+          - 'null'
+          description: Size unit
+        size_text:
+          type:
+          - string
+          - 'null'
+          description: Size text
+        created:
+          type: string
+          description: Created timestamp
+        updated:
+          type: string
+          description: Updated timestamp
+        expires_later:
+          type: boolean
+          description: Whether card expires later
+        blocked:
+          type: boolean
+          description: Whether card is blocked
+        blocking_card:
+          type: boolean
+          description: Whether card is blocking another card
+        completed_on_time:
+          type:
+          - boolean
+          - 'null'
+          description: Whether card was completed on time
+        completed_at:
+          type:
+          - string
+          - 'null'
+          description: Completion timestamp
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        sprint_id:
+          type:
+          - integer
+          - 'null'
+          description: Sprint ID
+        last_moved_at:
+          type:
+          - string
+          - 'null'
+          description: Last moved timestamp
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: External ID
+        lane_changed_at:
+          type:
+          - string
+          - 'null'
+          description: Lane change timestamp
+        column_changed_at:
+          type:
+          - string
+          - 'null'
+          description: Column change timestamp
+        first_moved_to_in_progress_at:
+          type:
+          - string
+          - 'null'
+          description: First moved to in-progress timestamp
+        last_moved_to_done_at:
+          type:
+          - string
+          - 'null'
+          description: Last moved to done timestamp
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        service_id:
+          type:
+          - integer
+          - 'null'
+          description: Service ID
+        properties:
+          type:
+          - object
+          - 'null'
+          description: Custom properties values
+          additionalProperties: true
+        planned_start:
+          type:
+          - string
+          - 'null'
+          description: Planned start date
+        planned_end:
+          type:
+          - string
+          - 'null'
+          description: Planned end date
+        public:
+          type: boolean
+          description: Public flag
+        share_id:
+          type:
+          - string
+          - 'null'
+          description: Share ID
+        share_settings:
+          type:
+          - object
+          - 'null'
+          description: Share settings
+        external_user_emails:
+          type:
+          - string
+          - 'null'
+          description: External user emails
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        tag_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: integer
+          description: Tag IDs
+        estimate_workload:
+          type: number
+          description: Estimated workload
+        parents_count:
+          type: integer
+          description: Number of parent cards
+        children_count:
+          type: integer
+          description: Number of child cards
+        children_done:
+          type: integer
+          description: Number of completed child cards
+        goals_total:
+          type: integer
+          description: Total goals
+        goals_done:
+          type: integer
+          description: Completed goals
+        parent_checklist_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: integer
+          description: Parent checklist IDs
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        fifo_order:
+          type:
+          - integer
+          - 'null'
+          description: FIFO order
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        has_blocked_children:
+          type: boolean
+          description: Whether card has blocked children
+        comments_total:
+          type: integer
+          description: Total comments count
+        comment_last_added_at:
+          type:
+          - string
+          - 'null'
+          description: Last comment timestamp
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        children_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: integer
+          description: Child card IDs
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        parents_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: integer
+          description: Parent card IDs
+        # DOC_MISMATCH: docs=non-nullable `string`, actual=`string | null` — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        counters_recalculated_at:
+          type:
+          - string
+          - 'null'
+          description: Counters recalculation timestamp
+        sd_new_comment:
+          type: boolean
+          description: Service desk new comment flag
+        time_spent_sum:
+          type: integer
+          description: Total time spent
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        calculated_planned_start:
+          type:
+          - string
+          - 'null'
+          description: Calculated planned start
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        calculated_planned_end:
+          type:
+          - string
+          - 'null'
+          description: Calculated planned end
+        time_blocked_sum:
+          type: integer
+          description: Total time blocked
+        children_number_properties_sum:
+          type:
+          - object
+          - 'null'
+          description: Sum of children number properties
+        description_filled:
+          type: boolean
+          description: Whether description is filled
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        locked:
+          type:
+          - string
+          - 'null'
+          description: Lock status
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        source:
+          type:
+          - string
+          - 'null'
+          enum:
+          - app
+          - api
+          - email
+          - telegram
+          - slack
+          - webhook
+          - import
+          - schedule
+          - automation
+          - null
+          description: Card source
+        lane:
+          type: object
+          description: Inline lane summary
+        column:
+          type: object
+          description: Inline column summary
+        board:
+          $ref: '#/components/schemas/CardBoardSummary'
+        type:
+          $ref: '#/components/schemas/CardType'
+        owner:
+          $ref: '#/components/schemas/User'
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        key:
+          type:
+          - string
+          - 'null'
+          description: Card key
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardMember'
+          description: Card members
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+          description: Card tags
+        ignore_planned_dates_recalculation:
+          type: boolean
+          description: Card is skipped in planned dates recalculation by planned relations
+        has_access_to_space:
+          type: boolean
+          description: Whether the requesting user has access to the space (present in the add response)
+        path_data:
+          type: object
+          additionalProperties: true
+          description: Card path info (space, board, column, lane). Present in the add response; the fields are not verified against the live API
     AddCardChildRequest:
       type: object
       required:
@@ -11639,6 +12007,12 @@ components:
         blocker_card_id:
           type: integer
           description: Blocker card ID
+        due_date:
+          $ref: '#/components/schemas/NullableString'
+          description: Block deadline, ISO 8601 format. Send null to clear
+        due_date_time_present:
+          type: boolean
+          description: Whether the deadline is specified up to hours and minutes
     CardLocationHistory:
       type: object
       properties:
@@ -13138,6 +13512,9 @@ components:
         card_uid:
           type: string
           description: UID of the card
+        card_id:
+          type: integer
+          description: ID of the card. Returned by the iteration cards list
         added_by_uid:
           type: string
           description: UID of the user who added the card to the iteration
@@ -13154,12 +13531,132 @@ components:
         sort_order:
           type: number
           description: Sort order of the card within the iteration
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/iterations/retrieve-cards-in-iteration
+        source:
+          type: string
+          description: How the card was added to the iteration. Observed value - manual
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only as null) — https://developers.kaiten.ru/iterations/retrieve-cards-in-iteration
+        board_uid:
+          type:
+          - string
+          - 'null'
+          description: Board UID
         created:
           type: string
           description: Creation timestamp
         updated:
           type: string
           description: Last update timestamp
+        iteration:
+          $ref: '#/components/schemas/IterationHistoryIteration'
+          description: Iteration metadata. Returned only by the card iterations history with with_details=true
+        addedBy:
+          $ref: '#/components/schemas/UserSummary'
+          description: User who added the card. Returned only by the card iterations history with with_details=true, and omitted if the user cannot be found
+        removedBy:
+          $ref: '#/components/schemas/UserSummary'
+          description: User who removed the card. Returned only by the card iterations history with with_details=true, and omitted if no removal author is recorded or the user cannot be found
+    IterationHistoryIteration:
+      type: object
+      description: Iteration metadata in the card iterations history, filtered by access to the iteration's space
+      properties:
+        id:
+          type: string
+          description: Iteration ID (UUID), always present
+        is_accessible:
+          type: boolean
+          description: Whether the caller has iteration.read on the iteration space
+        title:
+          type: string
+          description: Iteration title. Present only when is_accessible is true
+        space_uid:
+          type: string
+          description: Iteration space UID. Present only when is_accessible is true
+    UserSummary:
+      type: object
+      description: User embedded in another response (comment author, iteration history event author)
+      properties:
+        id:
+          type: integer
+          description: User ID
+        # DOC_MISMATCH: not in comment docs (documented for the iterations history addedBy), present in actual comment responses — https://developers.kaiten.ru/card-comments/retrieve-card-comments
+        uid:
+          type: string
+          description: User UID
+        full_name:
+          type:
+          - string
+          - 'null'
+          description: Full name
+        email:
+          type: string
+          description: Email address
+        username:
+          type:
+          - string
+          - 'null'
+          description: Username for mentions and login
+        avatar_initials_url:
+          type:
+          - string
+          - 'null'
+          description: Initials avatar URL
+        avatar_uploaded_url:
+          type:
+          - string
+          - 'null'
+          description: Uploaded avatar URL
+        initials:
+          type:
+          - string
+          - 'null'
+          description: Initials
+        avatar_type:
+          type: integer
+          description: 'Avatar type: 1 - gravatar, 2 - initials, 3 - uploaded'
+        lng:
+          type: string
+          description: Language
+        timezone:
+          type: string
+          description: Time zone
+        theme:
+          type: string
+          description: 'Color theme: light, dark or auto'
+        created:
+          type: string
+          description: Creation timestamp
+        updated:
+          type: string
+          description: Last update timestamp
+        activated:
+          type: boolean
+          description: Whether the user is activated
+        ui_version:
+          type: integer
+          description: 'UI version: 1 - old UI, 2 - new UI'
+        # DOC_MISMATCH: not in comment docs (documented for the iterations history addedBy), present in actual comment responses — https://developers.kaiten.ru/card-comments/retrieve-card-comments
+        virtual:
+          type: boolean
+          description: Whether the user is virtual
+        # DOC_MISMATCH: not in comment docs (documented for the iterations history addedBy), present in actual comment responses — https://developers.kaiten.ru/card-comments/retrieve-card-comments
+        email_blocked:
+          type:
+          - string
+          - 'null'
+          description: Email block timestamp, or null if email delivery is not blocked
+        # DOC_MISMATCH: not in comment docs (documented for the iterations history addedBy), present in actual comment responses — https://developers.kaiten.ru/card-comments/retrieve-card-comments
+        email_blocked_reason:
+          type:
+          - string
+          - 'null'
+          description: Email blocking reason
+        # DOC_MISMATCH: not in comment docs (documented for the iterations history addedBy), present in actual comment responses — https://developers.kaiten.ru/card-comments/retrieve-card-comments
+        delete_requested_at:
+          type:
+          - string
+          - 'null'
+          description: Account deletion request timestamp
     IterationMovedCard:
       type: object
       description: Iteration card record created in the target iteration when cards are moved
@@ -14324,6 +14821,7 @@ components:
           - string
           - 'null'
           description: Linked directory ID (for directory_link fields)
+        # DOC_MISMATCH: not in response attributes, shown only in the documentation's response examples — https://developers.kaiten.ru/custom-directory-fields/get-field
         reverse_field_id:
           type:
           - string
@@ -14462,6 +14960,11 @@ components:
         allow_editing:
           type: boolean
           description: When enabled, directory records can be edited from cards without custom properties permission
+        expected_field_ids:
+          type: array
+          items:
+            type: string
+          description: Snapshot of all active and inactive field IDs returned when the directory was loaded. Checked only when fields is supplied; a mismatch returns HTTP 409 with code 16. Checks field membership, not concurrent edits to field attributes
         fields:
           type: array
           items:

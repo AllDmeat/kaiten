@@ -18,10 +18,28 @@ struct CreateChecklist: AsyncParsableCommand {
   @Option(name: .long, help: "Position (sort order)")
   var sortOrder: Double?
 
+  @Option(name: .long, help: "Checklist ID to copy list items from")
+  var itemsSourceChecklistId: Int?
+
+  @Option(
+    name: .long,
+    help: "Comma-separated IDs of list items not to copy from --items-source-checklist-id")
+  var excludeItemIds: String?
+
+  @Option(name: .long, help: "Share checklist ID")
+  var sourceShareId: Int?
+
   func run() async throws {
+    let parsedExcludeItemIds = try parseIntegerCSV(
+      excludeItemIds, fieldName: "--exclude-item-ids")
     let client = try await global.makeClient()
     let checklist = try await client.createChecklist(
-      cardId: cardId, name: name, sortOrder: sortOrder)
+      cardId: cardId,
+      name: name,
+      sortOrder: sortOrder,
+      itemsSourceChecklistId: itemsSourceChecklistId,
+      excludeItemIds: parsedExcludeItemIds,
+      sourceShareId: sourceShareId)
     try printJSON(checklist, expand: global.expandedFields)
   }
 }

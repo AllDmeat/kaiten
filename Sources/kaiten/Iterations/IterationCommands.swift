@@ -20,7 +20,12 @@ struct GetCardIterationsHistory: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "get-card-iterations-history",
     abstract: "Get the iterations history of a card",
-    discussion: "Records are ordered from the most recent to the oldest."
+    discussion: """
+      Records are ordered from the most recent to the oldest. With --with-details true \
+      the API excludes removed iterations, adds iteration, addedBy and removedBy to \
+      each record, and answers 403 unless the token also has iteration.read. An \
+      iteration the caller cannot read carries only id and is_accessible.
+      """
   )
 
   @OptionGroup var global: GlobalOptions
@@ -28,9 +33,13 @@ struct GetCardIterationsHistory: AsyncParsableCommand {
   @Option(name: .long, help: "Card UID")
   var cardUid: String
 
+  @Option(name: .long, help: "Include iteration metadata and event authors")
+  var withDetails: Bool?
+
   func run() async throws {
     let client = try await global.makeClient()
-    let records = try await client.getCardIterationsHistory(cardUid: cardUid)
+    let records = try await client.getCardIterationsHistory(
+      cardUid: cardUid, withDetails: withDetails)
     try printJSON(records, expand: global.expandedFields)
   }
 }

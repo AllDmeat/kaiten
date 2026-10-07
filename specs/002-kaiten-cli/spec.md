@@ -300,6 +300,14 @@ stdout confirms it works.
   and removes the WIP limit (SDK FR-038), a number sets it, omitting the
   option leaves it unchanged, and any other input MUST fail with a
   validation error before the request.
+- **FR-032**: `get-card-iterations-history` MUST accept `--with-details`.
+  `create-checklist` MUST accept `--items-source-checklist-id`,
+  `--exclude-item-ids` and `--source-share-id`; `create-custom-property`
+  `--directory-id`, `--formula` and `--formula-source-card` (JSON, validated
+  locally per FR-024); `update-custom-directory` `--expected-field-ids`;
+  `update-card-blocker` `--due-date`, `--clear-due-date` (sends `null`,
+  like `--clear-description` of `update-custom-directory`) and
+  `--due-date-time-present` (SDK FR-042).
 
 ### Non-Functional Requirements
 

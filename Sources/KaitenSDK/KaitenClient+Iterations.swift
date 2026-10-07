@@ -29,7 +29,11 @@ extension KaitenClient {
   /// Returns all iteration card records for the card, ordered from the most recent to the
   /// oldest. The Kaiten iterations API is in beta and may change.
   ///
-  /// - Parameter cardUid: The card UID.
+  /// - Parameters:
+  ///   - cardUid: The card UID.
+  ///   - withDetails: When `true`, the API excludes removed iterations and adds `iteration`,
+  ///     `addedBy` and `removedBy` to each record. Requires `iteration.read` in addition to
+  ///     access to the card; without it the API answers 403.
   /// - Returns: An array of iteration card records. Returns an empty array if the card has
   ///   never been in an iteration.
   /// - Throws:
@@ -40,12 +44,13 @@ extension KaitenClient {
   ///     forbidden (403), not found (404) or other undocumented HTTP status codes. A 404 is
   ///     reported as `unexpectedResponse` rather than ``KaitenError/notFound(resource:id:)``
   ///     because cards are addressed here by string UID, which that error cannot represent.
-  public func getCardIterationsHistory(cardUid: String) async throws(KaitenError) -> [Components
-    .Schemas.IterationCard]
+  public func getCardIterationsHistory(cardUid: String, withDetails: Bool? = nil)
+    async throws(KaitenError) -> [Components.Schemas.IterationCard]
   {
     guard
       let response = try await callList({
-        try await client.get_card_iterations_history(path: .init(card_uid: cardUid))
+        try await client.get_card_iterations_history(
+          path: .init(card_uid: cardUid), query: .init(with_details: withDetails))
       })
     else {
       return []

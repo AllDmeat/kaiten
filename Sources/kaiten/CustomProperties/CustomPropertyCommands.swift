@@ -82,7 +82,9 @@ struct ListCustomProperties: AsyncParsableCommand {
   @Option(name: .long, help: "Text search query")
   var query: String?
 
-  @Option(name: .long, help: "Include property values in response")
+  @Option(
+    name: .long,
+    help: "Deprecated: the API rejects true with HTTP 400; values have their own endpoints")
   var includeValues: Bool?
 
   @Option(name: .long, help: "Include author details in response")
@@ -104,13 +106,15 @@ struct ListCustomProperties: AsyncParsableCommand {
   var orderDirection: String?
 
   func run() async throws {
+    if includeValues == true {
+      throw ValidationError("--include-values true is not supported by the Kaiten public API")
+    }
     let client = try await global.makeClient()
     let parsedIds = try parseIntegerCSV(ids, fieldName: "ids")
     let page = try await client.listCustomProperties(
       offset: offset,
       limit: limit,
       query: query,
-      includeValues: includeValues,
       includeAuthor: includeAuthor,
       compact: compact,
       loadByIds: loadByIds,

@@ -101,8 +101,8 @@ public struct KaitenClient: Sendable {
     }
   }
 
-  func validatePagination(offset: Int, limit: Int) throws(KaitenError) {
-    guard offset >= 0, (1...100).contains(limit) else {
+  func validatePagination(offset: Int, limit: Int, maxLimit: Int = 100) throws(KaitenError) {
+    guard offset >= 0, (1...maxLimit).contains(limit) else {
       throw .invalidPaginationRange(offset: offset, limit: limit)
     }
   }

@@ -10,8 +10,11 @@ extension KaitenClient {
   ///   - cardId: The card identifier.
   ///   - forDate: Filter by the `for_date` attribute (`YYYY-MM-DD`).
   ///   - personal: When `true`, returns only the current user's time logs.
+  ///   - limit: Maximum number of time logs to return (1–100). The API returns 100 when omitted.
+  ///   - offset: Number of time logs to skip.
   /// - Returns: An array of time logs. Returns an empty array if the card has no time logs.
   /// - Throws:
+  ///   - ``KaitenError/invalidPaginationRange(offset:limit:)`` if pagination parameters are out of range.
   ///   - ``KaitenError/notFound(resource:id:)`` if the card does not exist.
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
@@ -20,13 +23,16 @@ extension KaitenClient {
   public func getCardTimeLogs(
     cardId: Int,
     forDate: String? = nil,
-    personal: Bool? = nil
+    personal: Bool? = nil,
+    limit: Int? = nil,
+    offset: Int? = nil
   ) async throws(KaitenError) -> [Components.Schemas.CardTimeLog] {
+    try validatePagination(offset: offset ?? 0, limit: limit ?? 100)
     guard
       let response = try await callList({
         try await client.get_card_time_logs(
           path: .init(card_id: cardId),
-          query: .init(for_date: forDate, personal: personal)
+          query: .init(limit: limit, offset: offset, for_date: forDate, personal: personal)
         )
       })
     else {

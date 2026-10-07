@@ -693,7 +693,7 @@ paths:
         schema:
           type: string
         description: Filter by full_name, email or username
-      # DOC_MISMATCH: docs=the field to sort by (default id), actual has no observed effect (response order unchanged and not sorted by id) — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
+      # DOC_MISMATCH: docs=the field to sort by (default id), actual always orders by id; other values (e.g. full_name) have no observed effect — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
       - name: orderBy
         in: query
         schema:
@@ -704,18 +704,16 @@ paths:
         schema:
           type: integer
         description: Filter by role
-      # DOC_MISMATCH: docs=maximum amount of users in response, actual has no observed effect (full list returned regardless) — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
       - name: limit
         in: query
         schema:
           type: integer
-        description: Maximum amount of users in response
-      # DOC_MISMATCH: docs=number of records to skip, actual has no observed effect (full list returned regardless) — https://developers.kaiten.ru/card-allowed-users/retrieve-users-list
+        description: Public API page size. Must be a positive integer; values greater than 100 are treated as 100. Default 100
       - name: offset
         in: query
         schema:
           type: integer
-        description: Number of records to skip
+        description: Number of users to skip. Must be a non-negative integer. Default 0
       responses:
         '200':
           description: success
@@ -742,6 +740,16 @@ paths:
         schema:
           type: integer
         description: Card ID
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum amount of comments in response. Must be a positive integer; a value greater than 100 is treated as 100. An omitted value means 100 comments are returned
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of comments to skip. Must be a non negative integer. Default is 0
       responses:
         '200':
           description: success
@@ -1184,6 +1192,16 @@ paths:
         schema:
           type: integer
         description: Card ID
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum amount of children in response. Must be a positive integer; a value greater than 100 is treated as 100. An omitted value means 100 children are returned
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of children to skip. Must be a non negative integer. Default is 0
       responses:
         '200':
           description: success
@@ -1395,9 +1413,10 @@ paths:
         description: Maximum number of properties to return
       - name: include_values
         in: query
+        deprecated: true
         schema:
           type: boolean
-        description: Include property values in response
+        description: 'Include property values in response. Since October 1, 2026 the public API rejects true with HTTP 400; use the paginated value endpoints'
       - name: include_author
         in: query
         schema:
@@ -2340,6 +2359,17 @@ paths:
     get:
       summary: Retrieve list of spaces
       operationId: retrieve_list_of_spaces
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum amount of spaces in response. Must be a positive integer; a value greater than 100 is treated as 100. An omitted value means 100 spaces are returned
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of spaces to skip. Must be a non negative integer. Default is 0
       responses:
         '200':
           description: success
@@ -4143,6 +4173,16 @@ paths:
         schema:
           type: integer
         description: Card ID
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum amount of time logs in response. Must be a positive integer; a value greater than 100 is treated as 100. An omitted value means 100 time logs are returned
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of time logs to skip. Must be a non negative integer. Default is 0
       - name: for_date
         in: query
         schema:
@@ -4534,6 +4574,16 @@ paths:
         schema:
           type: boolean
         description: The result includes only inactive in company members
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum amount of users in response. Must be a positive integer; a value greater than 500 is treated as 500. An omitted value means 100 users are returned
+      - name: last_user_id
+        in: query
+        schema:
+          type: integer
+        description: 'User id after which the next page is fetched. Pass the greatest user id from the previous page, not the last one in the response: the default list is not ordered by id'
       responses:
         '200':
           description: success
@@ -6692,6 +6742,16 @@ paths:
         schema:
           type: string
         description: Group UID
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum amount of users in response. Must be a positive integer; a value greater than 100 is treated as 100. An omitted value means 100 users are returned
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of users to skip. Must be a non negative integer. Default is 0
       responses:
         '200':
           description: success

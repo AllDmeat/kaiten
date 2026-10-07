@@ -367,22 +367,30 @@ extension KaitenClient {
     return try decodeResponse(response.toCase()) { try $0.json }
   }
 
-  /// Lists children of a card.
+  /// Lists children of a card, one page at a time.
   ///
-  /// - Parameter cardId: The card identifier.
+  /// - Parameters:
+  ///   - cardId: The card identifier.
+  ///   - limit: Maximum number of children to return (1–100). The API returns 100 when omitted.
+  ///   - offset: Number of children to skip.
   /// - Returns: An array of card children.
   /// - Throws:
+  ///   - ``KaitenError/invalidPaginationRange(offset:limit:)`` if pagination parameters are out of range.
   ///   - ``KaitenError/notFound(resource:id:)`` if the card does not exist.
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403) or other undocumented HTTP status codes.
-  public func listCardChildren(cardId: Int) async throws(KaitenError) -> [Components.Schemas
-    .CardChild]
-  {
+  public func listCardChildren(
+    cardId: Int,
+    limit: Int? = nil,
+    offset: Int? = nil
+  ) async throws(KaitenError) -> [Components.Schemas.CardChild] {
+    try validatePagination(offset: offset ?? 0, limit: limit ?? 100)
     guard
       let response = try await callList({
-        try await client.list_card_children(path: .init(card_id: cardId))
+        try await client.list_card_children(
+          path: .init(card_id: cardId), query: .init(limit: limit, offset: offset))
       })
     else {
       return []

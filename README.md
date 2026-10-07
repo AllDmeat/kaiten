@@ -204,14 +204,14 @@ The SDK provides typed errors, retries `429 Too Many Requests` responses automat
 | `updateCard(...)` | Update a card |
 | `batchUpdateCards(...)` | Update multiple cards by criteria (background job) |
 | `deleteCard(...)` | Delete a card |
-| `listCardChildren(...)` | List child cards |
+| `listCardChildren(cardId:limit:offset:)` | List child cards (up to 100 per page) |
 | `addCardChild(...)` | Add a child card |
 | `removeCardChild(...)` | Remove a child card |
 | `getCardMembers(cardId:)` | Get members of a card |
 | `addCardMember(...)` | Add a member to a card |
 | `updateCardMemberRole(...)` | Update a card member's role |
 | `removeCardMember(...)` | Remove a member from a card |
-| `getCardComments(cardId:)` | Get comments on a card |
+| `getCardComments(cardId:limit:offset:)` | Get comments on a card (up to 100 per page) |
 | `createComment(cardId:text:)` | Add a comment to a card |
 | `updateComment(...)` | Update a comment |
 | `deleteComment(...)` | Delete a comment |
@@ -224,8 +224,8 @@ The SDK provides typed errors, retries `429 Too Many Requests` responses automat
 | `deleteCardBlocker(...)` | Delete a card blocker |
 | `getCardLocationHistory(...)` | Get card location history |
 | `getCardBaselines(...)` | Get card baselines |
-| `listCardAllowedUsers(cardId:...)` | List users with access to a card |
-| `getCardTimeLogs(cardId:forDate:personal:)` | List time logs on a card |
+| `listCardAllowedUsers(cardId:type:search:orderBy:role:limit:offset:)` | List users with access to a card (up to 100 per page, ordered by id) |
+| `getCardTimeLogs(cardId:forDate:personal:limit:offset:)` | List time logs on a card (up to 100 per page) |
 | `createCardTimeLog(cardId:roleId:timeSpent:forDate:comment:)` | Add a time log to a card |
 | `updateCardTimeLog(cardId:timeLogId:...)` | Update a time log |
 | `deleteCardTimeLog(cardId:timeLogId:)` | Remove a time log |
@@ -380,7 +380,7 @@ kaiten delete-custom-property-file --card-uid c1a2 --property-uid p3b4 --file-id
 
 | Method | Description |
 |--------|-------------|
-| `listSpaces()` | List all spaces |
+| `listSpaces(limit:offset:)` | List spaces (up to 100 per page) |
 | `createSpace(...)` | Create a space |
 | `getSpace(...)` | Get a space by ID |
 | `updateSpace(...)` | Update a space |
@@ -422,7 +422,7 @@ CLI: `get-space-board --space-id <id> --id <id>`.
 
 | Method | Description |
 |--------|-------------|
-| `listCustomProperties()` | List all custom property definitions |
+| `listCustomProperties(offset:limit:query:...)` | List custom property definitions (paginated). The `includeValues:` overload is deprecated: the public API rejects `true` with HTTP 400 |
 | `getCustomProperty(id:)` | Get a single custom property definition |
 | `createCustomProperty(name:type:...)` | Create a custom property definition |
 | `updateCustomProperty(id:...)` | Update a custom property definition |
@@ -542,14 +542,14 @@ CLI: `kaiten list-company-users` (with the same filters as the SDK method),
 
 | Method | Description |
 |--------|-------------|
-| `listGroupUsers(groupUid:)` | List users in a company group |
+| `listGroupUsers(groupUid:limit:offset:)` | List users in a company group (up to 100 per page, ordered by id) |
 | `addUserToGroup(groupUid:userId:requestId:operatorComment:)` | Add a user to a company group |
 | `removeUserFromGroup(groupUid:userId:)` | Remove a user from a company group |
 
 Groups are addressed by string UID. Kaiten marks the group-users endpoints as
 under active development, so their responses may change.
 
-CLI: `list-group-users --group-uid <uid>`,
+CLI: `list-group-users --group-uid <uid>` with optional `--limit` and `--offset`,
 `add-group-user --group-uid <uid> --user-id <id>` with optional `--request-id`
 and `--operator-comment`,
 `remove-group-user --group-uid <uid> --user-id <id>`.
@@ -652,7 +652,7 @@ let created = try await client.createAutomation(
 
 | Method | Description |
 |--------|-------------|
-| `listSpaceUsers(spaceId:includeInheritedAccess:inactive:)` | List users of a space |
+| `listSpaceUsers(spaceId:includeInheritedAccess:inactive:limit:lastUserId:)` | List users of a space (up to 500 per page; 100 by default) |
 | `inviteUserToSpace(spaceId:email:roleId:guest:operatorComment:sendEmail:)` | Invite a user to a space |
 | `getSpaceUser(spaceId:userId:)` | Get a user of a space |
 | `updateSpaceUser(spaceId:userId:roleId:notificationsEnabled:spaceGroupId:settings:)` | Change a space user's role and notification settings |
@@ -663,7 +663,10 @@ Role ids are string UIDs. Preset roles: reader
 `a431ed00-1b32-4cc7-92b6-85e4bc7de40e`, admin
 `07ea3efc-a004-4d31-8683-4bb2084e209b`.
 
-CLI: `list-space-users --space-id <id>`,
+The endpoint pages by cursor, not offset: pass the greatest user id of the previous page as
+`lastUserId` — the default list is not ordered by id.
+
+CLI: `list-space-users --space-id <id>` with optional `--limit` and `--last-user-id`,
 `invite-space-user --space-id <id> --email <email>`,
 `get-space-user --space-id <id> --user-id <id>`,
 `update-space-user --space-id <id> --user-id <id>`,
@@ -1231,6 +1234,13 @@ Available auto-pagination methods:
 | `allCards(boardId:columnId:laneId:filter:pageSize:)` | All cards matching the given criteria |
 | `allUsers(type:query:includeInactive:accessTypePermissions:excludeMembersByEntityUid:excludeDirectlyAddedMembersByEntityUid:pageSize:)` | All users |
 | `allCustomProperties(query:pageSize:)` | All custom property definitions |
+| `allSpaces(pageSize:)` | All spaces |
+| `allSpaceUsers(spaceId:includeInheritedAccess:inactive:pageSize:)` | All users of a space (cursor-paged by `last_user_id`) |
+| `allCardComments(cardId:pageSize:)` | All comments on a card |
+| `allCardChildren(cardId:pageSize:)` | All children of a card |
+| `allCardTimeLogs(cardId:forDate:personal:pageSize:)` | All time logs on a card |
+| `allCardAllowedUsers(cardId:type:role:pageSize:)` | All users with access to a card |
+| `allGroupUsers(groupUid:pageSize:)` | All users in a company group |
 | `allCustomPropertySelectValues(propertyId:pageSize:)` | All select values for a property |
 | `allCardTypes(pageSize:)` | All card types |
 | `allSprints(active:pageSize:)` | All sprints |

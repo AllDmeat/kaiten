@@ -4,10 +4,10 @@ import OpenAPIRuntime
 // MARK: - Card Allowed Users
 
 extension KaitenClient {
-  /// Lists users with access to a card.
+  /// Lists users with access to a card, one page at a time, ordered by user id.
   ///
-  /// The documented `search`, `orderBy`, `limit` and `offset` parameters are accepted by the API
-  /// but have no observed effect: the full list is returned regardless.
+  /// The documented `search` and `orderBy` parameters are accepted by the API but have no
+  /// observed effect: `search` does not filter, and the list stays ordered by id.
   ///
   /// - Parameters:
   ///   - cardId: The card identifier.
@@ -16,11 +16,12 @@ extension KaitenClient {
   ///   - search: Filter by full name, email or username.
   ///   - orderBy: The field to sort by.
   ///   - role: Filter by role.
-  ///   - limit: Maximum amount of users in the response.
-  ///   - offset: Number of records to skip.
+  ///   - limit: Maximum number of users to return (1–100). The API returns 100 when omitted.
+  ///   - offset: Number of users to skip.
   /// - Returns: An array of users allowed to access the card. Returns an empty array if the
   ///   response is empty.
   /// - Throws:
+  ///   - ``KaitenError/invalidPaginationRange(offset:limit:)`` if pagination parameters are out of range.
   ///   - ``KaitenError/notFound(resource:id:)`` if the card does not exist.
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
@@ -36,6 +37,7 @@ extension KaitenClient {
     limit: Int? = nil,
     offset: Int? = nil
   ) async throws(KaitenError) -> [Components.Schemas.AllowedUser] {
+    try validatePagination(offset: offset ?? 0, limit: limit ?? 100)
     guard
       let response = try await callList({
         try await client.retrieve_card_allowed_users(

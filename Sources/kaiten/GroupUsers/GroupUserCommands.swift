@@ -6,7 +6,7 @@ import KaitenSDK
 struct ListGroupUsers: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "list-group-users",
-    abstract: "List users in a company group"
+    abstract: "List users in a company group, ordered by user id"
   )
 
   @OptionGroup var global: GlobalOptions
@@ -14,9 +14,16 @@ struct ListGroupUsers: AsyncParsableCommand {
   @Option(name: .long, help: "Group UID")
   var groupUid: String
 
+  @Option(name: .long, help: "Maximum number of users to return (1-100, default 100)")
+  var limit: Int?
+
+  @Option(name: .long, help: "Number of users to skip")
+  var offset: Int?
+
   func run() async throws {
     let client = try await global.makeClient()
-    let users = try await client.listGroupUsers(groupUid: groupUid)
+    let users = try await client.listGroupUsers(
+      groupUid: groupUid, limit: limit, offset: offset)
     try printJSON(users, expand: global.expandedFields)
   }
 }

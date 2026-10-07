@@ -21,10 +21,17 @@ struct GetCardTimeLogs: AsyncParsableCommand {
   @Flag(name: .long, help: "Only the current user's time logs")
   var personal: Bool = false
 
+  @Option(name: .long, help: "Maximum number of time logs to return (1-100, default 100)")
+  var limit: Int?
+
+  @Option(name: .long, help: "Number of time logs to skip")
+  var offset: Int?
+
   func run() async throws {
     let client = try await global.makeClient()
     let timeLogs = try await client.getCardTimeLogs(
-      cardId: cardId, forDate: forDate, personal: personal ? true : nil)
+      cardId: cardId, forDate: forDate, personal: personal ? true : nil, limit: limit,
+      offset: offset)
     try printJSON(timeLogs, expand: global.expandedFields)
   }
 }

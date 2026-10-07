@@ -90,7 +90,6 @@ extension KaitenClient {
   ///
   /// - Parameters:
   ///   - query: Text search query to filter properties by name.
-  ///   - includeValues: Include property values in the response.
   ///   - includeAuthor: Include author details in the response.
   ///   - compact: Return compact representation.
   ///   - orderBy: Field to order by.
@@ -99,7 +98,40 @@ extension KaitenClient {
   /// - Returns: An `AsyncThrowingStream` of all custom properties.
   public func allCustomProperties(
     query: String? = nil,
-    includeValues: Bool? = nil,
+    includeAuthor: Bool? = nil,
+    compact: Bool? = nil,
+    orderBy: String? = nil,
+    orderDirection: String? = nil,
+    pageSize: Int = 100
+  ) -> AsyncThrowingStream<Components.Schemas.CustomProperty, Error> {
+    allPages(pageSize: pageSize) { [self] offset, limit in
+      try await self.listCustomProperties(
+        offset: offset, limit: limit, query: query, includeAuthor: includeAuthor,
+        compact: compact, orderBy: orderBy, orderDirection: orderDirection
+      )
+    }
+  }
+
+  /// Returns all custom properties across all pages, sending `include_values`.
+  ///
+  /// - Parameters:
+  ///   - query: Text search query to filter properties by name.
+  ///   - includeValues: Include property values in the response. The public API answers
+  ///     `true` with HTTP 400 since October 1, 2026.
+  ///   - includeAuthor: Include author details in the response.
+  ///   - compact: Return compact representation.
+  ///   - orderBy: Field to order by.
+  ///   - orderDirection: Order direction: asc or desc.
+  ///   - pageSize: Number of properties per page (default `100`).
+  /// - Returns: An `AsyncThrowingStream` of all custom properties.
+  @available(
+    *, deprecated,
+    message:
+      "The public API rejects include_values=true with HTTP 400; read values from the paginated value endpoints"
+  )
+  public func allCustomProperties(
+    query: String? = nil,
+    includeValues: Bool?,
     includeAuthor: Bool? = nil,
     compact: Bool? = nil,
     orderBy: String? = nil,
@@ -197,6 +229,144 @@ extension KaitenClient {
   ) -> AsyncThrowingStream<Components.Schemas.Sprint, Error> {
     allPages(pageSize: pageSize) { [self] offset, limit in
       try await self.listSprints(active: active, limit: limit, offset: offset)
+    }
+  }
+
+  /// Returns all spaces across all pages.
+  ///
+  /// - Parameter pageSize: Number of spaces per page (1–100, default `100`).
+  /// - Returns: An `AsyncThrowingStream` of all spaces.
+  public func allSpaces(
+    pageSize: Int = 100
+  ) -> AsyncThrowingStream<Components.Schemas.Space, Error> {
+    allPages(pageSize: pageSize) { [self] offset, limit in
+      try await self.listSpaces(limit: limit, offset: offset)
+    }
+  }
+
+  /// Returns all comments on a card across all pages.
+  ///
+  /// - Parameters:
+  ///   - cardId: The card identifier.
+  ///   - pageSize: Number of comments per page (1–100, default `100`).
+  /// - Returns: An `AsyncThrowingStream` of all comments.
+  public func allCardComments(
+    cardId: Int,
+    pageSize: Int = 100
+  ) -> AsyncThrowingStream<Components.Schemas.Comment, Error> {
+    allPages(pageSize: pageSize) { [self] offset, limit in
+      try await self.getCardComments(cardId: cardId, limit: limit, offset: offset)
+    }
+  }
+
+  /// Returns all children of a card across all pages.
+  ///
+  /// - Parameters:
+  ///   - cardId: The card identifier.
+  ///   - pageSize: Number of children per page (1–100, default `100`).
+  /// - Returns: An `AsyncThrowingStream` of all card children.
+  public func allCardChildren(
+    cardId: Int,
+    pageSize: Int = 100
+  ) -> AsyncThrowingStream<Components.Schemas.CardChild, Error> {
+    allPages(pageSize: pageSize) { [self] offset, limit in
+      try await self.listCardChildren(cardId: cardId, limit: limit, offset: offset)
+    }
+  }
+
+  /// Returns all time logs on a card across all pages.
+  ///
+  /// - Parameters:
+  ///   - cardId: The card identifier.
+  ///   - forDate: Filter by the `for_date` attribute (`YYYY-MM-DD`).
+  ///   - personal: When `true`, returns only the current user's time logs.
+  ///   - pageSize: Number of time logs per page (1–100, default `100`).
+  /// - Returns: An `AsyncThrowingStream` of all time logs.
+  public func allCardTimeLogs(
+    cardId: Int,
+    forDate: String? = nil,
+    personal: Bool? = nil,
+    pageSize: Int = 100
+  ) -> AsyncThrowingStream<Components.Schemas.CardTimeLog, Error> {
+    allPages(pageSize: pageSize) { [self] offset, limit in
+      try await self.getCardTimeLogs(
+        cardId: cardId, forDate: forDate, personal: personal, limit: limit, offset: offset)
+    }
+  }
+
+  /// Returns all users of a company group across all pages.
+  ///
+  /// - Parameters:
+  ///   - groupUid: The group UID.
+  ///   - pageSize: Number of users per page (1–100, default `100`).
+  /// - Returns: An `AsyncThrowingStream` of all group users.
+  public func allGroupUsers(
+    groupUid: String,
+    pageSize: Int = 100
+  ) -> AsyncThrowingStream<Components.Schemas.GroupUser, Error> {
+    allPages(pageSize: pageSize) { [self] offset, limit in
+      try await self.listGroupUsers(groupUid: groupUid, limit: limit, offset: offset)
+    }
+  }
+
+  /// Returns all users with access to a card across all pages.
+  ///
+  /// - Parameters:
+  ///   - cardId: The card identifier.
+  ///   - type: The type of users to return.
+  ///   - role: Filter by role.
+  ///   - pageSize: Number of users per page (1–100, default `100`).
+  /// - Returns: An `AsyncThrowingStream` of all allowed users.
+  public func allCardAllowedUsers(
+    cardId: Int,
+    type: String? = nil,
+    role: Int? = nil,
+    pageSize: Int = 100
+  ) -> AsyncThrowingStream<Components.Schemas.AllowedUser, Error> {
+    allPages(pageSize: pageSize) { [self] offset, limit in
+      try await self.listCardAllowedUsers(
+        cardId: cardId, type: type, role: role, limit: limit, offset: offset)
+    }
+  }
+
+  /// Returns all users of a space across all pages.
+  ///
+  /// The endpoint pages by a `last_user_id` cursor rather than an offset. Each request passes the
+  /// greatest user id seen on the previous page, since the default list is not ordered by id.
+  ///
+  /// - Parameters:
+  ///   - spaceId: The space identifier.
+  ///   - includeInheritedAccess: Include users whose access is inherited from a parent entity.
+  ///   - inactive: Return only members who are inactive in the company.
+  ///   - pageSize: Number of users per page (1–500, default `100`).
+  /// - Returns: An `AsyncThrowingStream` of all space users.
+  public func allSpaceUsers(
+    spaceId: Int,
+    includeInheritedAccess: Bool? = nil,
+    inactive: Bool? = nil,
+    pageSize: Int = 100
+  ) -> AsyncThrowingStream<Components.Schemas.SpaceUser, Error> {
+    AsyncThrowingStream { continuation in
+      let task = Task {
+        var lastUserId: Int?
+        do {
+          while !Task.isCancelled {
+            let users = try await listSpaceUsers(
+              spaceId: spaceId, includeInheritedAccess: includeInheritedAccess,
+              inactive: inactive, limit: pageSize, lastUserId: lastUserId)
+            for user in users { continuation.yield(user) }
+            // A short page is the last one; a cursor that stops growing would repeat the page.
+            guard users.count == pageSize, let maxId = users.compactMap(\.id).max(),
+              maxId > lastUserId ?? .min
+            else { break }
+            lastUserId = maxId
+          }
+          continuation.finish()
+        } catch {
+          continuation.finish(throwing: error)
+        }
+      }
+      continuation.onTermination = { _ in task.cancel() }
     }
   }
 }

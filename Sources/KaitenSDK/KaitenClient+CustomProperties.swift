@@ -41,7 +41,6 @@ extension KaitenClient {
   ///   - offset: Number of properties to skip (default `0`).
   ///   - limit: Maximum number of properties to return (default `100`).
   ///   - query: Text search query to filter properties by name.
-  ///   - includeValues: Include property values in the response.
   ///   - includeAuthor: Include author details in the response.
   ///   - compact: Return compact representation.
   ///   - loadByIds: Load properties by IDs (use with `ids`).
@@ -59,13 +58,75 @@ extension KaitenClient {
     offset: Int = 0,
     limit: Int = 100,
     query: String? = nil,
-    includeValues: Bool? = nil,
     includeAuthor: Bool? = nil,
     compact: Bool? = nil,
     loadByIds: Bool? = nil,
     ids: [Int]? = nil,
     orderBy: String? = nil,
     orderDirection: String? = nil
+  ) async throws(KaitenError) -> Page<Components.Schemas.CustomProperty> {
+    try await customPropertiesPage(
+      offset: offset, limit: limit, query: query, includeValues: nil,
+      includeAuthor: includeAuthor, compact: compact, loadByIds: loadByIds, ids: ids,
+      orderBy: orderBy, orderDirection: orderDirection)
+  }
+
+  /// Lists all custom property definitions for the company, sending `include_values`.
+  ///
+  /// - Parameters:
+  ///   - offset: Number of properties to skip.
+  ///   - limit: Maximum number of properties to return.
+  ///   - query: Text search query to filter properties by name.
+  ///   - includeValues: Include property values in the response. The public API answers
+  ///     `true` with HTTP 400 since October 1, 2026.
+  ///   - includeAuthor: Include author details in the response.
+  ///   - compact: Return compact representation.
+  ///   - loadByIds: Load properties by IDs (use with `ids`).
+  ///   - ids: Array of property IDs to load (requires `loadByIds: true`).
+  ///   - orderBy: Field to order by.
+  ///   - orderDirection: Order direction: asc or desc.
+  /// - Returns: A ``Page`` of custom property definitions.
+  /// - Throws:
+  ///   - ``KaitenError/invalidPaginationRange(offset:limit:)`` if pagination parameters are out of range.
+  ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` with status 400 if `includeValues` is `true`.
+  ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
+  ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
+  ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
+  ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403) or other undocumented HTTP status codes.
+  @available(
+    *, deprecated,
+    message:
+      "The public API rejects include_values=true with HTTP 400; read values from the paginated value endpoints"
+  )
+  public func listCustomProperties(
+    offset: Int = 0,
+    limit: Int = 100,
+    query: String? = nil,
+    includeValues: Bool?,
+    includeAuthor: Bool? = nil,
+    compact: Bool? = nil,
+    loadByIds: Bool? = nil,
+    ids: [Int]? = nil,
+    orderBy: String? = nil,
+    orderDirection: String? = nil
+  ) async throws(KaitenError) -> Page<Components.Schemas.CustomProperty> {
+    try await customPropertiesPage(
+      offset: offset, limit: limit, query: query, includeValues: includeValues,
+      includeAuthor: includeAuthor, compact: compact, loadByIds: loadByIds, ids: ids,
+      orderBy: orderBy, orderDirection: orderDirection)
+  }
+
+  private func customPropertiesPage(
+    offset: Int,
+    limit: Int,
+    query: String?,
+    includeValues: Bool?,
+    includeAuthor: Bool?,
+    compact: Bool?,
+    loadByIds: Bool?,
+    ids: [Int]?,
+    orderBy: String?,
+    orderDirection: String?
   ) async throws(KaitenError) -> Page<Components.Schemas.CustomProperty> {
     try validatePagination(offset: offset, limit: limit)
     guard

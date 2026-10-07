@@ -10,8 +10,13 @@ extension KaitenClient {
   ///   - spaceId: The space identifier.
   ///   - includeInheritedAccess: Include users whose access is inherited from a parent entity.
   ///   - inactive: Return only members who are inactive in the company.
+  ///   - limit: Maximum number of users to return (1–500). The API returns 100 when omitted.
+  ///   - lastUserId: Cursor: return users whose id is greater than this. Pass the greatest user id
+  ///     of the previous page, not the last element — the default list is not ordered by id.
+  ///     The endpoint has no `offset`.
   /// - Returns: An array of space users. Returns an empty array if the space has no users.
   /// - Throws:
+  ///   - ``KaitenError/invalidPaginationRange(offset:limit:)`` if pagination parameters are out of range.
   ///   - ``KaitenError/notFound(resource:id:)`` if the space does not exist.
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
@@ -20,15 +25,20 @@ extension KaitenClient {
   public func listSpaceUsers(
     spaceId: Int,
     includeInheritedAccess: Bool? = nil,
-    inactive: Bool? = nil
+    inactive: Bool? = nil,
+    limit: Int? = nil,
+    lastUserId: Int? = nil
   ) async throws(KaitenError) -> [Components.Schemas.SpaceUser] {
+    try validatePagination(offset: 0, limit: limit ?? 100, maxLimit: 500)
     guard
       let response = try await callList({
         try await client.list_space_users(
           path: .init(space_id: spaceId),
           query: .init(
             include_inherited_access: includeInheritedAccess,
-            inactive: inactive
+            inactive: inactive,
+            limit: limit,
+            last_user_id: lastUserId
           )
         )
       })

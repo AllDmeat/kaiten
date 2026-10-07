@@ -26,12 +26,25 @@ struct ListSpaceUsers: AsyncParsableCommand {
   @Option(name: .long, help: "Return only members inactive in the company")
   var inactive: Bool?
 
+  @Option(name: .long, help: "Maximum number of users to return (1-500, default 100)")
+  var limit: Int?
+
+  @Option(
+    name: .long,
+    help: """
+      Return users with an id greater than this. Pass the greatest id of the previous page: \
+      the default order is not by id
+      """)
+  var lastUserId: Int?
+
   func run() async throws {
     let client = try await global.makeClient()
     let users = try await client.listSpaceUsers(
       spaceId: spaceId,
       includeInheritedAccess: includeInheritedAccess,
-      inactive: inactive
+      inactive: inactive,
+      limit: limit,
+      lastUserId: lastUserId
     )
     try printJSON(users, expand: global.expandedFields)
   }

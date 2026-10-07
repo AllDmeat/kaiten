@@ -86,8 +86,8 @@ struct UpdateCustomPropertyFile: AsyncParsableCommand {
     commandName: "update-custom-property-file",
     abstract: "Update a custom property file",
     discussion: """
-      Requires "Restricted file access" enabled in company settings. Setting --card-cover \
-      to true additionally requires card update permission.
+      Requires the "Restricted file access" company setting to be enabled. The API answers \
+      403 for a locked card.
       """
   )
 

@@ -77,8 +77,7 @@ extension KaitenClient {
 
   /// Updates a private card file.
   ///
-  /// Requires "Restricted file access" enabled in company settings. Setting `cardCover` to
-  /// `true` additionally requires card update permission.
+  /// Requires "Restricted file access" enabled in company settings.
   ///
   /// - Parameters:
   ///   - cardUid: The card UID.

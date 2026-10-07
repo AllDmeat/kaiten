@@ -118,8 +118,8 @@ extension KaitenClient {
 
   /// Updates a custom property file.
   ///
-  /// The endpoint requires the "Restricted file access" company setting to be enabled.
-  /// Setting `cardCover` to `true` additionally requires card update permission.
+  /// The endpoint requires the "Restricted file access" company setting to be enabled. The
+  /// API answers 403 for a locked card.
   ///
   /// - Parameters:
   ///   - cardUid: The card UID.

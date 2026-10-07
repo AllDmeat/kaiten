@@ -3065,9 +3065,7 @@ paths:
     patch:
       summary: Update card file
       operationId: update_private_card_file
-      description: >-
-        Requires "Restricted file access" enabled in company settings. Setting `card_cover`
-        to true additionally requires card update permission.
+      description: Requires "Restricted file access" enabled in company settings.
       parameters:
       - name: card_uid
         in: path
@@ -3449,8 +3447,8 @@ paths:
       summary: Update custom property file
       operationId: update_custom_property_file
       description: >-
-        Requires "Restricted file access" enabled in company settings. Setting `card_cover`
-        to true additionally requires card update permission.
+        Requires "Restricted file access" enabled in company settings. A locked card yields
+        403.
       parameters:
       - name: card_uid
         in: path

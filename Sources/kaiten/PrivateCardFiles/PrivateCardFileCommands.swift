@@ -75,10 +75,7 @@ struct UpdatePrivateCardFile: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "update-private-card-file",
     abstract: "Update a private card file",
-    discussion: """
-      Requires "Restricted file access" enabled in company settings. Setting --card-cover \
-      to true additionally requires card update permission.
-      """
+    discussion: "Requires \"Restricted file access\" enabled in company settings."
   )
 
   @OptionGroup var global: GlobalOptions

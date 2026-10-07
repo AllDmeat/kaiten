@@ -1,5 +1,6 @@
 import ArgumentParser
 import KaitenSDK
+import OpenAPIRuntime
 
 struct CreateSpace: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
@@ -21,13 +22,17 @@ struct CreateSpace: AsyncParsableCommand {
   @Option(name: .long, help: "Parent entity UID for nesting the space")
   var parentEntityUid: String?
 
+  @Option(name: .long, help: "Work calendar ID")
+  var workCalendarId: String?
+
   func run() async throws {
     let client = try await global.makeClient()
     let space = try await client.createSpace(
       title: title,
       externalId: externalId,
       parentEntityUid: parentEntityUid,
-      sortOrder: sortOrder
+      sortOrder: sortOrder,
+      workCalendarId: workCalendarId
     )
     try printJSON(space, expand: global.expandedFields)
   }
@@ -77,7 +82,18 @@ struct UpdateSpace: AsyncParsableCommand {
   @Option(name: .long, help: "Parent entity UID for nesting the space")
   var parentEntityUid: String?
 
+  @Option(name: .long, help: "Comma-separated UIDs of card types hidden in the space")
+  var hiddenCardTypeUids: String?
+
+  @Option(name: .long, help: "Space settings as a JSON object")
+  var settings: String?
+
   func run() async throws {
+    let parsedHiddenCardTypeUids = try parseStringCSV(
+      hiddenCardTypeUids, fieldName: "hidden-card-type-uids")
+    let parsedSettings = try parseCardTypeJSON(
+      settings, as: OpenAPIObjectContainer.self, fieldName: "settings")
+
     let client = try await global.makeClient()
     let space = try await client.updateSpace(
       id: id,
@@ -85,7 +101,9 @@ struct UpdateSpace: AsyncParsableCommand {
       externalId: externalId,
       sortOrder: sortOrder,
       access: access,
-      parentEntityUid: parentEntityUid
+      parentEntityUid: parentEntityUid,
+      hiddenCardTypeUids: parsedHiddenCardTypeUids,
+      settings: parsedSettings
     )
     try printJSON(space, expand: global.expandedFields)
   }

@@ -381,9 +381,14 @@ kaiten delete-custom-property-file --card-uid c1a2 --property-uid p3b4 --file-id
 | Method | Description |
 |--------|-------------|
 | `listSpaces(limit:offset:)` | List spaces (up to 100 per page) |
-| `createSpace(...)` | Create a space |
+| `createSpace(title:externalId:parentEntityUid:sortOrder:workCalendarId:)` | Create a space |
 | `getSpace(...)` | Get a space by ID |
-| `updateSpace(...)` | Update a space |
+| `updateSpace(id:title:externalId:sortOrder:access:parentEntityUid:hiddenCardTypeUids:settings:)` | Update a space; `settings` is a free-form JSON object |
+
+`Space.allowed_card_type_ids` is deprecated by the API in favour of `hidden_card_type_uids`.
+
+CLI: `create-space --title <title> [--work-calendar-id <id>]`,
+`update-space --id <id> [--hidden-card-type-uids <uid,uid>] [--settings <json-object>]`.
 
 ### Boards
 
@@ -392,10 +397,12 @@ kaiten delete-custom-property-file --card-uid c1a2 --property-uid p3b4 --file-id
 | `listBoards(spaceId:)` | List boards in a space |
 | `getBoard(id:)` | Fetch a board by ID |
 | `getSpaceBoard(spaceId:id:)` | Fetch a board within a space, with its position on the space |
-| `createBoard(...)` | Create a board |
-| `updateBoard(...)` | Update a board |
+| `createBoard(spaceId:title:description:sortOrder:externalId:top:left:columns:lanes:)` | Create a board; `columns` and `lanes` must not be empty arrays |
+| `updateBoard(spaceId:id:title:description:sortOrder:externalId:top:left:type:cellWipLimits:moveParentsToDone:hideDonePolicies:hideDonePoliciesInDoneColumn:moveFromSpaceId:cardProperties:)` | Update a board, including its placement on the space |
 
-CLI: `get-space-board --space-id <id> --id <id>`.
+CLI: `get-space-board --space-id <id> --id <id>`,
+`create-board --space-id <id> --title <title> [--top <n>] [--left <n>] [--columns <json-array>] [--lanes <json-array>]`,
+`update-board --space-id <id> --id <id> [--top <n>] [--left <n>] [--type <1|5>] [--cell-wip-limits <json-object>] [--move-parents-to-done <bool>] [--hide-done-policies <bool>] [--hide-done-policies-in-done-column <bool>] [--move-from-space-id <id>] [--card-properties <json-array>]`.
 
 ### Columns
 

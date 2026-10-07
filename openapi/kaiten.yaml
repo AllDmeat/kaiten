@@ -7960,6 +7960,15 @@ components:
           - integer
           - 'null'
           description: Hide cards not moved for the last N days
+        # DOC_MISMATCH: not in docs, present in actual responses for columns embedded in a board (`array | null`) — https://developers.kaiten.ru/boards/get-board
+        policies:
+          type:
+          - array
+          - 'null'
+          items:
+            type: object
+            additionalProperties: true
+          description: Column policies. Returned only for columns embedded in a board.
         pause_sla:
           # DOC_MISMATCH: not in subcolumn docs, present in actual subcolumn responses — https://developers.kaiten.ru/subcolumn/get-list-of-subcolumns
           type: boolean
@@ -8075,7 +8084,9 @@ components:
           type: integer
           description: Default card type for new cards on board
         description:
-          type: string
+          type:
+          - string
+          - 'null'
           description: Board description
         email_key:
           type: string
@@ -8134,6 +8145,41 @@ components:
           items:
             $ref: '#/components/schemas/Card'
           description: Board cards
+        cards_deprecation_message:
+          type: string
+          description: Optional deprecation message returned when cards are excluded from the response
+        top:
+          type: integer
+          description: Y coordinate of the board on space. Returned by board create and update only.
+        left:
+          type: integer
+          description: X coordinate of the board on space. Returned by board create and update only.
+        sort_order:
+          type: number
+          description: Position. Returned by board create and update only.
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string`) — https://developers.kaiten.ru/boards/get-board
+        uid:
+          type: string
+          description: Board UID
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/boards/get-board
+        import_uid:
+          type:
+          - string
+          - 'null'
+          description: Import UID
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/boards/get-board
+        locked:
+          type:
+          - string
+          - 'null'
+          description: Lock status
+        # DOC_MISMATCH: not in docs, present in actual API responses (`object | null`) — https://developers.kaiten.ru/boards/get-board
+        settings:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Board settings
     SpaceBoard:
       type: object
       properties:
@@ -8164,7 +8210,6 @@ components:
           type: integer
           description: Default card type for new cards on board
         description:
-          # DOC_MISMATCH: docs=non-nullable `string`, actual=`string | null` — https://developers.kaiten.ru/space-boards/get-board
           type:
           - string
           - 'null'
@@ -8249,6 +8294,9 @@ components:
           items:
             $ref: '#/components/schemas/Card'
           description: Board cards
+        cards_deprecation_message:
+          type: string
+          description: Optional deprecation message returned when cards are excluded from the response
         top:
           type: integer
           description: Y coordinate of the board on space
@@ -8319,14 +8367,26 @@ components:
           - 'null'
           items:
             type: integer
-          description: Allowed card type IDs for this space
+          deprecated: true
+          description: Allowed card type IDs for this space. Deprecated by the API in favour of `hidden_card_type_uids`.
+        hidden_card_type_uids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: List of hidden card type uids
         external_id:
           type:
           - string
           - 'null'
           description: External id
         settings:
-          type: object
+          # DOC_MISMATCH: docs=non-nullable `object`, actual=`object | null` — https://developers.kaiten.ru/spaces/retrieve-list-of-spaces
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
           description: Space settings
         boards:
           type: array
@@ -8342,6 +8402,71 @@ components:
         access_mod:
           type: string
           description: User access modifier
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/spaces/retrieve-space
+        work_calendar_id:
+          type:
+          - string
+          - 'null'
+          description: Work calendar id
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/spaces/retrieve-space
+        author_uid:
+          type:
+          - string
+          - 'null'
+          description: Author uid
+        # DOC_MISMATCH: not in docs, present in actual API responses (`integer | null`) — https://developers.kaiten.ru/spaces/retrieve-space
+        icon_color:
+          type:
+          - integer
+          - 'null'
+          description: Icon color
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/spaces/retrieve-space
+        icon_type:
+          type:
+          - string
+          - 'null'
+          description: Icon type
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/spaces/retrieve-space
+        icon_value:
+          type:
+          - string
+          - 'null'
+          description: Icon value
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/spaces/retrieve-space
+        import_uid:
+          type:
+          - string
+          - 'null'
+          description: Import uid
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/spaces/retrieve-space
+        key:
+          type:
+          - string
+          - 'null'
+          description: Space key
+        # DOC_MISMATCH: not in docs, present in actual API responses (`boolean`) — https://developers.kaiten.ru/spaces/retrieve-space
+        protected:
+          type: boolean
+          description: Space protected flag
+        # DOC_MISMATCH: not in docs, present in actual list responses (`boolean`) — https://developers.kaiten.ru/spaces/retrieve-list-of-spaces
+        notifications_enabled:
+          type: boolean
+          description: Whether notifications are enabled for the current user
+        # DOC_MISMATCH: not in docs, present in actual list responses (`integer`) — https://developers.kaiten.ru/spaces/retrieve-list-of-spaces
+        role:
+          type: integer
+          description: Role of the current user in the space
+        # DOC_MISMATCH: not in docs, present in actual list responses (`object`) — https://developers.kaiten.ru/spaces/retrieve-list-of-spaces
+        role_permissions:
+          type: object
+          additionalProperties: true
+          description: Permissions of the current user in the space
+        users:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: Space users. Documented on the create response only.
     CustomProperty:
       type: object
       properties:
@@ -8922,7 +9047,9 @@ components:
           type: integer
           description: Default card type for new cards on board
         description:
-          type: string
+          type:
+          - string
+          - 'null'
           description: Board description
         email_key:
           type: string
@@ -8988,6 +9115,41 @@ components:
         type:
           type: integer
           description: 1 - place on space with coordinates (top, left), 5 - attach to space as sidebar
+        # DOC_MISMATCH: not in docs, present in actual API responses (`integer`) — https://developers.kaiten.ru/space-boards/get-list-of-boards
+        space_id:
+          type: integer
+          description: Board spaceId
+        # DOC_MISMATCH: not in docs, present in actual API responses (`integer`) — https://developers.kaiten.ru/space-boards/get-list-of-boards
+        board_id:
+          type: integer
+          description: Board id duplicated by the space binding
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string`) — https://developers.kaiten.ru/space-boards/get-list-of-boards
+        uid:
+          type: string
+          description: Board UID
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/space-boards/get-list-of-boards
+        import_uid:
+          type:
+          - string
+          - 'null'
+          description: Import UID
+        # DOC_MISMATCH: not in docs, present in actual API responses (`string | null`) — https://developers.kaiten.ru/space-boards/get-list-of-boards
+        locked:
+          type:
+          - string
+          - 'null'
+          description: Lock status
+        # DOC_MISMATCH: not in docs, present in actual API responses (`boolean`) — https://developers.kaiten.ru/space-boards/get-list-of-boards
+        primary_path:
+          type: boolean
+          description: Whether the space is the primary path of the board
+        # DOC_MISMATCH: not in docs, present in actual API responses (`object | null`) — https://developers.kaiten.ru/space-boards/get-list-of-boards
+        settings:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Board settings
     User:
       type: object
       properties:
@@ -11652,6 +11814,9 @@ components:
         sort_order:
           type: number
           description: Space sort order
+        work_calendar_id:
+          type: string
+          description: Work calendar id
     UpdateSpaceRequest:
       type: object
       properties:
@@ -11674,6 +11839,14 @@ components:
           - string
           - 'null'
           description: Parent tree entity uid
+        hidden_card_type_uids:
+          type: array
+          items:
+            type: string
+          description: List of hidden card type uids
+        settings:
+          type: object
+          description: Space settings
     DeletedIdResponse:
       type: object
       required:
@@ -11721,6 +11894,22 @@ components:
         auto_assign_enabled:
           type: boolean
           description: Auto assign author on move
+        top:
+          type: integer
+          description: Y coordinate of the board on space
+        left:
+          type: integer
+          description: X coordinate of the board on space
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateColumnRequest'
+          description: Board columns. A default column is created when omitted; an empty array is rejected by the API.
+        lanes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateLaneRequest'
+          description: Board lanes. A default lane is created when omitted; an empty array is rejected by the API.
     UpdateBoardRequest:
       type: object
       properties:
@@ -11763,6 +11952,36 @@ components:
         auto_assign_enabled:
           type: boolean
           description: Auto assign author
+        top:
+          type: integer
+          description: Y coordinate of the board on space
+        left:
+          type: integer
+          description: X coordinate of the board on space
+        type:
+          type: integer
+          description: "1 - place on space with coordinates (top, left), 5 - attach to space as sidebar"
+        # DOC_MISMATCH: docs=`array`, actual=`object` holding a `limits` array (response shape; request mirrors it) — https://developers.kaiten.ru/space-boards/update-board
+        cell_wip_limits:
+          type: object
+          description: JSON containing wip limits rules for cells
+        move_parents_to_done:
+          type: boolean
+          description: Automatically move parent cards to done when their children cards are done
+        hide_done_policies:
+          type: boolean
+          description: Hide done checklist policies
+        hide_done_policies_in_done_column:
+          type: boolean
+          description: Hide done checklist policies only in done column
+        move_from_space_id:
+          type: integer
+          description: Move board from space
+        card_properties:
+          type: array
+          items:
+            type: object
+            description: Properties of the board cards suggested for filling
     CreateColumnRequest:
       type: object
       required:

@@ -1,3 +1,4 @@
+import ArgumentParser
 import Foundation
 import Testing
 
@@ -56,6 +57,53 @@ struct ColumnLaneSettingsTests {
     #expect(json["pause_sla"] as? Bool == true)
     #expect(json["title"] == nil)
     #expect(json["card_hide_after_days"] == nil)
+  }
+
+  @Test("updateColumn sends explicit null for cleared nullable integers")
+  func updateColumnExplicitNull() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: columnJSON)
+    _ = try await makeClient(transport).updateColumn(
+      boardId: 10, id: 100, wipLimit: .some(nil), cardHideAfterDays: .some(nil),
+      prevColumnId: .some(nil), nextColumnId: .some(nil))
+
+    let json = try await sentBody(transport)
+    for key in ["wip_limit", "card_hide_after_days", "prev_column_id", "next_column_id"] {
+      #expect(json[key] is NSNull, "\(key) should be JSON null")
+    }
+  }
+
+  @Test("updateColumn sends values and omits absent nullable integers")
+  func updateColumnNullableValues() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: columnJSON)
+    _ = try await makeClient(transport).updateColumn(
+      boardId: 10, id: 100, wipLimit: 5, cardHideAfterDays: 14)
+
+    let json = try await sentBody(transport)
+    #expect(json["wip_limit"] as? Int == 5)
+    #expect(json["card_hide_after_days"] as? Int == 14)
+    #expect(json.keys.contains("prev_column_id") == false)
+    #expect(json.keys.contains("next_column_id") == false)
+  }
+
+  @Test("updateSubcolumn sends explicit null to turn card hiding off")
+  func updateSubcolumnExplicitNull() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: columnJSON)
+    _ = try await makeClient(transport).updateSubcolumn(
+      columnId: 100, id: 101, cardHideAfterDays: .some(nil))
+
+    let json = try await sentBody(transport)
+    #expect(json["card_hide_after_days"] is NSNull)
+    #expect(json.keys.contains("prev_column_id") == false)
+  }
+
+  @Test("ExplicitNullInteger encodes integers without a fractional part and null as null")
+  func explicitNullIntegerEncoding() throws {
+    let encoder = JSONEncoder()
+    #expect(
+      String(decoding: try encoder.encode(ExplicitNullInteger.value(14)), as: UTF8.self) == "14")
+    #expect(String(decoding: try encoder.encode(ExplicitNullInteger.null), as: UTF8.self) == "null")
+    #expect(try JSONDecoder().decode(ExplicitNullInteger.self, from: Data("null".utf8)) == .null)
+    #expect(try JSONDecoder().decode(ExplicitNullInteger.self, from: Data("7".utf8)) == .value(7))
   }
 
   @Test("createSubcolumn sends column settings and no WIP limit")
@@ -158,11 +206,21 @@ struct ColumnLaneSettingsTests {
       "--board-id", "10", "--id", "100", "--card-hide-after-days", "14", "--rules", "1",
       "--external-id", "ext-1", "--prev-column-id", "7", "--pause-sla", "true",
     ])
-    #expect(command.settings.cardHideAfterDays == 14)
+    #expect(command.update.cardHideAfterDays == "14")
     #expect(command.settings.rules == 1)
     #expect(command.settings.externalId == "ext-1")
-    #expect(command.update.prevColumnId == 7)
+    #expect(command.update.prevColumnId == "7")
     #expect(command.update.pauseSla == true)
+  }
+
+  @Test("nullable integer options map absent, empty and numeric input")
+  func parseNullableIntOption() throws {
+    #expect(try parseNullableInt(nil, option: "--wip-limit") == .none)
+    #expect(try parseNullableInt("", option: "--wip-limit") == .some(nil))
+    #expect(try parseNullableInt("5", option: "--wip-limit") == .some(5))
+    #expect(throws: ValidationError.self) {
+      _ = try parseNullableInt("five", option: "--wip-limit")
+    }
   }
 
   @Test("update-lane parses stale-card warning options")

@@ -10487,6 +10487,15 @@ components:
       type:
         - number
         - 'null'
+    NullableInteger:
+      description: >
+        An integer that supports three distinct states when used in a PATCH request body:
+        absent (field omitted — leave unchanged), null (field cleared), or an integer value (field set).
+        The generated Swift property is NullableInteger? — the outer optional handles absent vs present,
+        while the enum itself distinguishes null from an integer value.
+      type:
+        - integer
+        - 'null'
     CardBoardSummary:
       type: object
       required:
@@ -11708,11 +11717,11 @@ components:
           type: integer
           description: "1 - queue, 2 - in progress, 3 - done"
         wip_limit:
-          # DOC_MISMATCH: not in subcolumn request docs (column docs only), present in actual subcolumn responses — https://developers.kaiten.ru/subcolumn/create-new-subcolumn
+          # NOTE: shared with column requests; the subcolumn request docs omit this field and subcolumn acceptance is unverified, so subcolumn wrappers do not send it.
           type: integer
           description: WIP limit
         wip_limit_type:
-          # DOC_MISMATCH: not in subcolumn request docs (column docs only), present in actual subcolumn responses — https://developers.kaiten.ru/subcolumn/create-new-subcolumn
+          # NOTE: shared with column requests; the subcolumn request docs omit this field and subcolumn acceptance is unverified, so subcolumn wrappers do not send it.
           type: integer
           description: "1 - card count, 2 - card size"
         col_count:
@@ -11757,13 +11766,11 @@ components:
           type: integer
           description: "1 - queue, 2 - in progress, 3 - done"
         wip_limit:
-          # DOC_MISMATCH: not in subcolumn request docs (column docs only), present in actual subcolumn responses — https://developers.kaiten.ru/subcolumn/update-subcolumn
-          type:
-          - integer
-          - 'null'
-          description: WIP limit
+          # NOTE: shared with column requests; the subcolumn request docs omit this field and subcolumn acceptance is unverified, so subcolumn wrappers do not send it.
+          $ref: '#/components/schemas/NullableInteger'
+          description: WIP limit (null clears it, absent leaves it unchanged)
         wip_limit_type:
-          # DOC_MISMATCH: not in subcolumn request docs (column docs only), present in actual subcolumn responses — https://developers.kaiten.ru/subcolumn/update-subcolumn
+          # NOTE: shared with column requests; the subcolumn request docs omit this field and subcolumn acceptance is unverified, so subcolumn wrappers do not send it.
           type: integer
           description: "1 - card count, 2 - card size"
         col_count:
@@ -11787,10 +11794,8 @@ components:
           type: integer
           description: Days after which cards are archived automatically. Works only for columns with type done
         card_hide_after_days:
-          type:
-          - integer
-          - 'null'
-          description: Hide cards not moved for the last N days
+          $ref: '#/components/schemas/NullableInteger'
+          description: Hide cards not moved for the last N days (null clears it, absent leaves it unchanged)
         rules:
           type: integer
           minimum: 0
@@ -11801,14 +11806,10 @@ components:
           - 'null'
           description: External id
         prev_column_id:
-          type:
-          - integer
-          - 'null'
+          $ref: '#/components/schemas/NullableInteger'
           description: "Column ID to move column before; null moves the column to the beginning"
         next_column_id:
-          type:
-          - integer
-          - 'null'
+          $ref: '#/components/schemas/NullableInteger'
           description: "Column ID to move column after; null moves the column to the end"
         pause_sla:
           type: boolean

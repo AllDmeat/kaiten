@@ -102,7 +102,8 @@ extension KaitenClient {
   ///   - title: The updated title.
   ///   - sortOrder: The updated sort order.
   ///   - type: The updated column type.
-  ///   - wipLimit: The updated WIP limit.
+  ///   - wipLimit: The updated WIP limit. Pass `.some(nil)` to clear it, or `nil` to leave it
+  ///     unchanged. An `Int?` variable holding `nil` is promoted to `.some(nil)` and clears it.
   ///   - wipLimitType: The updated WIP limit type.
   ///   - colCount: The updated column count.
   ///   - lastMovedWarningAfterDays: Days without movement after which a card is marked stale.
@@ -110,11 +111,14 @@ extension KaitenClient {
   ///   - lastMovedWarningAfterMinutes: Minutes without movement after which a card is marked stale.
   ///   - archiveAfterDays: Days after which cards are archived automatically. Honoured only by
   ///     columns of type ``ColumnType/done``.
-  ///   - cardHideAfterDays: Hides cards not moved for the last N days.
+  ///   - cardHideAfterDays: Hides cards not moved for the last N days. Pass `.some(nil)` to turn
+  ///     hiding off.
   ///   - rules: Bit mask of column rules: `1` — checklists must be checked, `2` — display FIFO order.
   ///   - externalId: An external identifier, not shown in the web interface.
-  ///   - prevColumnId: The column to move this column before.
-  ///   - nextColumnId: The column to move this column after.
+  ///   - prevColumnId: The column to move this column before. Pass `.some(nil)` to move it to
+  ///     the beginning.
+  ///   - nextColumnId: The column to move this column after. Pass `.some(nil)` to move it to the
+  ///     end.
   ///   - pauseSla: Whether the SLA timer is paused in this column.
   /// - Returns: The updated column.
   /// - Throws:
@@ -129,18 +133,18 @@ extension KaitenClient {
     title: String? = nil,
     sortOrder: Double? = nil,
     type: ColumnType? = nil,
-    wipLimit: Int? = nil,
+    wipLimit: Int?? = nil,
     wipLimitType: WipLimitType? = nil,
     colCount: Int? = nil,
     lastMovedWarningAfterDays: Int? = nil,
     lastMovedWarningAfterHours: Int? = nil,
     lastMovedWarningAfterMinutes: Int? = nil,
     archiveAfterDays: Int? = nil,
-    cardHideAfterDays: Int? = nil,
+    cardHideAfterDays: Int?? = nil,
     rules: Int? = nil,
     externalId: String? = nil,
-    prevColumnId: Int? = nil,
-    nextColumnId: Int? = nil,
+    prevColumnId: Int?? = nil,
+    nextColumnId: Int?? = nil,
     pauseSla: Bool? = nil
   ) async throws(KaitenError) -> Components.Schemas.Column {
     let response = try await call {
@@ -151,18 +155,18 @@ extension KaitenClient {
             title: title,
             sort_order: sortOrder,
             _type: type?.rawValue,
-            wip_limit: wipLimit,
+            wip_limit: .from(wipLimit),
             wip_limit_type: wipLimitType?.rawValue,
             col_count: colCount,
             last_moved_warning_after_days: lastMovedWarningAfterDays,
             last_moved_warning_after_hours: lastMovedWarningAfterHours,
             last_moved_warning_after_minutes: lastMovedWarningAfterMinutes,
             archive_after_days: archiveAfterDays,
-            card_hide_after_days: cardHideAfterDays,
+            card_hide_after_days: .from(cardHideAfterDays),
             rules: rules,
             external_id: externalId,
-            prev_column_id: prevColumnId,
-            next_column_id: nextColumnId,
+            prev_column_id: .from(prevColumnId),
+            next_column_id: .from(nextColumnId),
             pause_sla: pauseSla
           )))
     }
@@ -299,11 +303,14 @@ extension KaitenClient {
   ///   - lastMovedWarningAfterMinutes: Minutes without movement after which a card is marked stale.
   ///   - archiveAfterDays: Days after which cards are archived automatically. Honoured only by
   ///     columns of type ``ColumnType/done``.
-  ///   - cardHideAfterDays: Hides cards not moved for the last N days.
+  ///   - cardHideAfterDays: Hides cards not moved for the last N days. Pass `.some(nil)` to turn
+  ///     hiding off.
   ///   - rules: Bit mask of column rules: `1` — checklists must be checked, `2` — display FIFO order.
   ///   - externalId: An external identifier, not shown in the web interface.
-  ///   - prevColumnId: The column to move this column before.
-  ///   - nextColumnId: The column to move this column after.
+  ///   - prevColumnId: The column to move this column before. Pass `.some(nil)` to move it to
+  ///     the beginning.
+  ///   - nextColumnId: The column to move this column after. Pass `.some(nil)` to move it to the
+  ///     end.
   ///   - pauseSla: Whether the SLA timer is paused in this column.
   /// - Returns: The updated subcolumn.
   /// - Throws:
@@ -323,11 +330,11 @@ extension KaitenClient {
     lastMovedWarningAfterHours: Int? = nil,
     lastMovedWarningAfterMinutes: Int? = nil,
     archiveAfterDays: Int? = nil,
-    cardHideAfterDays: Int? = nil,
+    cardHideAfterDays: Int?? = nil,
     rules: Int? = nil,
     externalId: String? = nil,
-    prevColumnId: Int? = nil,
-    nextColumnId: Int? = nil,
+    prevColumnId: Int?? = nil,
+    nextColumnId: Int?? = nil,
     pauseSla: Bool? = nil
   ) async throws(KaitenError) -> Components.Schemas.Column {
     let response = try await call {
@@ -343,11 +350,11 @@ extension KaitenClient {
             last_moved_warning_after_hours: lastMovedWarningAfterHours,
             last_moved_warning_after_minutes: lastMovedWarningAfterMinutes,
             archive_after_days: archiveAfterDays,
-            card_hide_after_days: cardHideAfterDays,
+            card_hide_after_days: .from(cardHideAfterDays),
             rules: rules,
             external_id: externalId,
-            prev_column_id: prevColumnId,
-            next_column_id: nextColumnId,
+            prev_column_id: .from(prevColumnId),
+            next_column_id: .from(nextColumnId),
             pause_sla: pauseSla
           )))
     }

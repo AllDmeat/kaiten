@@ -23,6 +23,18 @@ func parseWipLimitType(_ rawValue: Int?) throws -> WipLimitType? {
   return type
 }
 
+/// Maps an option that can clear a nullable integer field:
+/// absent → leave unchanged, `""` → send JSON null, a number → send it.
+func parseNullableInt(_ raw: String?, option: String) throws -> Int?? {
+  try raw.map { raw in
+    if raw.isEmpty { return nil }
+    guard let value = Int(raw) else {
+      throw ValidationError("Invalid \(option) value: '\(raw)'")
+    }
+    return value
+  }
+}
+
 /// Settings shared by columns and subcolumns on create and update.
 struct ColumnSettingsOptions: ParsableArguments {
   @Option(name: .long, help: "Days without movement after which a card is marked stale")
@@ -39,9 +51,6 @@ struct ColumnSettingsOptions: ParsableArguments {
     help: "Days after which cards are archived automatically. Honoured only by done columns.")
   var archiveAfterDays: Int?
 
-  @Option(name: .long, help: "Hide cards not moved for the last N days")
-  var cardHideAfterDays: Int?
-
   @Option(
     name: .long,
     help: "Bit mask of column rules: 1=checklists must be checked, 2=display FIFO order")
@@ -51,13 +60,24 @@ struct ColumnSettingsOptions: ParsableArguments {
   var externalId: String?
 }
 
-/// Reordering and SLA options accepted only by column and subcolumn updates.
+/// Options accepted only by column and subcolumn updates.
 struct ColumnUpdateOptions: ParsableArguments {
-  @Option(name: .long, help: "Column ID to move this column before")
-  var prevColumnId: Int?
+  @Option(
+    name: .long,
+    help: "Hide cards not moved for the last N days. Pass empty string \"\" to turn hiding off.")
+  var cardHideAfterDays: String?
 
-  @Option(name: .long, help: "Column ID to move this column after")
-  var nextColumnId: Int?
+  @Option(
+    name: .long,
+    help:
+      "Column ID to move this column before. Pass empty string \"\" to move it to the beginning."
+  )
+  var prevColumnId: String?
+
+  @Option(
+    name: .long,
+    help: "Column ID to move this column after. Pass empty string \"\" to move it to the end.")
+  var nextColumnId: String?
 
   @Option(name: .long, help: "Pause the SLA timer in this column (true or false)")
   var pauseSla: Bool?
@@ -92,6 +112,9 @@ struct CreateColumn: AsyncParsableCommand {
   @Option(name: .long, help: "Number of columns to display side by side")
   var colCount: Int?
 
+  @Option(name: .long, help: "Hide cards not moved for the last N days")
+  var cardHideAfterDays: Int?
+
   @OptionGroup var settings: ColumnSettingsOptions
 
   func run() async throws {
@@ -108,7 +131,7 @@ struct CreateColumn: AsyncParsableCommand {
       lastMovedWarningAfterHours: settings.lastMovedWarningAfterHours,
       lastMovedWarningAfterMinutes: settings.lastMovedWarningAfterMinutes,
       archiveAfterDays: settings.archiveAfterDays,
-      cardHideAfterDays: settings.cardHideAfterDays,
+      cardHideAfterDays: cardHideAfterDays,
       rules: settings.rules,
       externalId: settings.externalId
     )
@@ -139,8 +162,8 @@ struct UpdateColumn: AsyncParsableCommand {
   @Option(name: .long, help: "Column type: 1=queue, 2=in progress, 3=done")
   var columnType: Int?
 
-  @Option(name: .long, help: "WIP limit value")
-  var wipLimit: Int?
+  @Option(name: .long, help: "WIP limit value. Pass empty string \"\" to clear the limit.")
+  var wipLimit: String?
 
   @Option(name: .long, help: "WIP limit type: 1=card count, 2=card size")
   var wipLimitType: Int?
@@ -160,18 +183,19 @@ struct UpdateColumn: AsyncParsableCommand {
       title: title,
       sortOrder: sortOrder,
       type: try parseColumnType(columnType),
-      wipLimit: wipLimit,
+      wipLimit: try parseNullableInt(wipLimit, option: "--wip-limit"),
       wipLimitType: try parseWipLimitType(wipLimitType),
       colCount: colCount,
       lastMovedWarningAfterDays: settings.lastMovedWarningAfterDays,
       lastMovedWarningAfterHours: settings.lastMovedWarningAfterHours,
       lastMovedWarningAfterMinutes: settings.lastMovedWarningAfterMinutes,
       archiveAfterDays: settings.archiveAfterDays,
-      cardHideAfterDays: settings.cardHideAfterDays,
+      cardHideAfterDays: try parseNullableInt(
+        update.cardHideAfterDays, option: "--card-hide-after-days"),
       rules: settings.rules,
       externalId: settings.externalId,
-      prevColumnId: update.prevColumnId,
-      nextColumnId: update.nextColumnId,
+      prevColumnId: try parseNullableInt(update.prevColumnId, option: "--prev-column-id"),
+      nextColumnId: try parseNullableInt(update.nextColumnId, option: "--next-column-id"),
       pauseSla: update.pauseSla
     )
     try printJSON(column, expand: global.expandedFields)
@@ -247,6 +271,9 @@ struct CreateSubcolumn: AsyncParsableCommand {
   @Option(name: .long, help: "Number of columns to display side by side")
   var colCount: Int?
 
+  @Option(name: .long, help: "Hide cards not moved for the last N days")
+  var cardHideAfterDays: Int?
+
   @OptionGroup var settings: ColumnSettingsOptions
 
   func run() async throws {
@@ -261,7 +288,7 @@ struct CreateSubcolumn: AsyncParsableCommand {
       lastMovedWarningAfterHours: settings.lastMovedWarningAfterHours,
       lastMovedWarningAfterMinutes: settings.lastMovedWarningAfterMinutes,
       archiveAfterDays: settings.archiveAfterDays,
-      cardHideAfterDays: settings.cardHideAfterDays,
+      cardHideAfterDays: cardHideAfterDays,
       rules: settings.rules,
       externalId: settings.externalId
     )
@@ -312,11 +339,12 @@ struct UpdateSubcolumn: AsyncParsableCommand {
       lastMovedWarningAfterHours: settings.lastMovedWarningAfterHours,
       lastMovedWarningAfterMinutes: settings.lastMovedWarningAfterMinutes,
       archiveAfterDays: settings.archiveAfterDays,
-      cardHideAfterDays: settings.cardHideAfterDays,
+      cardHideAfterDays: try parseNullableInt(
+        update.cardHideAfterDays, option: "--card-hide-after-days"),
       rules: settings.rules,
       externalId: settings.externalId,
-      prevColumnId: update.prevColumnId,
-      nextColumnId: update.nextColumnId,
+      prevColumnId: try parseNullableInt(update.prevColumnId, option: "--prev-column-id"),
+      nextColumnId: try parseNullableInt(update.nextColumnId, option: "--next-column-id"),
       pauseSla: update.pauseSla
     )
     try printJSON(subcolumn, expand: global.expandedFields)

@@ -21,7 +21,7 @@ struct CardFilesTests {
     {
       "id": 101,
       "url": "https://files.kaiten.ru/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.MP4",
-      "name": "IMG_3131 (1).MP4",
+      "name": "video.mp4",
       "type": 1,
       "size": 7804333,
       "mime_type": null,
@@ -53,7 +53,7 @@ struct CardFilesTests {
       "card_id": 202,
       "external": false,
       "author_id": 301,
-      "comment_id": 71234567,
+      "comment_id": 402,
       "sort_order": 2.5,
       "card_cover": false,
       "created": "2026-01-26T09:14:02.001Z",
@@ -108,7 +108,7 @@ struct CardFilesTests {
     #expect(entry.value2 == nil)
 
     #expect(file.id == 101)
-    #expect(file.name == "IMG_3131 (1).MP4")
+    #expect(file.name == "video.mp4")
     #expect(file._type == 1)
     #expect(file.size == 7_804_333)
     #expect(file.card_id == 201)
@@ -140,7 +140,7 @@ struct CardFilesTests {
     let file = try #require(entry.value1)
     #expect(entry.value2 == nil)
     #expect(file._type == 8)
-    #expect(file.comment_id == 71_234_567)
+    #expect(file.comment_id == 402)
     #expect(file.size == 90092)
   }
 
@@ -217,7 +217,7 @@ struct CardFilesTests {
     let json = """
       {
         "id": "66666666-6666-4666-8666-666666666666",
-        "name": "IMG_4064.HEIC",
+        "name": "photo.heic",
         "size": "1818065",
         "mime_type": "image/heic",
         "author_uid": "77777777-7777-4777-8777-777777777777",

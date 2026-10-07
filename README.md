@@ -1342,6 +1342,21 @@ selects what it counts — `1` for card count, `2` for card size:
 kaiten update-column --board-id 42 --id 7 --wip-limit 5 --wip-limit-type 1
 ```
 
+#### Column and lane settings
+
+Columns, subcolumns and lanes take `--last-moved-warning-after-days`, `--last-moved-warning-after-hours`
+and `--last-moved-warning-after-minutes` to mark cards that have not moved as stale. Columns and
+subcolumns also take `--archive-after-days` (honoured only by done columns), `--card-hide-after-days`,
+`--rules` (a bit mask: `1` — checklists must be checked, `2` — display FIFO order) and `--external-id`;
+their updates add `--prev-column-id`, `--next-column-id` and `--pause-sla`. The SDK methods take the
+same settings as optional parameters. `months_to_hide_cards` on `Column` is deprecated in favour of
+`card_hide_after_days`. The API's cascading `force` option on column and subcolumn delete is not
+exposed.
+
+```bash
+kaiten update-column --board-id 42 --id 7 --card-hide-after-days 14 --pause-sla true
+```
+
 ### SDK configuration
 
 `KaitenClient` can read the same `~/.config/kaiten/config.json` file as the CLI. See [Authenticate](#authenticate).

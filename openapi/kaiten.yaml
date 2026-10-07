@@ -7892,15 +7892,23 @@ components:
           type:
           - integer
           - 'null'
-          description: '[Deprecated] Hide cards not moved for the last N months'
+          deprecated: true
+          description: '[Deprecated] Hide cards not moved for the last N months. Use card_hide_after_days'
         card_hide_after_days:
           type:
           - integer
           - 'null'
           description: Hide cards not moved for the last N days
         pause_sla:
+          # DOC_MISMATCH: not in subcolumn docs, present in actual subcolumn responses — https://developers.kaiten.ru/subcolumn/get-list-of-subcolumns
           type: boolean
           description: Indicates whether the SLA timer should be paused in this column
+        subcolumns:
+          # DOC_MISMATCH: docs=`array of objects`, actual=omitted when the column has no subcolumns — https://developers.kaiten.ru/columns/get-list-of-columns
+          type: array
+          items:
+            $ref: '#/components/schemas/Column'
+          description: Column subcolumns
         uid:
           type: string
           description: Column UID
@@ -11700,14 +11708,42 @@ components:
           type: integer
           description: "1 - queue, 2 - in progress, 3 - done"
         wip_limit:
+          # DOC_MISMATCH: not in subcolumn request docs (column docs only), present in actual subcolumn responses — https://developers.kaiten.ru/subcolumn/create-new-subcolumn
           type: integer
           description: WIP limit
         wip_limit_type:
+          # DOC_MISMATCH: not in subcolumn request docs (column docs only), present in actual subcolumn responses — https://developers.kaiten.ru/subcolumn/create-new-subcolumn
           type: integer
           description: "1 - card count, 2 - card size"
         col_count:
           type: integer
           description: Width
+        last_moved_warning_after_days:
+          type: integer
+          description: Warning appears on stale cards
+        last_moved_warning_after_hours:
+          type: integer
+          description: Warning appears on stale cards
+        last_moved_warning_after_minutes:
+          type: integer
+          description: Warning appears on stale cards
+        archive_after_days:
+          type: integer
+          description: Days after which cards are archived automatically. Works only for columns with type done
+        card_hide_after_days:
+          type:
+          - integer
+          - 'null'
+          description: Hide cards not moved for the last N days
+        rules:
+          type: integer
+          minimum: 0
+          description: "Bit mask for column rules: 1 - checklists must be checked, 2 - display FIFO order"
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: External id
     UpdateColumnRequest:
       type: object
       properties:
@@ -11721,11 +11757,13 @@ components:
           type: integer
           description: "1 - queue, 2 - in progress, 3 - done"
         wip_limit:
+          # DOC_MISMATCH: not in subcolumn request docs (column docs only), present in actual subcolumn responses — https://developers.kaiten.ru/subcolumn/update-subcolumn
           type:
           - integer
           - 'null'
           description: WIP limit
         wip_limit_type:
+          # DOC_MISMATCH: not in subcolumn request docs (column docs only), present in actual subcolumn responses — https://developers.kaiten.ru/subcolumn/update-subcolumn
           type: integer
           description: "1 - card count, 2 - card size"
         col_count:
@@ -11736,6 +11774,45 @@ components:
           - string
           - 'null'
           description: Default tags
+        last_moved_warning_after_days:
+          type: integer
+          description: Warning appears on stale cards
+        last_moved_warning_after_hours:
+          type: integer
+          description: Warning appears on stale cards
+        last_moved_warning_after_minutes:
+          type: integer
+          description: Warning appears on stale cards
+        archive_after_days:
+          type: integer
+          description: Days after which cards are archived automatically. Works only for columns with type done
+        card_hide_after_days:
+          type:
+          - integer
+          - 'null'
+          description: Hide cards not moved for the last N days
+        rules:
+          type: integer
+          minimum: 0
+          description: "Bit mask for column rules: 1 - checklists must be checked, 2 - display FIFO order"
+        external_id:
+          type:
+          - string
+          - 'null'
+          description: External id
+        prev_column_id:
+          type:
+          - integer
+          - 'null'
+          description: "Column ID to move column before; null moves the column to the beginning"
+        next_column_id:
+          type:
+          - integer
+          - 'null'
+          description: "Column ID to move column after; null moves the column to the end"
+        pause_sla:
+          type: boolean
+          description: Whether the SLA timer is paused in this column
     CreateLaneRequest:
       type: object
       required:
@@ -11756,6 +11833,15 @@ components:
         row_count:
           type: integer
           description: Height
+        last_moved_warning_after_days:
+          type: integer
+          description: Warning appears on stale cards
+        last_moved_warning_after_hours:
+          type: integer
+          description: Warning appears on stale cards
+        last_moved_warning_after_minutes:
+          type: integer
+          description: Warning appears on stale cards
     UpdateLaneRequest:
       type: object
       properties:
@@ -11776,6 +11862,15 @@ components:
         row_count:
           type: integer
           description: Height
+        last_moved_warning_after_days:
+          type: integer
+          description: Warning appears on stale cards
+        last_moved_warning_after_hours:
+          type: integer
+          description: Warning appears on stale cards
+        last_moved_warning_after_minutes:
+          type: integer
+          description: Warning appears on stale cards
         default_tags:
           type:
           - string

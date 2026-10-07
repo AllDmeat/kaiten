@@ -38,6 +38,14 @@ extension KaitenClient {
   ///   - wipLimit: An optional WIP limit.
   ///   - wipLimitType: An optional WIP limit type.
   ///   - colCount: An optional column count.
+  ///   - lastMovedWarningAfterDays: Days without movement after which a card is marked stale.
+  ///   - lastMovedWarningAfterHours: Hours without movement after which a card is marked stale.
+  ///   - lastMovedWarningAfterMinutes: Minutes without movement after which a card is marked stale.
+  ///   - archiveAfterDays: Days after which cards are archived automatically. Honoured only by
+  ///     columns of type ``ColumnType/done``.
+  ///   - cardHideAfterDays: Hides cards not moved for the last N days.
+  ///   - rules: Bit mask of column rules: `1` — checklists must be checked, `2` — display FIFO order.
+  ///   - externalId: An external identifier, not shown in the web interface.
   /// - Returns: The created column.
   /// - Throws:
   ///   - ``KaitenError/notFound(resource:id:)`` if the board does not exist.
@@ -52,7 +60,14 @@ extension KaitenClient {
     type: ColumnType? = nil,
     wipLimit: Int? = nil,
     wipLimitType: WipLimitType? = nil,
-    colCount: Int? = nil
+    colCount: Int? = nil,
+    lastMovedWarningAfterDays: Int? = nil,
+    lastMovedWarningAfterHours: Int? = nil,
+    lastMovedWarningAfterMinutes: Int? = nil,
+    archiveAfterDays: Int? = nil,
+    cardHideAfterDays: Int? = nil,
+    rules: Int? = nil,
+    externalId: String? = nil
   ) async throws(KaitenError) -> Components.Schemas.Column {
     let response = try await call {
       try await client.create_column(
@@ -64,7 +79,14 @@ extension KaitenClient {
             _type: type?.rawValue,
             wip_limit: wipLimit,
             wip_limit_type: wipLimitType?.rawValue,
-            col_count: colCount
+            col_count: colCount,
+            last_moved_warning_after_days: lastMovedWarningAfterDays,
+            last_moved_warning_after_hours: lastMovedWarningAfterHours,
+            last_moved_warning_after_minutes: lastMovedWarningAfterMinutes,
+            archive_after_days: archiveAfterDays,
+            card_hide_after_days: cardHideAfterDays,
+            rules: rules,
+            external_id: externalId
           )))
     }
     return try decodeResponse(
@@ -83,6 +105,17 @@ extension KaitenClient {
   ///   - wipLimit: The updated WIP limit.
   ///   - wipLimitType: The updated WIP limit type.
   ///   - colCount: The updated column count.
+  ///   - lastMovedWarningAfterDays: Days without movement after which a card is marked stale.
+  ///   - lastMovedWarningAfterHours: Hours without movement after which a card is marked stale.
+  ///   - lastMovedWarningAfterMinutes: Minutes without movement after which a card is marked stale.
+  ///   - archiveAfterDays: Days after which cards are archived automatically. Honoured only by
+  ///     columns of type ``ColumnType/done``.
+  ///   - cardHideAfterDays: Hides cards not moved for the last N days.
+  ///   - rules: Bit mask of column rules: `1` — checklists must be checked, `2` — display FIFO order.
+  ///   - externalId: An external identifier, not shown in the web interface.
+  ///   - prevColumnId: The column to move this column before.
+  ///   - nextColumnId: The column to move this column after.
+  ///   - pauseSla: Whether the SLA timer is paused in this column.
   /// - Returns: The updated column.
   /// - Throws:
   ///   - ``KaitenError/notFound(resource:id:)`` if the column does not exist.
@@ -98,7 +131,17 @@ extension KaitenClient {
     type: ColumnType? = nil,
     wipLimit: Int? = nil,
     wipLimitType: WipLimitType? = nil,
-    colCount: Int? = nil
+    colCount: Int? = nil,
+    lastMovedWarningAfterDays: Int? = nil,
+    lastMovedWarningAfterHours: Int? = nil,
+    lastMovedWarningAfterMinutes: Int? = nil,
+    archiveAfterDays: Int? = nil,
+    cardHideAfterDays: Int? = nil,
+    rules: Int? = nil,
+    externalId: String? = nil,
+    prevColumnId: Int? = nil,
+    nextColumnId: Int? = nil,
+    pauseSla: Bool? = nil
   ) async throws(KaitenError) -> Components.Schemas.Column {
     let response = try await call {
       try await client.update_column(
@@ -110,7 +153,17 @@ extension KaitenClient {
             _type: type?.rawValue,
             wip_limit: wipLimit,
             wip_limit_type: wipLimitType?.rawValue,
-            col_count: colCount
+            col_count: colCount,
+            last_moved_warning_after_days: lastMovedWarningAfterDays,
+            last_moved_warning_after_hours: lastMovedWarningAfterHours,
+            last_moved_warning_after_minutes: lastMovedWarningAfterMinutes,
+            archive_after_days: archiveAfterDays,
+            card_hide_after_days: cardHideAfterDays,
+            rules: rules,
+            external_id: externalId,
+            prev_column_id: prevColumnId,
+            next_column_id: nextColumnId,
+            pause_sla: pauseSla
           )))
     }
     return try decodeResponse(
@@ -179,6 +232,15 @@ extension KaitenClient {
   ///   - title: The subcolumn title.
   ///   - sortOrder: An optional sort order.
   ///   - type: An optional column type.
+  ///   - colCount: An optional column count.
+  ///   - lastMovedWarningAfterDays: Days without movement after which a card is marked stale.
+  ///   - lastMovedWarningAfterHours: Hours without movement after which a card is marked stale.
+  ///   - lastMovedWarningAfterMinutes: Minutes without movement after which a card is marked stale.
+  ///   - archiveAfterDays: Days after which cards are archived automatically. Honoured only by
+  ///     columns of type ``ColumnType/done``.
+  ///   - cardHideAfterDays: Hides cards not moved for the last N days.
+  ///   - rules: Bit mask of column rules: `1` — checklists must be checked, `2` — display FIFO order.
+  ///   - externalId: An external identifier, not shown in the web interface.
   /// - Returns: The created subcolumn.
   /// - Throws:
   ///   - ``KaitenError/notFound(resource:id:)`` if the column does not exist.
@@ -190,7 +252,15 @@ extension KaitenClient {
     columnId: Int,
     title: String,
     sortOrder: Double? = nil,
-    type: ColumnType? = nil
+    type: ColumnType? = nil,
+    colCount: Int? = nil,
+    lastMovedWarningAfterDays: Int? = nil,
+    lastMovedWarningAfterHours: Int? = nil,
+    lastMovedWarningAfterMinutes: Int? = nil,
+    archiveAfterDays: Int? = nil,
+    cardHideAfterDays: Int? = nil,
+    rules: Int? = nil,
+    externalId: String? = nil
   ) async throws(KaitenError) -> Components.Schemas.Column {
     let response = try await call {
       try await client.create_subcolumn(
@@ -199,7 +269,15 @@ extension KaitenClient {
           .init(
             title: title,
             sort_order: sortOrder,
-            _type: type?.rawValue
+            _type: type?.rawValue,
+            col_count: colCount,
+            last_moved_warning_after_days: lastMovedWarningAfterDays,
+            last_moved_warning_after_hours: lastMovedWarningAfterHours,
+            last_moved_warning_after_minutes: lastMovedWarningAfterMinutes,
+            archive_after_days: archiveAfterDays,
+            card_hide_after_days: cardHideAfterDays,
+            rules: rules,
+            external_id: externalId
           )))
     }
     return try decodeResponse(
@@ -215,6 +293,18 @@ extension KaitenClient {
   ///   - title: The updated title.
   ///   - sortOrder: The updated sort order.
   ///   - type: The updated column type.
+  ///   - colCount: The updated column count.
+  ///   - lastMovedWarningAfterDays: Days without movement after which a card is marked stale.
+  ///   - lastMovedWarningAfterHours: Hours without movement after which a card is marked stale.
+  ///   - lastMovedWarningAfterMinutes: Minutes without movement after which a card is marked stale.
+  ///   - archiveAfterDays: Days after which cards are archived automatically. Honoured only by
+  ///     columns of type ``ColumnType/done``.
+  ///   - cardHideAfterDays: Hides cards not moved for the last N days.
+  ///   - rules: Bit mask of column rules: `1` — checklists must be checked, `2` — display FIFO order.
+  ///   - externalId: An external identifier, not shown in the web interface.
+  ///   - prevColumnId: The column to move this column before.
+  ///   - nextColumnId: The column to move this column after.
+  ///   - pauseSla: Whether the SLA timer is paused in this column.
   /// - Returns: The updated subcolumn.
   /// - Throws:
   ///   - ``KaitenError/notFound(resource:id:)`` if the subcolumn does not exist.
@@ -227,7 +317,18 @@ extension KaitenClient {
     id: Int,
     title: String? = nil,
     sortOrder: Double? = nil,
-    type: ColumnType? = nil
+    type: ColumnType? = nil,
+    colCount: Int? = nil,
+    lastMovedWarningAfterDays: Int? = nil,
+    lastMovedWarningAfterHours: Int? = nil,
+    lastMovedWarningAfterMinutes: Int? = nil,
+    archiveAfterDays: Int? = nil,
+    cardHideAfterDays: Int? = nil,
+    rules: Int? = nil,
+    externalId: String? = nil,
+    prevColumnId: Int? = nil,
+    nextColumnId: Int? = nil,
+    pauseSla: Bool? = nil
   ) async throws(KaitenError) -> Components.Schemas.Column {
     let response = try await call {
       try await client.update_subcolumn(
@@ -236,7 +337,18 @@ extension KaitenClient {
           .init(
             title: title,
             sort_order: sortOrder,
-            _type: type?.rawValue
+            _type: type?.rawValue,
+            col_count: colCount,
+            last_moved_warning_after_days: lastMovedWarningAfterDays,
+            last_moved_warning_after_hours: lastMovedWarningAfterHours,
+            last_moved_warning_after_minutes: lastMovedWarningAfterMinutes,
+            archive_after_days: archiveAfterDays,
+            card_hide_after_days: cardHideAfterDays,
+            rules: rules,
+            external_id: externalId,
+            prev_column_id: prevColumnId,
+            next_column_id: nextColumnId,
+            pause_sla: pauseSla
           )))
     }
     return try decodeResponse(

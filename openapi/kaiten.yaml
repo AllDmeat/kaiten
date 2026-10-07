@@ -3443,6 +3443,8 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+        '422':
+          description: The file is malicious
     patch:
       summary: Update custom property file
       operationId: update_custom_property_file

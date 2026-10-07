@@ -164,6 +164,15 @@ struct PrivateCustomPropertyFilesTests {
     }
   }
 
+  @Test("get: 422 malicious file throws unexpectedResponse")
+  func getMalicious() async throws {
+    let client = try makeClient(.returning(statusCode: 422))
+    await expectUnexpectedResponse(statusCode: 422) {
+      _ = try await client.getCustomPropertyFile(
+        cardUid: "card-uid-1", propertyUid: "prop-uid-1", fileId: "file-uid-1")
+    }
+  }
+
   // MARK: - Update
 
   @Test("update sends PATCH with name and card_cover, returns the file")

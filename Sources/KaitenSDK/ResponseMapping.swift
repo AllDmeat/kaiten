@@ -2649,6 +2649,7 @@ extension Operations.get_custom_property_file.Output {
     case .unauthorized: .unauthorized
     case .forbidden: .forbidden
     case .notFound: .notFound
+    case .unprocessableContent: .undocumented(statusCode: 422)
     case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
     }
   }

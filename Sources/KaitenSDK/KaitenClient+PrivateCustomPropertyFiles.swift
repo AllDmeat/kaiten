@@ -60,7 +60,7 @@ extension KaitenClient {
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for forbidden (403), not found
-  ///     (404) or other undocumented HTTP status codes.
+  ///     (404), a malicious file (422) or other undocumented HTTP status codes.
   public func getCustomPropertyFile(
     cardUid: String,
     propertyUid: String,

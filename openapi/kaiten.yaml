@@ -11767,8 +11767,10 @@ components:
           description: "1 - queue, 2 - in progress, 3 - done"
         wip_limit:
           # NOTE: shared with column requests; the subcolumn request docs omit this field and subcolumn acceptance is unverified, so subcolumn wrappers do not send it.
-          $ref: '#/components/schemas/NullableInteger'
-          description: WIP limit (null clears it, absent leaves it unchanged)
+          type:
+          - integer
+          - 'null'
+          description: WIP limit
         wip_limit_type:
           # NOTE: shared with column requests; the subcolumn request docs omit this field and subcolumn acceptance is unverified, so subcolumn wrappers do not send it.
           type: integer

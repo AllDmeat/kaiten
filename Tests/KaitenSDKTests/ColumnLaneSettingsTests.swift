@@ -63,11 +63,11 @@ struct ColumnLaneSettingsTests {
   func updateColumnExplicitNull() async throws {
     let transport = MockClientTransport.returning(statusCode: 200, body: columnJSON)
     _ = try await makeClient(transport).updateColumn(
-      boardId: 10, id: 100, wipLimit: .some(nil), cardHideAfterDays: .some(nil),
+      boardId: 10, id: 100, cardHideAfterDays: .some(nil),
       prevColumnId: .some(nil), nextColumnId: .some(nil))
 
     let json = try await sentBody(transport)
-    for key in ["wip_limit", "card_hide_after_days", "prev_column_id", "next_column_id"] {
+    for key in ["card_hide_after_days", "prev_column_id", "next_column_id"] {
       #expect(json[key] is NSNull, "\(key) should be JSON null")
     }
   }
@@ -76,13 +76,13 @@ struct ColumnLaneSettingsTests {
   func updateColumnNullableValues() async throws {
     let transport = MockClientTransport.returning(statusCode: 200, body: columnJSON)
     _ = try await makeClient(transport).updateColumn(
-      boardId: 10, id: 100, wipLimit: 5, cardHideAfterDays: 14)
+      boardId: 10, id: 100, cardHideAfterDays: 14, nextColumnId: 8)
 
     let json = try await sentBody(transport)
-    #expect(json["wip_limit"] as? Int == 5)
+    #expect(json["next_column_id"] as? Int == 8)
     #expect(json["card_hide_after_days"] as? Int == 14)
     #expect(json.keys.contains("prev_column_id") == false)
-    #expect(json.keys.contains("next_column_id") == false)
+    #expect(json.keys.contains("wip_limit") == false)
   }
 
   @Test("updateSubcolumn sends explicit null to turn card hiding off")
@@ -215,11 +215,11 @@ struct ColumnLaneSettingsTests {
 
   @Test("nullable integer options map absent, empty and numeric input")
   func parseNullableIntOption() throws {
-    #expect(try parseNullableInt(nil, option: "--wip-limit") == .none)
-    #expect(try parseNullableInt("", option: "--wip-limit") == .some(nil))
-    #expect(try parseNullableInt("5", option: "--wip-limit") == .some(5))
+    #expect(try parseNullableInt(nil, option: "--card-hide-after-days") == .none)
+    #expect(try parseNullableInt("", option: "--card-hide-after-days") == .some(nil))
+    #expect(try parseNullableInt("5", option: "--card-hide-after-days") == .some(5))
     #expect(throws: ValidationError.self) {
-      _ = try parseNullableInt("five", option: "--wip-limit")
+      _ = try parseNullableInt("five", option: "--card-hide-after-days")
     }
   }
 

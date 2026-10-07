@@ -1353,9 +1353,9 @@ same settings as optional parameters. `months_to_hide_cards` on `Column` is depr
 `card_hide_after_days`. The API's cascading `force` option on column and subcolumn delete is not
 exposed.
 
-On column and subcolumn updates, `--wip-limit` (columns only), `--card-hide-after-days`,
-`--prev-column-id` and `--next-column-id` take an empty string `""` to send `null`: it clears the
-limit, turns card hiding off, or moves the column to the beginning or end. In the SDK these are
+On column and subcolumn updates, `--card-hide-after-days`, `--prev-column-id` and
+`--next-column-id` take an empty string `""` to send `null`: it turns card hiding off, or moves the
+column to the beginning or end. In the SDK these are
 `Int??` parameters — `nil` leaves the field unchanged, `.some(nil)` sends `null`:
 
 ```bash

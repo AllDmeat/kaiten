@@ -162,8 +162,8 @@ struct UpdateColumn: AsyncParsableCommand {
   @Option(name: .long, help: "Column type: 1=queue, 2=in progress, 3=done")
   var columnType: Int?
 
-  @Option(name: .long, help: "WIP limit value. Pass empty string \"\" to clear the limit.")
-  var wipLimit: String?
+  @Option(name: .long, help: "WIP limit value")
+  var wipLimit: Int?
 
   @Option(name: .long, help: "WIP limit type: 1=card count, 2=card size")
   var wipLimitType: Int?
@@ -183,7 +183,7 @@ struct UpdateColumn: AsyncParsableCommand {
       title: title,
       sortOrder: sortOrder,
       type: try parseColumnType(columnType),
-      wipLimit: try parseNullableInt(wipLimit, option: "--wip-limit"),
+      wipLimit: wipLimit,
       wipLimitType: try parseWipLimitType(wipLimitType),
       colCount: colCount,
       lastMovedWarningAfterDays: settings.lastMovedWarningAfterDays,

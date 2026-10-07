@@ -18,7 +18,7 @@
 /// Public-facing API uses `Int??` for ergonomics and maps it internally:
 ///
 /// ```swift
-/// wip_limit: .from(wipLimit)
+/// card_hide_after_days: .from(cardHideAfterDays)
 /// ```
 public enum ExplicitNullInteger: Codable, Hashable, Sendable {
   /// A non-null integer value.

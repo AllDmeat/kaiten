@@ -7697,6 +7697,7 @@ components:
           items:
             type: integer
           description: Tag IDs
+        # DOC_MISMATCH: docs=`number`, actual=`integer` — https://developers.kaiten.ru/cards/retrieve-card
         estimate_workload:
           type: integer
           description: Estimated workload
@@ -10122,8 +10123,11 @@ components:
         url:
           type: string
           description: External link url
+        # DOC_MISMATCH: docs=non-nullable `string`, actual=`string | null` — https://developers.kaiten.ru/card-external-links/retrieve-card-external-links
         description:
-          type: string
+          type:
+          - string
+          - 'null'
           description: External link description
         card_id:
           type: integer
@@ -10131,6 +10135,16 @@ components:
         external_link_id:
           type: integer
           description: External link id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-external-links/retrieve-card-external-links
+        uid:
+          type: string
+          description: External link uid
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `uid` — https://developers.kaiten.ru/card-external-links/retrieve-card-external-links
+        external_link_uid:
+          type:
+          - string
+          - 'null'
+          description: External link uid
         created:
           type: string
           description: Create date
@@ -10160,8 +10174,11 @@ components:
           - integer
           - 'null'
           description: User id who checked checklist item
+        # DOC_MISMATCH: docs=non-nullable `index`, actual=`integer | null` — https://developers.kaiten.ru/card-checklist-items/add-item-to-checklist
         user_id:
-          type: integer
+          type:
+          - integer
+          - 'null'
           description: Creator user id
         checked_at:
           type:
@@ -11414,6 +11431,14 @@ components:
         tag_id:
           type: integer
           description: Tag ID
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-tags/rertrieve-list-of-tags
+        created:
+          type: string
+          description: Create date
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-tags/rertrieve-list-of-tags
+        updated:
+          type: string
+          description: Last update timestamp
     AddTagRequest:
       type: object
       required:
@@ -12135,6 +12160,10 @@ components:
         updated:
           type: string
           description: Last update timestamp
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-blockers/retrieve-card-blockers-list
+        fts_version:
+          type: string
+          description: Full-text search version
         # NOTE: these three are nullable, but expressed as plain $refs rather than
         # `anyOf: [$ref, 'null']` — swift-openapi-generator silently drops properties using
         # that pattern, so the fields never reached callers at all. The properties are
@@ -13068,6 +13097,10 @@ components:
         hasToFireOnCardCreation:
           type: boolean
           description: Should it fire on card creation
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/automations/get-list-of-automations
+        created:
+          type: string
+          description: Trigger create timestamp
         data:
           type: object
           additionalProperties: true
@@ -16283,6 +16316,12 @@ components:
         fts_version:
           type: string
           description: Full-text search index version
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from the name — https://developers.kaiten.ru/document-groups/retrieve-document-group
+        public_site_url:
+          type:
+          - string
+          - 'null'
+          description: Public site url
         # DOC_MISMATCH: not in docs, present in actual API responses; observed only null — https://developers.kaiten.ru/document-groups/retrieve-document-group
         slug:
           type:
@@ -16529,6 +16568,19 @@ components:
         updated:
           type: string
           description: Last update timestamp
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/groups/get-list-of-groups
+        company_id:
+          type: integer
+          description: Company id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/groups/get-list-of-groups
+        condition:
+          type: integer
+          description: 'Group condition: 1 - active, 2 - inactive (the values of the documented `condition` query filter)'
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/groups/get-list-of-groups
+        named_permissions:
+          type: object
+          additionalProperties: true
+          description: Company-level permissions granted to the group, keyed by permission name. Shape is not described in the Kaiten documentation
     CreateGroupRequest:
       type: object
       required:
@@ -17039,7 +17091,7 @@ components:
           description: 'Document content width mode: default (700px) or wide (1008px). Setting wide is only available for companies enrolled in the feature rollout; other companies receive a 403 error (code doc_2)'
     DocumentAccessRecord:
       type: object
-      description: Current user access record to a document. The documentation describes only role and role_permissions; live responses carry further undocumented fields, of which only the ones with an observable type are declared
+      description: Current user access record to a document. The documentation describes only role and role_permissions; live responses carry further undocumented fields
       properties:
         role:
           type: integer
@@ -17060,6 +17112,50 @@ components:
         user_id:
           type: integer
           description: User id this record belongs to
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: Role ids granted to the user
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `role` — https://developers.kaiten.ru/documents/retrieve-document
+        own_role:
+          type:
+          - integer
+          - 'null'
+          description: Role id granted to the user directly
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `role_ids` — https://developers.kaiten.ru/documents/retrieve-document
+        own_role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: Role ids granted to the user directly
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        groups_role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: Role ids granted via user groups
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `groups_role_ids` — https://developers.kaiten.ru/documents/retrieve-document
+        own_groups_role_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+          description: Role ids granted via user groups directly
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `access_mod` — https://developers.kaiten.ru/documents/retrieve-document
+        own_access_mod:
+          type:
+          - string
+          - 'null'
+          description: Access modifier granted to the user directly
     DocumentUserSummary:
       type: object
       description: Short user data embedded in a document. Not described in the Kaiten documentation; the shape is taken from live responses
@@ -17596,6 +17692,10 @@ components:
         read_own:
           type: boolean
           description: Permissions for reading card, where user is a member or owner
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/tree-entity-roles/get-list-of-tree-entity-roles
+        invite_members:
+          type: boolean
+          description: Permissions for inviting card members
         properties:
           anyOf:
           - type: boolean

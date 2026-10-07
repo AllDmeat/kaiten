@@ -38,6 +38,7 @@ extension KaitenClient {
   ///   - externalId: An optional external identifier.
   ///   - parentEntityUid: An optional parent entity UID.
   ///   - sortOrder: An optional sort order.
+  ///   - workCalendarId: An optional work calendar identifier.
   /// - Returns: The created space.
   /// - Throws:
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
@@ -48,7 +49,8 @@ extension KaitenClient {
     title: String,
     externalId: String? = nil,
     parentEntityUid: String? = nil,
-    sortOrder: Double? = nil
+    sortOrder: Double? = nil,
+    workCalendarId: String? = nil
   ) async throws(KaitenError) -> Components.Schemas.Space {
     let response = try await call {
       try await client.create_space(
@@ -57,7 +59,8 @@ extension KaitenClient {
             title: title,
             external_id: externalId,
             parent_entity_uid: parentEntityUid,
-            sort_order: sortOrder
+            sort_order: sortOrder,
+            work_calendar_id: workCalendarId
           )))
     }
     return try decodeResponse(response.toCase()) {
@@ -95,6 +98,8 @@ extension KaitenClient {
   ///   - sortOrder: The updated sort order.
   ///   - access: The updated access level.
   ///   - parentEntityUid: The updated parent entity UID.
+  ///   - hiddenCardTypeUids: The UIDs of card types hidden in the space.
+  ///   - settings: The updated space settings, as a free-form JSON object.
   /// - Returns: The updated space.
   /// - Throws:
   ///   - ``KaitenError/notFound(resource:id:)`` if the space does not exist.
@@ -108,7 +113,9 @@ extension KaitenClient {
     externalId: String? = nil,
     sortOrder: Double? = nil,
     access: String? = nil,
-    parentEntityUid: String? = nil
+    parentEntityUid: String? = nil,
+    hiddenCardTypeUids: [String]? = nil,
+    settings: OpenAPIObjectContainer? = nil
   ) async throws(KaitenError) -> Components.Schemas.Space {
     let response = try await call {
       try await client.update_space(
@@ -119,7 +126,9 @@ extension KaitenClient {
             external_id: externalId,
             sort_order: sortOrder,
             access: access,
-            parent_entity_uid: parentEntityUid
+            parent_entity_uid: parentEntityUid,
+            hidden_card_type_uids: hiddenCardTypeUids,
+            settings: settings
           )))
     }
     return try decodeResponse(

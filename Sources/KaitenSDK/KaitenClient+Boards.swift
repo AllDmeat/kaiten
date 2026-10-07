@@ -54,6 +54,12 @@ extension KaitenClient {
   ///   - description: An optional board description.
   ///   - sortOrder: An optional sort order.
   ///   - externalId: An optional external identifier.
+  ///   - top: An optional Y coordinate of the board on the space.
+  ///   - left: An optional X coordinate of the board on the space.
+  ///   - columns: Optional columns to create the board with. A default column is created when
+  ///     omitted; the API rejects an empty array.
+  ///   - lanes: Optional lanes to create the board with. A default lane is created when omitted;
+  ///     the API rejects an empty array.
   /// - Returns: The created board.
   /// - Throws:
   ///   - ``KaitenError/notFound(resource:id:)`` if the space does not exist.
@@ -66,7 +72,11 @@ extension KaitenClient {
     title: String,
     description: String? = nil,
     sortOrder: Double? = nil,
-    externalId: String? = nil
+    externalId: String? = nil,
+    top: Int? = nil,
+    left: Int? = nil,
+    columns: [Components.Schemas.CreateBoardColumnRequest]? = nil,
+    lanes: [Components.Schemas.CreateBoardLaneRequest]? = nil
   ) async throws(KaitenError) -> Components.Schemas.Board {
     let response = try await call {
       try await client.create_board(
@@ -76,7 +86,11 @@ extension KaitenClient {
             title: title,
             description: description,
             sort_order: sortOrder,
-            external_id: externalId
+            external_id: externalId,
+            top: top,
+            left: left,
+            columns: columns,
+            lanes: lanes
           )))
     }
     return try decodeResponse(
@@ -93,6 +107,17 @@ extension KaitenClient {
   ///   - description: The updated description.
   ///   - sortOrder: The updated sort order.
   ///   - externalId: The updated external identifier.
+  ///   - top: The updated Y coordinate of the board on the space.
+  ///   - left: The updated X coordinate of the board on the space.
+  ///   - type: The placement type: `1` places the board on the space by coordinates,
+  ///     `5` attaches it to the space as a sidebar.
+  ///   - cellWipLimits: The WIP limit rules for cells, as any JSON value. The documentation declares an
+  ///     array while responses return an object with a `limits` array; the request shape is unverified.
+  ///   - moveParentsToDone: Whether parent cards move to done when their children on this board are done.
+  ///   - hideDonePolicies: Whether done checklist policies are hidden.
+  ///   - hideDonePoliciesInDoneColumn: Whether done checklist policies are hidden only in the done column.
+  ///   - moveFromSpaceId: The space to move the board from.
+  ///   - cardProperties: The card properties suggested for filling, as JSON objects.
   /// - Returns: The updated board.
   /// - Throws:
   ///   - ``KaitenError/notFound(resource:id:)`` if the board does not exist.
@@ -106,7 +131,16 @@ extension KaitenClient {
     title: String? = nil,
     description: String? = nil,
     sortOrder: Double? = nil,
-    externalId: String? = nil
+    externalId: String? = nil,
+    top: Int? = nil,
+    left: Int? = nil,
+    type: Int? = nil,
+    cellWipLimits: OpenAPIValueContainer? = nil,
+    moveParentsToDone: Bool? = nil,
+    hideDonePolicies: Bool? = nil,
+    hideDonePoliciesInDoneColumn: Bool? = nil,
+    moveFromSpaceId: Int? = nil,
+    cardProperties: [OpenAPIObjectContainer]? = nil
   ) async throws(KaitenError) -> Components.Schemas.Board {
     let response = try await call {
       try await client.update_board(
@@ -116,7 +150,16 @@ extension KaitenClient {
             title: title,
             description: description,
             sort_order: sortOrder,
-            external_id: externalId
+            external_id: externalId,
+            top: top,
+            left: left,
+            _type: type,
+            cell_wip_limits: cellWipLimits,
+            move_parents_to_done: moveParentsToDone,
+            hide_done_policies: hideDonePolicies,
+            hide_done_policies_in_done_column: hideDonePoliciesInDoneColumn,
+            move_from_space_id: moveFromSpaceId,
+            card_properties: cardProperties
           )))
     }
     return try decodeResponse(

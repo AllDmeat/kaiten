@@ -217,8 +217,9 @@ stdout confirms it works.
   means, and it beats two field names for one relation.
   The CLI MUST NOT invent ids, and id arrays Kaiten sends itself (`tag_ids`,
   `parents_ids`) MUST be passed through untouched.
-- **FR-021a**: Only entities may be trimmed, and the presence of an `id` is
-  what identifies one. A nested value carrying no `id` is data rather than a
+- **FR-021a**: Only entities may be trimmed, and an `id` is necessary to
+  identify one, though for a single object not sufficient (FR-034). A
+  nested value carrying no `id` is data rather than a
   reference — a card's `properties` holds custom field values shaped
   `{"id_714": [1088]}` — and MUST be passed through whole, whether it is an
   object or a collection. No `properties_id` exists to stand in for it, so
@@ -331,6 +332,16 @@ stdout confirms it works.
   `update-card-blocker` `--due-date`, `--clear-due-date` (sends `null`,
   like `--clear-description` of `update-custom-directory`) and
   `--due-date-time-present` (SDK FR-042).
+- **FR-034**: A single nested object MUST be omitted by default only when it
+  carries an `id` and the same object also carries a reference to it,
+  `<key>_id` or `<key>_uid` — `owner` beside `owner_id`. Otherwise it MUST
+  be passed through whole: a user's `personal_settings` has an `id` but no
+  `personal_settings_id`, so dropping it would lose the settings rather than
+  a reference to them. `--expand` MUST still accept such an object's key as
+  a no-op, so that naming it, which used to be the only way to get it back,
+  does not start failing with an unknown-field error. An expanded
+  value MUST be stripped by the same rule. Collections are unaffected and
+  keep FR-021.
 
 ### Non-Functional Requirements
 

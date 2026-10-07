@@ -8,11 +8,12 @@ import Foundation
 /// children and files. Those thirteen-odd fields dwarf the seventy scalars callers usually read, so
 /// by default they are cut back to the reference alone and `--expand` names the ones to restore.
 ///
-/// Only entities are cut, and an `id` is what marks one. A single entity is dropped outright — its
-/// `*_id` is already alongside it — while a collection becomes the ids of its members, under its own
-/// key. Anything without an `id` is data rather than a reference, has no `*_id` standing in for it,
-/// and is passed through whole: dropping a card's `properties` would lose the custom field values
-/// themselves, which is the silent loss this trimming exists to avoid.
+/// Only what something else in the response stands in for is cut. A single entity is dropped only
+/// when its reference sits beside it — `owner` goes because `owner_id` stays — while a collection of
+/// entities becomes the ids of its members, under its own key. Anything else is data and is passed
+/// through whole: dropping a card's `properties` would lose the custom field values themselves, and
+/// dropping a user's `personal_settings`, which has an `id` but no `personal_settings_id`, would
+/// lose the settings. That silent loss is what this trimming exists to avoid.
 ///
 /// Expansion is one level deep. An expanded value is itself stripped of its own nested fields, so
 /// `--expand children` on an epic returns its children without *their* children. The bound is not a
@@ -67,13 +68,21 @@ enum JSONOutput {
   /// simply has nothing in it. Judging by the value's type instead would make `--expand tags`
   /// succeed on a card that has tags and fail on one that does not, so a script sweeping cards
   /// would break on whichever row happened to be empty.
+  ///
+  /// A single object with an `id` is accepted too, even when it has no reference beside it and is
+  /// therefore kept by default. Expanding it is a no-op, but `--expand personal_settings` was how
+  /// such an object used to be brought back, and rejecting it now would break the scripts that
+  /// relied on that.
   static func expandableFields(in json: Any) -> Set<String> {
     if let envelope = json as? [String: Any], let key = envelopePayloadKey(envelope) {
       return expandableFields(in: envelope[key] ?? [])
     }
     return Set(
       objects(in: json).flatMap { object in
-        object.filter { isEntityReference($1) || ($1 as? [Any])?.isEmpty == true }.keys
+        object.filter { key, value in
+          (value as? [String: Any])?["id"] != nil || isEntityReference(key, in: object)
+            || (value as? [Any])?.isEmpty == true
+        }.keys
       }
     )
   }
@@ -85,7 +94,7 @@ enum JSONOutput {
   private static func keeping(_ keep: Set<String>, in object: [String: Any]) -> [String: Any] {
     var result: [String: Any] = [:]
     for (key, value) in object {
-      guard isEntityReference(value) else {
+      guard isEntityReference(key, in: object) else {
         result[key] = value
         continue
       }
@@ -110,8 +119,8 @@ enum JSONOutput {
   /// expanded. That is what `--expand` is for, and it beats the alternative of two different field
   /// names for the same relation.
   ///
-  /// Returns nil for a single object, which needs no help — its `*_id` is already alongside it.
-  /// Every element is known to carry an `id` by the time this runs; ``isEntityReference(_:)`` is
+  /// Returns nil for a single object, which needs no help — its reference is already alongside it.
+  /// Every element is known to carry an `id` by the time this runs; ``isEntityReference(_:in:)`` is
   /// what established that, and a collection failing it is kept whole rather than arriving here.
   private static func identifiers(of value: Any) -> [Any]? {
     guard let elements = value as? [Any] else { return nil }
@@ -120,22 +129,27 @@ enum JSONOutput {
 
   /// Strips an expanded value of its own nested fields — the one level of depth.
   private static func flattened(_ value: Any) -> Any {
-    apply(value) { object in object.filter { _, nested in !isEntityReference(nested) } }
+    apply(value) { object in object.filter { key, _ in !isEntityReference(key, in: object) } }
   }
 
-  /// Whether a value holds entities the response can point at by id, rather than data that exists
-  /// only here.
+  /// Whether `object[key]` holds entities that something else in the response points at, rather
+  /// than data that exists only here.
   ///
-  /// The `id` is the whole signal, and it is what makes dropping safe. `owner` carries one, so
-  /// removing it costs nothing: `owner_id` says the same thing. A card's `properties` — the custom
-  /// field values, shaped `{"id_714": [1088]}` — carries none, and no `properties_id` exists
-  /// either, so dropping it would silently lose the values themselves. That is the failure this
-  /// trimming exists to prevent, not to cause, so data is kept whole.
+  /// A single object qualifies only when it carries an `id` and its reference sits beside it, as
+  /// `<key>_id` or `<key>_uid`: removing `owner` costs nothing because `owner_id` says the same
+  /// thing. The `id` alone is not enough — `personal_settings` carries one, yet nothing else in a
+  /// user points at it, so dropping it would silently lose the settings themselves. A collection
+  /// qualifies when every element carries an `id`, because those ids are what it leaves behind. A card's
+  /// `properties` — the custom field values, shaped `{"id_714": [1088]}` — passes neither test and
+  /// is kept whole.
   ///
   /// An empty array is data by this test, which is also the right answer: it is indistinguishable
   /// from an empty list of ids and costs nothing to keep.
-  private static func isEntityReference(_ value: Any) -> Bool {
-    if let object = value as? [String: Any] { return object["id"] != nil }
+  private static func isEntityReference(_ key: String, in object: [String: Any]) -> Bool {
+    let value = object[key]
+    if let nested = value as? [String: Any] {
+      return nested["id"] != nil && (object["\(key)_id"] != nil || object["\(key)_uid"] != nil)
+    }
     guard let array = value as? [Any], !array.isEmpty else { return false }
     let objects = array.compactMap { $0 as? [String: Any] }
     return objects.count == array.count && objects.allSatisfy { $0["id"] != nil }

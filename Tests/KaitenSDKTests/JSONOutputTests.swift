@@ -135,6 +135,7 @@ struct JSONOutputTests {
     // them would lose the values outright.
     let card: [String: Any] = [
       "id": 42,
+      "owner_id": 7,
       "owner": ["id": 7, "full_name": "A"],
       "properties": ["id_714": [1088], "id_90": 100],
     ]
@@ -160,6 +161,70 @@ struct JSONOutputTests {
     let card: [String: Any] = ["id": 42, "properties": ["id_714": [1088]]]
 
     #expect(!JSONOutput.expandableFields(in: card).contains("properties"))
+  }
+
+  // MARK: - Single objects and their references
+
+  @Test("An object with an id but no reference beside it is data, and survives whole")
+  func keepsObjectWithoutSiblingReference() throws {
+    // A user's personal settings carry an id, but nothing in the user points at them: there is no
+    // `personal_settings_id`, so dropping them would lose the settings outright.
+    let user: [String: Any] = [
+      "id": 7,
+      "personal_settings": ["id": 3, "theme": "dark"],
+    ]
+
+    let trimmed = try object(JSONOutput.trim(user, expand: []))
+
+    #expect(try object(#require(trimmed["personal_settings"]))["theme"] as? String == "dark")
+  }
+
+  @Test("Expanding an object that is already kept is accepted and changes nothing")
+  func acceptsExpandOfKeptObject() throws {
+    let user: [String: Any] = [
+      "id": 7,
+      "personal_settings": ["id": 3, "theme": "dark"],
+    ]
+
+    let expanded = try object(JSONOutput.trim(user, expand: ["personal_settings"]))
+
+    #expect(JSONOutput.expandableFields(in: user) == ["personal_settings"])
+    #expect(try object(#require(expanded["personal_settings"]))["theme"] as? String == "dark")
+    #expect(throws: ValidationError.self) {
+      _ = try JSONOutput.trim(user, expand: ["personal_setings"])
+    }
+  }
+
+  @Test("A uid reference stands in for its object just as an id one does")
+  func dropsObjectWithSiblingUid() throws {
+    let row: [String: Any] = ["id": 1, "space_uid": "abc", "space": ["id": 5, "uid": "abc"]]
+
+    let trimmed = try object(JSONOutput.trim(row, expand: []))
+
+    #expect(trimmed["space"] == nil)
+    #expect(trimmed["space_uid"] as? String == "abc")
+    #expect(JSONOutput.expandableFields(in: row) == ["space"])
+  }
+
+  @Test("An expanded entity is trimmed by the same rule, keeping its data")
+  func flattensByTheSameRule() throws {
+    let card: [String: Any] = [
+      "id": 42,
+      "owner_id": 7,
+      "owner": [
+        "id": 7,
+        "company_id": 1,
+        "company": ["id": 1, "name": "Acme"],
+        "personal_settings": ["id": 3, "theme": "dark"],
+      ],
+    ]
+
+    let trimmed = try object(JSONOutput.trim(card, expand: ["owner"]))
+    let owner = try object(#require(trimmed["owner"]))
+
+    #expect(owner["company"] == nil, "company_id stands in for it")
+    #expect(owner["company_id"] as? Int == 1)
+    #expect(try object(#require(owner["personal_settings"]))["theme"] as? String == "dark")
   }
 
   // MARK: - Pagination
@@ -255,8 +320,8 @@ struct JSONOutputTests {
 
   @Test("Expandable fields of an array response union its elements")
   func unionsExpandableFieldsAcrossElements() {
-    let first: [String: Any] = ["id": 1, "owner": ["id": 7]]
-    let second: [String: Any] = ["id": 2, "board": ["id": 5]]
+    let first: [String: Any] = ["id": 1, "owner_id": 7, "owner": ["id": 7]]
+    let second: [String: Any] = ["id": 2, "board_id": 5, "board": ["id": 5]]
 
     #expect(JSONOutput.expandableFields(in: [first, second]) == ["owner", "board"])
   }
@@ -274,6 +339,11 @@ struct JSONOutputTests {
     var size: Double
     var ownerId: Int
     var owner: Owner
+
+    enum CodingKeys: String, CodingKey {
+      case id, archived, size, owner
+      case ownerId = "owner_id"
+    }
   }
 
   private let encodable = Encoded(
@@ -288,7 +358,7 @@ struct JSONOutputTests {
   func rendersCompactTrimmedJSON() throws {
     let rendered = try renderJSON(encodable)
 
-    #expect(rendered == #"{"archived":false,"id":42,"ownerId":7,"size":3}"#)
+    #expect(rendered == #"{"archived":false,"id":42,"owner_id":7,"size":3}"#)
   }
 
   @Test("Rendered output keeps expanded entities")

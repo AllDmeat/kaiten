@@ -99,7 +99,7 @@ struct CompanyUsersTests {
         "access_mod": "direct",
         "role": "3"
       }],
-      "groups": {
+      "groups": [{
         "updated": "2024-01-02T03:04:05.678Z",
         "created": "2023-01-02T03:04:05.678Z",
         "id": 5,
@@ -111,7 +111,19 @@ struct CompanyUsersTests {
         "user_id": 101,
         "group_id": 5,
         "spaces": [{"id": 11}]
-      }
+      }, {
+        "updated": "2024-02-03T04:05:06.789Z",
+        "created": "2023-02-03T04:05:06.789Z",
+        "id": 6,
+        "uid": "fake-group-uid-2",
+        "name": "Designers",
+        "permissions": 0,
+        "company_id": 7,
+        "add_to_cards_and_spaces_enabled": false,
+        "user_id": 101,
+        "group_id": 6,
+        "spaces": []
+      }]
     }
     """
 
@@ -142,8 +154,20 @@ struct CompanyUsersTests {
     #expect(user.spaces?.first?.title == "Demo space")
     #expect(user.spaces?.first?.sort_order == 1.5)
     #expect(user.spaces?.first?.role == "3")
-    #expect(user.groups?.name == "Engineers")
-    #expect(user.groups?.spaces?.count == 1)
+    #expect(user.groups?.map(\.name) == ["Engineers", "Designers"])
+    #expect(user.groups?.map(\.uid) == ["fake-group-uid-1", "fake-group-uid-2"])
+    #expect(user.groups?.first?.spaces?.count == 1)
+    #expect(user.groups?.last?.add_to_cards_and_spaces_enabled == false)
+  }
+
+  @Test("user without groups decodes an empty groups array")
+  func listEmptyGroups() async throws {
+    let client = try makeClient(
+      .returning(statusCode: 200, body: #"[{"id": 103, "groups": []}]"#))
+
+    let users = try await client.listCompanyUsers()
+    #expect(users.count == 1)
+    #expect(users[0].groups?.isEmpty == true)
   }
 
   /// The user serializer returns explicit JSON `null` for settings objects the documentation

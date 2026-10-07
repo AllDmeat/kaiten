@@ -324,9 +324,11 @@ stdout confirms it works.
 - **FR-034**: A single nested object MUST be omitted by default only when it
   carries an `id` and the same object also carries a reference to it,
   `<key>_id` or `<key>_uid` — `owner` beside `owner_id`. Otherwise it MUST
-  be passed through whole and MUST NOT be offered to `--expand`: a user's
-  `personal_settings` has an `id` but no `personal_settings_id`, so dropping
-  it would lose the settings rather than a reference to them. An expanded
+  be passed through whole: a user's `personal_settings` has an `id` but no
+  `personal_settings_id`, so dropping it would lose the settings rather than
+  a reference to them. `--expand` MUST still accept such an object's key as
+  a no-op, so that naming it, which used to be the only way to get it back,
+  does not start failing with an unknown-field error. An expanded
   value MUST be stripped by the same rule. Collections are unaffected and
   keep FR-021.
 

@@ -177,7 +177,22 @@ struct JSONOutputTests {
     let trimmed = try object(JSONOutput.trim(user, expand: []))
 
     #expect(try object(#require(trimmed["personal_settings"]))["theme"] as? String == "dark")
-    #expect(JSONOutput.expandableFields(in: user).isEmpty, "never collapsed, nothing to restore")
+  }
+
+  @Test("Expanding an object that is already kept is accepted and changes nothing")
+  func acceptsExpandOfKeptObject() throws {
+    let user: [String: Any] = [
+      "id": 7,
+      "personal_settings": ["id": 3, "theme": "dark"],
+    ]
+
+    let expanded = try object(JSONOutput.trim(user, expand: ["personal_settings"]))
+
+    #expect(JSONOutput.expandableFields(in: user) == ["personal_settings"])
+    #expect(try object(#require(expanded["personal_settings"]))["theme"] as? String == "dark")
+    #expect(throws: ValidationError.self) {
+      _ = try JSONOutput.trim(user, expand: ["personal_setings"])
+    }
   }
 
   @Test("A uid reference stands in for its object just as an id one does")

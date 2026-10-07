@@ -250,8 +250,9 @@ struct GlobalOptions: ParsableArguments {
         stripped of the nested entities this rule would omit.
 
         Any other nested value is data that nothing else in the response stands in for, so it is \
-        always present and cannot be expanded: a card's custom field values and a user's \
-        personal_settings are never omitted.
+        always present: a card's custom field values and a user's personal_settings are never \
+        omitted. A value carrying no id cannot be expanded; a single object carrying one can, and \
+        expanding it changes nothing.
 
         Pass an unknown name to list what a command offers.
         """,

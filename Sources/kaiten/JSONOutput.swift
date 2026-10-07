@@ -68,6 +68,11 @@ enum JSONOutput {
   /// simply has nothing in it. Judging by the value's type instead would make `--expand tags`
   /// succeed on a card that has tags and fail on one that does not, so a script sweeping cards
   /// would break on whichever row happened to be empty.
+  ///
+  /// A single object with an `id` is accepted too, even when it has no reference beside it and is
+  /// therefore kept by default. Expanding it is a no-op, but `--expand personal_settings` was how
+  /// such an object used to be brought back, and rejecting it now would break the scripts that
+  /// relied on that.
   static func expandableFields(in json: Any) -> Set<String> {
     if let envelope = json as? [String: Any], let key = envelopePayloadKey(envelope) {
       return expandableFields(in: envelope[key] ?? [])
@@ -75,7 +80,8 @@ enum JSONOutput {
     return Set(
       objects(in: json).flatMap { object in
         object.filter { key, value in
-          isEntityReference(key, in: object) || (value as? [Any])?.isEmpty == true
+          (value as? [String: Any])?["id"] != nil || isEntityReference(key, in: object)
+            || (value as? [Any])?.isEmpty == true
         }.keys
       }
     )

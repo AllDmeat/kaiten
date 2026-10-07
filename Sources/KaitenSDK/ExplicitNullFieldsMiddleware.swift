@@ -29,7 +29,10 @@ struct ExplicitNullFieldsMiddleware: ClientMiddleware {
     for field in fields {
       json[field] = NSNull()
     }
-    return try await next(
-      request, HTTPBody(try JSONSerialization.data(withJSONObject: json)), baseURL)
+    let patched = try JSONSerialization.data(withJSONObject: json)
+    // The runtime stamps content-length from the original body before middlewares run.
+    var request = request
+    request.headerFields[.contentLength] = String(patched.count)
+    return try await next(request, HTTPBody(patched), baseURL)
   }
 }

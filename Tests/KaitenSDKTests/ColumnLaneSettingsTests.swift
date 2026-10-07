@@ -265,6 +265,9 @@ struct ColumnLaneSettingsTests {
       boardId: 10, id: 100, title: "T", clearWipLimit: true, wipLimitType: .cardCount)
     let columnJSON = try await sentBody(columns)
     #expect(columnJSON["wip_limit"] is NSNull)
+    let request = try #require(columns.recordedRequests.first)
+    let sent = try await Data(collecting: #require(request.body), upTo: 1024 * 1024)
+    #expect(request.request.headerFields[.contentLength] == String(sent.count))
     #expect(columnJSON["title"] as? String == "T")
     #expect(columnJSON["wip_limit_type"] as? Int == 1)
 

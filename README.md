@@ -428,8 +428,8 @@ CLI: `create-space --title <title> [--work-calendar-id <id>]`,
 | `createBoard(spaceId:title:description:sortOrder:externalId:top:left:columns:lanes:)` | Create a board; `columns` and `lanes` must not be empty arrays |
 | `updateBoard(spaceId:id:title:description:sortOrder:externalId:top:left:type:cellWipLimits:moveParentsToDone:hideDonePolicies:hideDonePoliciesInDoneColumn:moveFromSpaceId:cardProperties:)` | Update a board, including its placement on the space |
 
-Kaiten deprecated the `cards` both board reads return: it holds at most 100 cards since
-2026-10-01 and is no longer returned from 2026-11-01. Page through a board's cards with
+Kaiten deprecated the `cards` field returned by both board reads: it holds at most 100
+cards since 2026-10-01 and is no longer returned from 2026-11-01. Page through a board's cards with
 `listCards(boardId:)` or `allCards(boardId:)`.
 
 CLI: `get-space-board --space-id <id> --id <id>`,

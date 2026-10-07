@@ -12254,14 +12254,26 @@ components:
           description: Sprint velocity
         velocity_details:
           type: object
-          additionalProperties: true
+          properties:
+            by_members:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+              description: Velocity per member
           description: Velocity by members
         children_velocity:
           type: number
           description: Velocity of child cards
         children_velocity_details:
           type: object
-          additionalProperties: true
+          properties:
+            by_members:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+              description: Velocity per member
           description: Velocity details of child cards
         creator_id:
           type: integer
@@ -12323,14 +12335,26 @@ components:
           description: Sprint velocity
         velocity_details:
           type: object
-          additionalProperties: true
+          properties:
+            by_members:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+              description: Velocity per member
           description: Velocity by members
         children_velocity:
           type: number
           description: Velocity of child cards
         children_velocity_details:
           type: object
-          additionalProperties: true
+          properties:
+            by_members:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+              description: Velocity per member
           description: Velocity details of child cards
         creator_id:
           type: integer

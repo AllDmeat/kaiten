@@ -13,6 +13,13 @@ extension KaitenClient {
   ///   - limit: Maximum number of users (max 100).
   ///   - offset: Pagination offset.
   ///   - includeInactive: Include inactive users.
+  ///   - accessTypePermissions: `member` excludes guests before pagination for the `all`,
+  ///     `domain` and `shared` types (for `shared`, only users with paid access, even with
+  ///     `includeInactive`); `guest` applies to the `all` and `domain` types.
+  ///   - excludeMembersByEntityUid: Excludes direct, group and inherited members of the entity
+  ///     with this UID before pagination. Access for everyone alone does not count as membership.
+  ///   - excludeDirectlyAddedMembersByEntityUid: Excludes users invited directly to the entity
+  ///     with this UID.
   /// - Returns: An array of users.
   /// - Throws:
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
@@ -25,7 +32,10 @@ extension KaitenClient {
     ids: String? = nil,
     limit: Int? = nil,
     offset: Int? = nil,
-    includeInactive: Bool? = nil
+    includeInactive: Bool? = nil,
+    accessTypePermissions: String? = nil,
+    excludeMembersByEntityUid: String? = nil,
+    excludeDirectlyAddedMembersByEntityUid: String? = nil
   ) async throws(KaitenError) -> [Components.Schemas.User] {
     guard
       let response = try await callList({
@@ -36,7 +46,10 @@ extension KaitenClient {
             ids: ids,
             limit: limit,
             offset: offset,
-            include_inactive: includeInactive
+            include_inactive: includeInactive,
+            access_type_permissions: accessTypePermissions,
+            exclude_members_by_entity_uid: excludeMembersByEntityUid,
+            exclude_directly_added_members_by_entity_uid: excludeDirectlyAddedMembersByEntityUid
           )
         )
       })

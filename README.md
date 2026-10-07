@@ -485,7 +485,7 @@ CLI: `list-collective-vote-values`, `create-collective-vote-value`,
 
 | Method | Description |
 |--------|-------------|
-| `listUsers()` | List all users |
+| `listUsers(type:query:ids:limit:offset:includeInactive:accessTypePermissions:excludeMembersByEntityUid:excludeDirectlyAddedMembersByEntityUid:)` | List users |
 | `getCurrentUser()` | Get the current user |
 | `updateUser(id:...)` | Update a user |
 | `getCurrentUserBlockers()` | Get cards blocked on the current user (see [Card Blocker Users](#card-blocker-users)) |
@@ -499,7 +499,19 @@ Swift enums (`UserAvatarType`, `UserTheme`, `UserEmailFrequency`,
 `notification_settings` payloads stay free-form JSON — the documentation does
 not describe their fields.
 
-CLI: `update-user --id <id> [--full-name <name>] [--theme <theme>] ...`.
+`listUsers` takes every documented filter: `accessTypePermissions` (`member`
+drops guests before pagination), `excludeMembersByEntityUid` and
+`excludeDirectlyAddedMembersByEntityUid` (drop an entity's members, or only
+those invited to it directly). `GET /users/current` returns a superset of a
+list row, so `telegram_id`, `telegram_settings`, `has_password` and the other
+current-user-only fields of `User` are absent from list results. Nested
+settings such as `notification_settings`, `slack_settings` and
+`named_permissions` are free-form JSON objects.
+
+CLI: `list-users [--type <type>] [--query <text>] [--ids <ids>] [--include-inactive]
+[--access-type-permissions <member|guest>] [--exclude-members-by-entity-uid <uid>]
+[--exclude-directly-added-members-by-entity-uid <uid>]`,
+`update-user --id <id> [--full-name <name>] [--theme <theme>] ...`.
 
 ### Company Users
 
@@ -1209,7 +1221,7 @@ Available auto-pagination methods:
 | Method | Description |
 |--------|-------------|
 | `allCards(boardId:columnId:laneId:filter:pageSize:)` | All cards matching the given criteria |
-| `allUsers(type:query:includeInactive:pageSize:)` | All users |
+| `allUsers(type:query:includeInactive:accessTypePermissions:excludeMembersByEntityUid:excludeDirectlyAddedMembersByEntityUid:pageSize:)` | All users |
 | `allCustomProperties(query:pageSize:)` | All custom property definitions |
 | `allCustomPropertySelectValues(propertyId:pageSize:)` | All select values for a property |
 | `allCardTypes(pageSize:)` | All card types |

@@ -2443,6 +2443,21 @@ paths:
         schema:
           type: boolean
         description: Include inactive users
+      - name: access_type_permissions
+        in: query
+        schema:
+          type: string
+        description: member excludes guests before pagination for the all, domain and shared types (for shared, only users with paid access, even with include_inactive); guest applies to the all and domain types
+      - name: exclude_members_by_entity_uid
+        in: query
+        schema:
+          type: string
+        description: Exclude members of the entity with this uid, including direct, group and inherited membership, before pagination. Access for everyone alone does not count as membership. Applies to the all, domain and shared types
+      - name: exclude_directly_added_members_by_entity_uid
+        in: query
+        schema:
+          type: string
+        description: Exclude users directly invited to the entity with this uid
       responses:
         '200':
           description: success
@@ -8724,6 +8739,7 @@ components:
         id:
           type: integer
           description: User id
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-list-of-users
         uid:
           type: string
           description: User uid
@@ -8765,19 +8781,23 @@ components:
         ui_version:
           type: integer
           description: 1 - old ui, 2 - new
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-list-of-users
         virtual:
           type: boolean
           description: Virtual user flag
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only `null`) — https://developers.kaiten.ru/users/retrieve-list-of-users
         email_blocked:
           type:
           - string
           - 'null'
           description: Email blocked status
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-list-of-users
         email_blocked_reason:
           type:
           - string
           - 'null'
           description: Email blocked reason
+        # DOC_MISMATCH: not in docs, present in actual API responses (observed only `null`) — https://developers.kaiten.ru/users/retrieve-list-of-users
         delete_requested_at:
           type:
           - string
@@ -8806,6 +8826,158 @@ components:
           - string
           - 'null'
           description: Date of last request
+        last_request_method:
+          type:
+          - string
+          - 'null'
+          description: Type of last request
+        default_space_id:
+          type:
+          - integer
+          - 'null'
+          description: Default space
+        permissions:
+          type: integer
+          description: User company permissions
+        # DOC_MISMATCH: docs=`enum`, actual=`integer` — https://developers.kaiten.ru/users/retrieve-list-of-users
+        email_frequency:
+          type: integer
+          description: 1 - never, 2 - instantly
+        # NOTE: nullable, but expressed as a plain $ref rather than `anyOf: [$ref, 'null']` —
+        # swift-openapi-generator silently drops properties using that pattern. The property is
+        # optional, and the synthesized decoder maps an explicit JSON `null` to `nil`.
+        # Guarded by Tests/KaitenSDKTests/OpenAPISpecIntegrityTests.swift.
+        # DOC_MISMATCH: docs=non-nullable `object`, actual=`object | null` — https://developers.kaiten.ru/users/retrieve-list-of-users
+        email_settings:
+          $ref: '#/components/schemas/UserEmailSettings'
+          description: Email settings
+        # DOC_MISMATCH: docs=`null | integer`, actual=`string | null` — https://developers.kaiten.ru/users/retrieve-list-of-users
+        slack_id:
+          type:
+          - string
+          - 'null'
+          description: User slack id
+        slack_settings:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Slack settings. The documentation does not describe the fields
+        notification_settings:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Channel lists where notifications for specified events should be sent, keyed by event
+        notification_enabled_channels:
+          type: array
+          items:
+            type: string
+          description: 'List of enabled channels for notifications. Documented values: inner, mobile_app, email, slack, telegram'
+        # DOC_MISMATCH: docs=`null | integer`, actual=`string | null` — https://developers.kaiten.ru/users/retrieve-list-of-users
+        slack_private_channel_id:
+          type:
+          - string
+          - 'null'
+          description: User slack private channel id
+        telegram_sd_bot_enabled:
+          type: boolean
+          description: Telegram bot enable flag
+        # DOC_MISMATCH: docs=non-nullable `string`, actual=`string | null` — https://developers.kaiten.ru/users/retrieve-list-of-users
+        invite_last_sent_at:
+          type:
+          - string
+          - 'null'
+          description: Last invite date
+        # DOC_MISMATCH: docs=`string`, actual=`integer` — https://developers.kaiten.ru/users/retrieve-list-of-users
+        apps_permissions:
+          type: integer
+          description: 0 - no access, 1 - full access to Kaiten without service desk, 2 - guest access to Kaiten without service desk, 4 - service desk only, 5 - full access to Kaiten and service desk, 6 - guest access to Kaiten with service desk
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-list-of-users
+        locked:
+          type: boolean
+          description: Locked flag
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-list-of-users
+        temporarily_inactive:
+          type: boolean
+          description: Temporarily inactive flag
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `delete_requested_at` — https://developers.kaiten.ru/users/retrieve-list-of-users
+        depersonalized_at:
+          type:
+          - string
+          - 'null'
+          description: Depersonalization timestamp
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-list-of-users
+        beta_features:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: Beta features. The documentation does not describe the fields
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, so no type is imposed — https://developers.kaiten.ru/users/retrieve-list-of-users
+        chat_settings:
+          description: Chat settings. Shape is not described in the Kaiten documentation
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-list-of-users
+        personal_settings:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Personal settings. The documentation does not describe the fields
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, so no type is imposed — https://developers.kaiten.ru/users/retrieve-list-of-users
+        work_calendar_id:
+          description: Work calendar id. Type is not described in the Kaiten documentation
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-list-of-users
+        work_time_settings:
+          $ref: '#/components/schemas/UserWorkTimeSettings'
+          description: Work time settings
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-list-of-users
+        named_permissions:
+          type: object
+          additionalProperties: true
+          description: Effective company permissions by name. The documentation does not describe the fields
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-list-of-users
+        own_named_permissions:
+          type: object
+          additionalProperties: true
+          description: Company permissions granted to the user directly, by name. The documentation does not describe the fields
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-list-of-users
+        own_permissions:
+          type: integer
+          description: Company permissions granted to the user directly
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-list-of-users
+        max_messenger_sd_bot_enabled:
+          type: boolean
+          description: MAX messenger service desk bot enable flag
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/users/retrieve-current-user
+        telegram_id:
+          type:
+          - integer
+          - 'null'
+          description: Telegram id. Returned only by the current user endpoint
+        telegram_settings:
+          type: object
+          additionalProperties: true
+          description: Telegram settings. Returned only by the current user endpoint. The documentation does not describe the fields
+        has_password:
+          type: boolean
+          description: Has user password flag. Returned only by the current user endpoint
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only an empty array, so no item type is imposed — https://developers.kaiten.ru/users/retrieve-current-user
+        directory_synced_profile_fields:
+          type: array
+          items: {}
+          description: Profile fields synced from a directory. Returned only by the current user endpoint
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only null, type inferred from `telegram_id` — https://developers.kaiten.ru/users/retrieve-current-user
+        max_messenger_id:
+          type:
+          - integer
+          - 'null'
+          description: MAX messenger id. Returned only by the current user endpoint
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/users/retrieve-current-user
+        max_messenger_settings:
+          type: object
+          additionalProperties: true
+          description: MAX messenger settings. Returned only by the current user endpoint. The documentation does not describe the fields
     UpdateUserRequest:
       type: object
       properties:

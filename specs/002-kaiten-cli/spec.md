@@ -246,6 +246,11 @@ stdout confirms it works.
   `--conditions` and `--actions`) MUST be decoded and validated locally before the
   SDK call. Malformed JSON MUST produce a validation error naming the offending
   option; silently forwarding or dropping the value is forbidden.
+- **FR-025**: `list-users` MUST expose every filter `listUsers` accepts:
+  `--access-type-permissions`, `--exclude-members-by-entity-uid` and
+  `--exclude-directly-added-members-by-entity-uid` alongside the existing
+  `--type`, `--query`, `--ids`, `--limit`, `--offset` and
+  `--include-inactive`.
 
 ### Non-Functional Requirements
 

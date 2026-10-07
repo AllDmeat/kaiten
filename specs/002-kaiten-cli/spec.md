@@ -285,6 +285,16 @@ stdout confirms it works.
   a validation error before the request. On create,
   `--card-hide-after-days` is an integer option. `--wip-limit` keeps its
   integer form.
+- **FR-030**: Space and board subcommands MUST expose every request
+  attribute their SDK methods accept: `create-space --work-calendar-id`;
+  `update-space --hidden-card-type-uids` (comma-separated) and `--settings`
+  (JSON object); `create-board --top`, `--left`, `--columns` and `--lanes`
+  (JSON arrays); `update-board --top`, `--left`, `--type`,
+  `--cell-wip-limits` (JSON object), `--move-parents-to-done`,
+  `--hide-done-policies`, `--hide-done-policies-in-done-column`,
+  `--move-from-space-id` and `--card-properties` (JSON array). JSON options
+  follow FR-024. An empty `--columns` or `--lanes` array MUST fail locally
+  with a validation error, because the API rejects it.
 
 ### Non-Functional Requirements
 

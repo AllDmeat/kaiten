@@ -32,8 +32,8 @@ enum JSONOutput {
   /// - Returns: the response with unexpanded nested fields removed and expanded ones flattened.
   /// - Throws: `ValidationError` if a requested name is not expandable in this response.
   static func trim(_ json: Any, expand: Set<String>) throws -> Any {
-    if var envelope = json as? [String: Any], isPageEnvelope(envelope) {
-      envelope["items"] = try trim(envelope["items"] ?? [], expand: expand)
+    if var envelope = json as? [String: Any], let key = envelopePayloadKey(envelope) {
+      envelope[key] = try trim(envelope[key] ?? [], expand: expand)
       return envelope
     }
     // An empty result set has nothing to expand and nothing to validate a name against. Rejecting
@@ -68,8 +68,8 @@ enum JSONOutput {
   /// succeed on a card that has tags and fail on one that does not, so a script sweeping cards
   /// would break on whichever row happened to be empty.
   static func expandableFields(in json: Any) -> Set<String> {
-    if let envelope = json as? [String: Any], isPageEnvelope(envelope) {
-      return expandableFields(in: envelope["items"] ?? [])
+    if let envelope = json as? [String: Any], let key = envelopePayloadKey(envelope) {
+      return expandableFields(in: envelope[key] ?? [])
     }
     return Set(
       objects(in: json).flatMap { object in
@@ -143,14 +143,18 @@ enum JSONOutput {
 
   // MARK: - Pagination
 
-  /// Whether an object is a `KaitenSDK.Page` envelope rather than an entity.
+  /// The key holding the rows when an object is a pagination envelope rather than an entity.
   ///
-  /// Its `items` array is the response payload, not a nested entity, so trimming has to reach
+  /// The envelope's array is the response payload, not a nested entity, so trimming has to reach
   /// through it. Treating it like any other array of objects would leave a paginated command
-  /// returning its page metadata and none of the rows. `hasMore` is what tells the envelope apart
-  /// from an entity that merely has `items`, such as a checklist.
-  private static func isPageEnvelope(_ object: [String: Any]) -> Bool {
-    object["items"] is [Any] && object["hasMore"] != nil
+  /// returning its page metadata and none of the rows. A `KaitenSDK.Page` keeps its rows in
+  /// `items`, and `hasMore` is what tells it apart from an entity that merely has `items`, such as
+  /// a checklist. A version=2 search keeps them in `result` next to its `position` cursor, and
+  /// having no `id` is what tells it apart from an entity.
+  private static func envelopePayloadKey(_ object: [String: Any]) -> String? {
+    if object["items"] is [Any] && object["hasMore"] != nil { return "items" }
+    if object["result"] is [Any] && object["id"] == nil { return "result" }
+    return nil
   }
 
   // MARK: - Traversal

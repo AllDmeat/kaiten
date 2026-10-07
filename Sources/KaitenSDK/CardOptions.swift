@@ -44,6 +44,8 @@ public struct CardCreateOptions: Sendable {
   public var position: CardPosition?
   /// Card type ID.
   public var typeId: Int?
+  /// Service desk service ID. Must reference an active service.
+  public var serviceId: Int?
   /// External identifier.
   public var externalId: String?
   /// Text format for card description.
@@ -125,6 +127,9 @@ public struct CardUpdateOptions: Sendable {
   public var plannedStart: String??
   /// Planned end date. Same three-state semantics as ``plannedStart``.
   public var plannedEnd: String??
+  /// Skip the card in planned dates recalculation by planned relations. Requires the Gantt and
+  /// Resource planning feature.
+  public var ignorePlannedDatesRecalculation: Bool?
   /// Custom properties object.
   public var properties: Components.Schemas.UpdateCardRequest.propertiesPayload?
 

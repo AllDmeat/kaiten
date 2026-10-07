@@ -2,7 +2,8 @@ import Foundation
 
 /// Filters for querying cards from the Kaiten API.
 ///
-/// Use `CardFilter` to narrow down results when calling ``KaitenClient/listCards(boardId:columnId:laneId:offset:limit:filter:)``.
+/// Use `CardFilter` to narrow down results when calling ``KaitenClient/listCards(boardId:columnId:laneId:offset:limit:filter:)``
+/// or ``KaitenClient/searchCards(boardId:columnId:laneId:startPosition:includeSearchPreview:limit:filter:)``.
 /// All properties are optional — only set the ones you need. Non-`nil` values are sent as
 /// query parameters to the `GET /cards` endpoint; `nil` values are omitted.
 ///
@@ -156,6 +157,16 @@ public struct CardFilter: Sendable {
 
   /// Comma-separated list of additional fields to include in the response (e.g. `"description,checklist"`).
   public let additionalCardFields: String?
+  /// Comma-separated project UUIDs.
+  public let projectIds: String?
+  /// (Beta) And/or condition tree encoded in base64, passed to the API unchanged.
+  ///
+  /// - SeeAlso: [Kaiten API – Cards](https://developers.kaiten.ru/cards/retrieve-card-list)
+  public let filter: String?
+  /// Representation of user-type custom property values (`broken_api`).
+  ///
+  /// The list returns those values as arrays of user objects regardless of this flag.
+  public let brokenApi: Bool?
 
   /// Creates a new card filter with all fields defaulting to `nil`.
   public init(
@@ -200,7 +211,10 @@ public struct CardFilter: Sendable {
     orderBy: String? = nil,
     orderDirection: String? = nil,
     orderSpaceId: Int? = nil,
-    additionalCardFields: String? = nil
+    additionalCardFields: String? = nil,
+    projectIds: String? = nil,
+    filter: String? = nil,
+    brokenApi: Bool? = nil
   ) {
     self.createdBefore = createdBefore
     self.createdAfter = createdAfter
@@ -244,5 +258,8 @@ public struct CardFilter: Sendable {
     self.orderDirection = orderDirection
     self.orderSpaceId = orderSpaceId
     self.additionalCardFields = additionalCardFields
+    self.projectIds = projectIds
+    self.filter = filter
+    self.brokenApi = brokenApi
   }
 }

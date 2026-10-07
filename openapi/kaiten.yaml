@@ -413,15 +413,48 @@ paths:
         schema:
           type: string
         description: Comma-separated additional fields to include
+      - name: project_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated project UUIDs
+      - name: filter
+        in: query
+        schema:
+          type: string
+        description: (Beta) Filter by and/or conditions encoded in the base64 format
+      - name: version
+        in: query
+        schema:
+          type: integer
+        description: 'Search version. Default: 1. Use version=2 to search via OpenSearch and enable the new response format with result and position fields'
+      - name: start_position
+        in: query
+        schema:
+          type: string
+        description: Search cursor for version=2 pagination. Pass the position value from the previous version=2 response
+      - name: include_search_preview
+        in: query
+        schema:
+          type: boolean
+        description: 'Include the preview object in each search result. Used with version=2. Default: false'
+      - name: broken_api
+        in: query
+        schema:
+          type: boolean
+        description: Backward compatibility flag for user-type custom properties. true returns user UID strings, false returns user integer ids. The list returns user-type values as arrays of user objects regardless of the flag
       responses:
         '200':
           description: List of cards
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Card'
+                description: Array of cards when version is omitted or 1, an object with result and position when version=2
+                anyOf:
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/Card'
+                - $ref: '#/components/schemas/CardSearchResponse'
         '401':
           description: Unauthorized
     post:
@@ -519,6 +552,11 @@ paths:
         schema:
           type: integer
         description: Card ID
+      - name: broken_api
+        in: query
+        schema:
+          type: boolean
+        description: Backward compatibility flag for user-type custom properties. true returns user UID strings, false (the current default) returns user integer ids
       responses:
         '200':
           description: Card details
@@ -1202,6 +1240,11 @@ paths:
         schema:
           type: integer
         description: Number of children to skip. Must be a non negative integer. Default is 0
+      - name: broken_api
+        in: query
+        schema:
+          type: boolean
+        description: Backward compatibility flag for user-type custom properties. true returns user UID strings, false returns user integer ids
       responses:
         '200':
           description: success
@@ -7637,6 +7680,7 @@ components:
           items:
             type: string
           description: External user emails
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/cards/retrieve-card
         tag_ids:
           type:
           - array
@@ -7706,8 +7750,11 @@ components:
           items:
             type: integer
           description: Parent card IDs
+        # DOC_MISMATCH: docs=non-nullable `string`, actual=`string | null` (null on embedded children/parents) — https://developers.kaiten.ru/cards/retrieve-card-list
         counters_recalculated_at:
-          type: string
+          type:
+          - string
+          - 'null'
           description: Counters recalculation timestamp
         sd_new_comment:
           type: boolean
@@ -7741,9 +7788,11 @@ components:
           - integer
           - 'null'
           description: Import ID
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/cards/retrieve-card
         fts_version:
           type: string
           description: Full-text search version
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only `null` — https://developers.kaiten.ru/cards/retrieve-card
         locked:
           type:
           - string
@@ -7777,6 +7826,7 @@ components:
           $ref: '#/components/schemas/CardType'
         owner:
           $ref: '#/components/schemas/User'
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed only `null` — https://developers.kaiten.ru/cards/retrieve-card
         key:
           type:
           - string
@@ -7837,6 +7887,93 @@ components:
           items:
             type: integer
           description: IDs of related cards
+        ignore_planned_dates_recalculation:
+          type: boolean
+          description: Card is skipped in planned dates recalculation by planned relations
+        path_data:
+          type: object
+          additionalProperties: true
+          description: Card path info (space, board, column, lane, etc). Returned by the card list and on the embedded children/parents of a single card; absent on the single card itself
+        preview:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          description: Search preview snippet. Present only in version=2 list results requested with include_search_preview=true
+        # DOC_MISMATCH: not in docs, present in actual API responses (version=2 results of a text search) — https://developers.kaiten.ru/cards/retrieve-card-list
+        mQueries:
+          type: array
+          items: {}
+          description: Search match data returned with version=2 text search results
+        # DOC_MISMATCH: docs=array of user objects, actual=array of card blocker records — https://developers.kaiten.ru/cards/retrieve-card
+        blockers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardBlocker'
+          description: Card blocks. Returned by the single-card endpoint for a blocked card
+        blocked_at:
+          type: string
+          description: Date of card block
+        blocker_id:
+          type: integer
+          description: User id who blocked card
+        blocker:
+          $ref: '#/components/schemas/User'
+          description: Info of user who blocked card
+        block_reason:
+          type: string
+          description: Block reason
+        cardRole:
+          type: integer
+          description: Card role of the user who made the request
+        email:
+          type: string
+          description: Card email for email comments
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/cards/retrieve-card
+        in_workflow:
+          type: boolean
+          description: Whether the card is in a workflow
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/cards/retrieve-card
+        card_permissions:
+          type: object
+          additionalProperties: true
+          description: Permissions of the requesting user on the card
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/cards/retrieve-card
+        card_cp_value_fts_version:
+          type: string
+          description: Full-text search version of the card custom property values
+        # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/cards/retrieve-card
+        card_tag_fts_version:
+          type: string
+          description: Full-text search version of the card tags
+        card_id:
+          type: integer
+          description: Parent card id. Present only on embedded children/parents relations
+        depends_on_card_id:
+          type: integer
+          description: Child card id. Present only on embedded children/parents relations
+        # DOC_MISMATCH: not in docs, present in actual API responses (embedded children/parents of a single card) — https://developers.kaiten.ru/cards/retrieve-card
+        has_access_to_space:
+          type: boolean
+          description: Whether the requesting user has access to the related card's space. Present only on embedded children/parents relations
+        # DOC_MISMATCH: not in docs, present in actual API responses (embedded children/parents of a single card) — https://developers.kaiten.ru/cards/retrieve-card
+        space_id:
+          type:
+          - integer
+          - 'null'
+          description: Space id of the related card. Present only on embedded children/parents relations
+    CardSearchResponse:
+      type: object
+      description: The version=2 card list response envelope
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+          description: Search results
+        position:
+          type: string
+          description: Opaque cursor for pagination. Pass this value as start_position in the next request
     CardMember:
       description: User with card membership info (card_id, user_id, type)
       allOf:
@@ -9750,8 +9887,11 @@ components:
           - string
           - 'null'
           description: Card type description template
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` (observed on the type embedded in cards) — https://developers.kaiten.ru/cards/retrieve-card-list
         company_id:
-          type: integer
+          type:
+          - integer
+          - 'null'
           description: Company id
         properties:
           type:
@@ -10775,6 +10915,9 @@ components:
         planned_end:
           $ref: '#/components/schemas/NullableString'
           description: Planned end date in ISO 8601 format (null to clear, absent to leave unchanged)
+        ignore_planned_dates_recalculation:
+          type: boolean
+          description: Skip the card in planned dates recalculation by planned relations (requires the Gantt and Resource planning feature)
         properties:
           type: object
           additionalProperties: true
@@ -10914,6 +11057,9 @@ components:
         type_id:
           type: integer
           description: Card type ID
+        service_id:
+          type: integer
+          description: Service desk service ID. Must reference an active service
         external_id:
           type:
           - string
@@ -14579,6 +14725,9 @@ components:
           - string
           - 'null'
           description: Card timeline planned end
+        ignore_planned_dates_recalculation:
+          type: boolean
+          description: Card is skipped in planned dates recalculation by planned relations
         counters_recalculated_at:
           type: string
           description: Date of recalculating counters

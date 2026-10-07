@@ -230,8 +230,8 @@ stdout confirms it works.
   misreports, the help of the affected subcommand MUST say so.
   `children_ids` and `children_count` undercount — both have been observed
   reporting eight children for a card that has eleven, and expanding
-  `children` returns the same short list — so `get-card`, `list-cards` and
-  `list-card-children` each state it. The CLI MUST NOT issue extra requests
+  `children` returns the same short list — so `get-card`, `list-cards`,
+  `search-cards` and `list-card-children` each state it. The CLI MUST NOT issue extra requests
   to repair such a field: the cost is per row, and documenting the limit
   keeps one command one request.
 - **FR-023**: A subcommand's help MUST describe the behaviour of its own
@@ -285,6 +285,18 @@ stdout confirms it works.
   a validation error before the request. On create,
   `--card-hide-after-days` is an integer option. `--wip-limit` keeps its
   integer form on create.
+- **FR-029**: `list-cards` MUST expose every filter `listCards` accepts,
+  including `--project-ids`, `--filter` (the base64-encoded condition tree,
+  passed through unchanged) and `--broken-api`. A `search-cards` subcommand
+  MUST wrap `searchCards` with the same filters plus `--start-position` and
+  `--include-search-preview`; it prints the `result`/`position` object and
+  takes no `--offset`, because Kaiten does not honour `offset` with
+  `version=2`. Its help MUST state that consecutive pages overlap, so a
+  card can appear on more than one page (per FR-022). Trimming (FR-021) MUST reach through the `result` array of a
+  version=2 envelope as it does through a page's `items`; otherwise every
+  row collapses to its id. `get-card` and `list-card-children` MUST expose
+  `--broken-api`, `create-card` `--service-id`, and `update-card`
+  `--ignore-planned-dates-recalculation`.
 - **FR-030**: Space and board subcommands MUST expose every request
   attribute their SDK methods accept: `create-space --work-calendar-id`;
   `update-space --hidden-card-type-uids` (comma-separated) and `--settings`

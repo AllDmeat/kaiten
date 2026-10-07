@@ -198,13 +198,15 @@ The SDK provides typed errors, retries `429 Too Many Requests` responses automat
 
 | Method | Description |
 |--------|-------------|
-| `listCards(boardId:)` | List all cards on a board |
-| `getCard(id:)` | Fetch a single card by ID |
+| `listCards(boardId:columnId:laneId:offset:limit:filter:)` | List cards, filtered by a `CardFilter` (version=1 response, offset-paged) |
+| `searchCards(boardId:columnId:laneId:startPosition:includeSearchPreview:limit:filter:)` | Search cards via OpenSearch (version=2 response, cursor-paged) |
+| `searchAllCards(boardId:columnId:laneId:includeSearchPreview:filter:pageSize:)` | Stream every card a version=2 search matches, following the cursor |
+| `getCard(id:brokenApi:)` | Fetch a single card by ID |
 | `createCard(...)` | Create a new card |
 | `updateCard(...)` | Update a card |
 | `batchUpdateCards(...)` | Update multiple cards by criteria (background job) |
 | `deleteCard(...)` | Delete a card |
-| `listCardChildren(cardId:limit:offset:)` | List child cards (up to 100 per page) |
+| `listCardChildren(cardId:limit:offset:brokenApi:)` | List child cards (up to 100 per page) |
 | `addCardChild(...)` | Add a child card |
 | `removeCardChild(...)` | Remove a child card |
 | `getCardMembers(cardId:)` | Get members of a card |
@@ -229,6 +231,32 @@ The SDK provides typed errors, retries `429 Too Many Requests` responses automat
 | `createCardTimeLog(cardId:roleId:timeSpent:forDate:comment:)` | Add a time log to a card |
 | `updateCardTimeLog(cardId:timeLogId:...)` | Update a time log |
 | `deleteCardTimeLog(cardId:timeLogId:)` | Remove a time log |
+
+`GET /cards` answers in two shapes: the default (version=1) response is a
+plain array exposed as a `Page`, while `searchCards` calls the same endpoint
+with `version=2` and returns a `result` list plus an opaque `position` cursor —
+pass it back as `startPosition` to fetch the next page. Kaiten does not honour
+`offset` with `version=2`, so the search pages by cursor only; an exhausted
+search answers with an empty `result`. Consecutive pages overlap even when
+`position` is passed back exactly, so a card can appear on more than one page:
+`searchCards` returns each page as the API sends it, while `searchAllCards`
+yields each card once. It stops on an empty page, a missing or already seen
+`position`, or after three consecutive pages without a new card. `CardFilter` carries every documented
+filter, including `projectIds`, the beta base64-encoded `filter` condition
+tree, and `brokenApi`.
+
+`brokenApi` selects how user-type custom property values come back. On
+`getCard` they are integer user ids by default and with `false`, user UID
+strings with `true`; the card list returns them as arrays of user objects
+whatever the flag says. `properties` is a free-form object, so every shape
+decodes.
+
+CLI: `list-cards` takes every `CardFilter` option, including
+`--project-ids`, `--filter` and `--broken-api`; `search-cards` takes the same
+filters plus `--start-position`, `--include-search-preview` and `--limit`
+(no `--offset`); `get-card` and `list-card-children` take `--broken-api`;
+`create-card` takes `--service-id`; `update-card` takes
+`--ignore-planned-dates-recalculation`.
 
 ### Checklists
 
@@ -1241,12 +1269,13 @@ Available auto-pagination methods:
 | Method | Description |
 |--------|-------------|
 | `allCards(boardId:columnId:laneId:filter:pageSize:)` | All cards matching the given criteria |
+| `searchAllCards(boardId:columnId:laneId:includeSearchPreview:filter:pageSize:)` | All cards a version=2 search matches, paged by cursor |
 | `allUsers(type:query:includeInactive:accessTypePermissions:excludeMembersByEntityUid:excludeDirectlyAddedMembersByEntityUid:pageSize:)` | All users |
 | `allCustomProperties(query:pageSize:)` | All custom property definitions. The `includeValues:` overload is deprecated |
 | `allSpaces(pageSize:)` | All spaces |
 | `allSpaceUsers(spaceId:includeInheritedAccess:inactive:pageSize:)` | All users of a space (cursor-paged by `last_user_id`) |
 | `allCardComments(cardId:pageSize:)` | All comments on a card |
-| `allCardChildren(cardId:pageSize:)` | All children of a card |
+| `allCardChildren(cardId:brokenApi:pageSize:)` | All children of a card |
 | `allCardTimeLogs(cardId:forDate:personal:pageSize:)` | All time logs on a card |
 | `allCardAllowedUsers(cardId:type:role:pageSize:)` | All users with access to a card |
 | `allGroupUsers(groupUid:pageSize:)` | All users in a company group |
@@ -1283,7 +1312,15 @@ for try await card in client.allCards(boardId: 1, filter: filter) {
 }
 ```
 
-Commonly used filter properties include `query`, `memberIds`, `states`, `overdue`, `spaceId`, `typeId`, `condition`, and date ranges like `createdAfter`/`createdBefore`. See `CardFilter` source for the full list of 40+ parameters.
+The same filter drives the version=2 search:
+
+```swift
+for try await card in client.searchAllCards(filter: CardFilter(query: "login bug")) {
+    print(card.title)
+}
+```
+
+Commonly used filter properties include `query`, `memberIds`, `states`, `overdue`, `spaceId`, `typeId`, `condition`, `projectIds`, and date ranges like `createdAfter`/`createdBefore`. See `CardFilter` source for the full list of 40+ parameters.
 
 ### Creating and updating cards
 

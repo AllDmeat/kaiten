@@ -90,7 +90,9 @@ struct DocumentationGapsTests {
         "due_date": null, "state": 2, "condition": 1, "board_id": 3, "column_id": 4,
         "lane_id": 5, "owner_id": 6, "type_id": 7, "card_id": 10, "depends_on_card_id": 11,
         "size": 3, "size_text": "3", "children_count": 0, "goals_total": 0,
-        "counters_recalculated_at": null, "ignore_planned_dates_recalculation": null,
+        "counters_recalculated_at": null, "ignore_planned_dates_recalculation": false,
+        "sprint_id": null, "fifo_order": null, "estimate_workload": 1.5,
+        "external_user_emails": null,
         "properties": null, "sprint_id": null, "external_id": null, "completed_at": null,
         "created": "2026-01-01T00:00:00Z", "updated": "2026-01-01T00:00:00Z",
         "last_moved_at": "2026-01-01T00:00:00Z", "tags": [], "members": []},
@@ -106,6 +108,9 @@ struct DocumentationGapsTests {
     #expect(children[0].size_text == "3")
     #expect(children[0].counters_recalculated_at == nil)
     #expect(children[0].archived == false)
+    #expect(children[0].ignore_planned_dates_recalculation == false)
+    #expect(children[0].sprint_id == nil)
+    #expect(children[0].estimate_workload == 1.5)
     #expect(children[1].state == nil)
     #expect(children[1].depends_on_card_id == 12)
   }

@@ -11390,6 +11390,7 @@ components:
           - string
           - 'null'
           description: Completion timestamp
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/card-children/retrieve-card-children-list
         sprint_id:
           type:
           - integer
@@ -11425,6 +11426,7 @@ components:
           - string
           - 'null'
           description: Last moved to done timestamp
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/card-children/retrieve-card-children-list
         service_id:
           type:
           - integer
@@ -11461,10 +11463,8 @@ components:
           description: Share settings
         external_user_emails:
           type:
-          - array
+          - string
           - 'null'
-          items:
-            type: string
           description: External user emails
         # DOC_MISMATCH: not in docs, present in actual API responses — https://developers.kaiten.ru/card-children/retrieve-card-children-list
         tag_ids:
@@ -11475,7 +11475,7 @@ components:
             type: integer
           description: Tag IDs
         estimate_workload:
-          type: integer
+          type: number
           description: Estimated workload
         parents_count:
           type: integer
@@ -11499,6 +11499,7 @@ components:
           items:
             type: integer
           description: Parent checklist IDs
+        # DOC_MISMATCH: docs=non-nullable `integer`, actual=`integer | null` — https://developers.kaiten.ru/card-children/retrieve-card-children-list
         fifo_order:
           type:
           - integer
@@ -11620,11 +11621,8 @@ components:
           items:
             $ref: '#/components/schemas/Tag'
           description: Card tags
-        # DOC_MISMATCH: docs=non-nullable `boolean`, actual=`boolean | null` — https://developers.kaiten.ru/card-children/retrieve-card-children-list
         ignore_planned_dates_recalculation:
-          type:
-          - boolean
-          - 'null'
+          type: boolean
           description: Card is skipped in planned dates recalculation by planned relations
         has_access_to_space:
           type: boolean

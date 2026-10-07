@@ -372,7 +372,7 @@ let sections: [Section] = [
       name: "create_custom_directory", errors: [.badRequest, .unauthorized, .forbidden]),
     Operation(name: "get_custom_directory", errors: [.unauthorized, .notFound]),
     Operation(
-      name: "update_custom_directory", errors: [.badRequest, .unauthorized, .notFound]),
+      name: "update_custom_directory", errors: [.badRequest, .unauthorized, .notFound, .conflict]),
     Operation(
       name: "delete_custom_directory", errors: [.badRequest, .unauthorized, .notFound]),
   ]),

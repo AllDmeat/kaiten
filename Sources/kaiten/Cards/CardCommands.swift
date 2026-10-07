@@ -38,33 +38,8 @@ func parseCardCondition(_ rawValue: Int?) throws -> CardCondition? {
   return condition
 }
 
-struct ListCards: AsyncParsableCommand {
-  static let configuration = CommandConfiguration(
-    commandName: "list-cards",
-    abstract: "List cards on a board (paginated)",
-    discussion: """
-      `children_ids` and `children_count` on each row come straight from Kaiten and undercount: a \
-      card can have more children than either field admits.
-      """
-  )
-
-  @OptionGroup var global: GlobalOptions
-
-  @Option(name: .long, help: "Board ID")
-  var boardId: Int?
-
-  @Option(name: .long, help: "Column ID")
-  var columnId: Int?
-
-  @Option(name: .long, help: "Lane ID")
-  var laneId: Int?
-
-  @Option(name: .long, help: "Offset for pagination (default: 0)")
-  var offset: Int = 0
-
-  @Option(name: .long, help: "Limit for pagination (default/max: 100)")
-  var limit: Int = 100
-
+/// `GET /cards` filters shared by `list-cards` and `search-cards`.
+struct CardFilterOptions: ParsableArguments {
   // Date filters
   @Option(name: .long, help: "Filter cards created before this date (ISO 8601)")
   var createdBefore: String?
@@ -199,9 +174,23 @@ struct ListCards: AsyncParsableCommand {
   @Option(name: .long, help: "Comma-separated additional fields to include")
   var additionalCardFields: String?
 
-  func run() async throws {
-    let client = try await global.makeClient()
-    let filter = KaitenClient.CardFilter(
+  @Option(name: .long, help: "Comma-separated project UUIDs")
+  var projectIds: String?
+
+  @Option(
+    name: .long,
+    help: "(Beta) And/or condition tree encoded in base64, passed to the API unchanged")
+  var filter: String?
+
+  @Option(
+    name: .long,
+    help:
+      "User-type custom property format flag; the list returns those values as arrays of user objects regardless"
+  )
+  var brokenApi: Bool?
+
+  func makeFilter() throws -> KaitenClient.CardFilter {
+    KaitenClient.CardFilter(
       createdBefore: try DateParsing.parse(createdBefore),
       createdAfter: try DateParsing.parse(createdAfter),
       updatedBefore: try DateParsing.parse(updatedBefore),
@@ -243,12 +232,97 @@ struct ListCards: AsyncParsableCommand {
       orderBy: orderBy,
       orderDirection: orderDirection,
       orderSpaceId: orderSpaceId,
-      additionalCardFields: additionalCardFields
+      additionalCardFields: additionalCardFields,
+      projectIds: projectIds,
+      filter: filter,
+      brokenApi: brokenApi
     )
+  }
+}
+
+struct ListCards: AsyncParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "list-cards",
+    abstract: "List cards on a board (paginated)",
+    discussion: """
+      `children_ids` and `children_count` on each row come straight from Kaiten and undercount: a \
+      card can have more children than either field admits.
+      """
+  )
+
+  @OptionGroup var global: GlobalOptions
+
+  @Option(name: .long, help: "Board ID")
+  var boardId: Int?
+
+  @Option(name: .long, help: "Column ID")
+  var columnId: Int?
+
+  @Option(name: .long, help: "Lane ID")
+  var laneId: Int?
+
+  @Option(name: .long, help: "Offset for pagination (default: 0)")
+  var offset: Int = 0
+
+  @Option(name: .long, help: "Limit for pagination (default/max: 100)")
+  var limit: Int = 100
+
+  @OptionGroup var filters: CardFilterOptions
+
+  func run() async throws {
+    let client = try await global.makeClient()
     let page = try await client.listCards(
       boardId: boardId, columnId: columnId, laneId: laneId, offset: offset, limit: limit,
-      filter: filter)
+      filter: try filters.makeFilter())
     try printJSON(page, expand: global.expandedFields)
+  }
+}
+
+struct SearchCards: AsyncParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "search-cards",
+    abstract: "Search cards via OpenSearch (version=2)",
+    discussion: """
+      Prints an object with `result` and an opaque `position` cursor; pass that value back via \
+      --start-position to fetch the next page. Kaiten does not honour an offset with this \
+      search, so there is none; an exhausted search returns an empty `result`. \
+      `children_ids` and `children_count` on each row come straight from Kaiten and undercount: \
+      a card can have more children than either field admits.
+      """
+  )
+
+  @OptionGroup var global: GlobalOptions
+
+  @Option(name: .long, help: "Board ID")
+  var boardId: Int?
+
+  @Option(name: .long, help: "Column ID")
+  var columnId: Int?
+
+  @Option(name: .long, help: "Lane ID")
+  var laneId: Int?
+
+  @Option(name: .long, help: "Search cursor from the previous response")
+  var startPosition: String?
+
+  @Option(
+    name: .long,
+    help:
+      "Include the preview object in each result (observed only when the search covers description)"
+  )
+  var includeSearchPreview: Bool?
+
+  @Option(name: .long, help: "Limit for pagination (default/max: 100)")
+  var limit: Int = 100
+
+  @OptionGroup var filters: CardFilterOptions
+
+  func run() async throws {
+    let client = try await global.makeClient()
+    let response = try await client.searchCards(
+      boardId: boardId, columnId: columnId, laneId: laneId, startPosition: startPosition,
+      includeSearchPreview: includeSearchPreview, limit: limit, filter: try filters.makeFilter())
+    try printJSON(response, expand: global.expandedFields)
   }
 }
 
@@ -308,6 +382,9 @@ struct CreateCard: AsyncParsableCommand {
   @Option(name: .long, help: "Card type ID")
   var typeId: Int?
 
+  @Option(name: .long, help: "Service desk service ID; must reference an active service")
+  var serviceId: Int?
+
   @Option(name: .long, help: "External ID")
   var externalId: String?
 
@@ -338,6 +415,7 @@ struct CreateCard: AsyncParsableCommand {
     opts.ownerEmail = ownerEmail
     opts.position = position.map(CardPosition.init(rawValue:))
     opts.typeId = typeId
+    opts.serviceId = serviceId
     opts.externalId = externalId
     opts.textFormatTypeId = textFormatTypeId.map(TextFormatType.init(rawValue:))
     opts.properties = try parseCardProperties(properties, fieldName: "properties")
@@ -361,9 +439,16 @@ struct GetCard: AsyncParsableCommand {
   @Option(name: .long, help: "Card ID")
   var id: Int
 
+  @Option(
+    name: .long,
+    help:
+      "User-type custom property values as user UID strings (true) or integer user ids (false, the default)"
+  )
+  var brokenApi: Bool?
+
   func run() async throws {
     let client = try await global.makeClient()
-    let card = try await client.getCard(id: id)
+    let card = try await client.getCard(id: id, brokenApi: brokenApi)
     try printJSON(card, expand: global.expandedFields)
   }
 }
@@ -454,6 +539,13 @@ struct UpdateCard: AsyncParsableCommand {
   )
   var plannedEnd: String?
 
+  @Option(
+    name: .long,
+    help:
+      "Skip the card in planned dates recalculation by planned relations (requires the Gantt and Resource planning feature)"
+  )
+  var ignorePlannedDatesRecalculation: Bool?
+
   @Option(name: .long, help: "Service Desk unseen-comment flag")
   var sdNewComment: Bool?
 
@@ -494,6 +586,7 @@ struct UpdateCard: AsyncParsableCommand {
     //   "date"            → .some("date") (send string, server sets the value)
     opts.plannedStart = plannedStart.map { $0.isEmpty ? nil : $0 }
     opts.plannedEnd = plannedEnd.map { $0.isEmpty ? nil : $0 }
+    opts.ignorePlannedDatesRecalculation = ignorePlannedDatesRecalculation
     opts.sdNewComment = sdNewComment
     opts.properties = try parseCardProperties(properties, fieldName: "properties")
     let card = try await client.updateCard(id: id, opts)

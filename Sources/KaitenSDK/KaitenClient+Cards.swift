@@ -55,8 +55,124 @@ extension KaitenClient {
     limit: Int = 100, filter: KaitenSDK.CardFilter? = nil
   ) async throws(KaitenError) -> Page<Components.Schemas.Card> {
     try validatePagination(offset: offset, limit: limit)
+    let queryParams = cardsQuery(
+      boardId: boardId, columnId: columnId, laneId: laneId, offset: offset, limit: limit,
+      filter: filter)
+    guard let response = try await callList({ try await client.get_cards(query: queryParams) })
+    else {
+      return Page(items: [], offset: offset, limit: limit)
+    }
+    let payload = try decodeResponse(response.toCase()) { try $0.json }
+    guard let items = payload.value1 else {
+      throw .decodingError(
+        underlying: DecodingError.dataCorrupted(
+          .init(
+            codingPath: [],
+            debugDescription:
+              "GET /cards without version=2 did not answer with an array of cards")))
+    }
+    return Page(items: items, offset: offset, limit: limit)
+  }
+
+  /// Searches cards via OpenSearch (version=2).
+  ///
+  /// Calls `GET /cards` with `version=2`, which answers with an object carrying `result`
+  /// and an opaque `position` cursor. Pass the returned
+  /// ``Components/Schemas/CardSearchResponse/position`` as `startPosition` to fetch the next
+  /// page. The API does not honour `offset` together with `version=2`, so this method pages by
+  /// cursor only. An exhausted search answers with an empty `result` and still carries a
+  /// `position`.
+  ///
+  /// - Parameters:
+  ///   - boardId: Filter by board identifier (optional).
+  ///   - columnId: Filter by column identifier (optional).
+  ///   - laneId: Filter by lane identifier (optional).
+  ///   - startPosition: Search cursor from the previous response (optional).
+  ///   - includeSearchPreview: Include the `preview` object in each result (optional).
+  ///   - limit: Maximum number of cards to return (default `100`).
+  ///   - filter: Optional ``CardFilter`` with additional query parameters.
+  /// - Returns: The search response. Returns an empty result list when no cards match.
+  /// - Throws:
+  ///   - ``KaitenError/invalidPaginationRange(offset:limit:)`` if `limit` is out of range.
+  ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
+  ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
+  ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
+  ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for undocumented HTTP status codes.
+  public func searchCards(
+    boardId: Int? = nil, columnId: Int? = nil, laneId: Int? = nil,
+    startPosition: String? = nil, includeSearchPreview: Bool? = nil, limit: Int = 100,
+    filter: KaitenSDK.CardFilter? = nil
+  ) async throws(KaitenError) -> Components.Schemas.CardSearchResponse {
+    try validatePagination(offset: 0, limit: limit)
+    var queryParams = cardsQuery(
+      boardId: boardId, columnId: columnId, laneId: laneId, offset: nil, limit: limit,
+      filter: filter)
+    queryParams.version = 2
+    queryParams.start_position = startPosition
+    queryParams.include_search_preview = includeSearchPreview
+    guard let response = try await callList({ try await client.get_cards(query: queryParams) })
+    else {
+      return .init(result: [], position: nil)
+    }
+    let payload = try decodeResponse(response.toCase()) { try $0.json }
+    guard let searchResponse = payload.value2 else {
+      throw .decodingError(
+        underlying: DecodingError.dataCorrupted(
+          .init(
+            codingPath: [],
+            debugDescription:
+              "GET /cards with version=2 did not answer with a result/position object")))
+    }
+    return searchResponse
+  }
+
+  /// Returns every card a version=2 search matches, following the `position` cursor.
+  ///
+  /// Pagination stops on the first empty page or when the response carries no `position`.
+  ///
+  /// - Parameters:
+  ///   - boardId: Filter by board identifier (optional).
+  ///   - columnId: Filter by column identifier (optional).
+  ///   - laneId: Filter by lane identifier (optional).
+  ///   - includeSearchPreview: Include the `preview` object in each result (optional).
+  ///   - filter: Optional ``CardFilter`` with additional query parameters.
+  ///   - pageSize: Number of cards per page (default `100`).
+  /// - Returns: An `AsyncThrowingStream` of all matching cards.
+  public func searchAllCards(
+    boardId: Int? = nil, columnId: Int? = nil, laneId: Int? = nil,
+    includeSearchPreview: Bool? = nil, filter: KaitenSDK.CardFilter? = nil, pageSize: Int = 100
+  ) -> AsyncThrowingStream<Components.Schemas.Card, Error> {
+    AsyncThrowingStream { continuation in
+      let task = Task { [self] in
+        var position: String?
+        do {
+          while !Task.isCancelled {
+            let page = try await searchCards(
+              boardId: boardId, columnId: columnId, laneId: laneId, startPosition: position,
+              includeSearchPreview: includeSearchPreview, limit: pageSize, filter: filter)
+            let items = page.result ?? []
+            for item in items {
+              continuation.yield(item)
+            }
+            guard !items.isEmpty, let next = page.position else { break }
+            position = next
+          }
+          continuation.finish()
+        } catch {
+          continuation.finish(throwing: error)
+        }
+      }
+      continuation.onTermination = { _ in task.cancel() }
+    }
+  }
+
+  /// Builds the `GET /cards` query shared by ``listCards(boardId:columnId:laneId:offset:limit:filter:)``
+  /// and ``searchCards(boardId:columnId:laneId:startPosition:includeSearchPreview:limit:filter:)``.
+  private func cardsQuery(
+    boardId: Int?, columnId: Int?, laneId: Int?, offset: Int?, limit: Int, filter: CardFilter?
+  ) -> Operations.get_cards.Input.Query {
     let f = filter
-    let queryParams = Operations.get_cards.Input.Query(
+    return Operations.get_cards.Input.Query(
       board_id: boardId,
       column_id: columnId,
       lane_id: laneId,
@@ -103,19 +219,19 @@ extension KaitenClient {
       order_by: f?.orderBy,
       order_direction: f?.orderDirection,
       order_space_id: f?.orderSpaceId,
-      additional_card_fields: f?.additionalCardFields
+      additional_card_fields: f?.additionalCardFields,
+      project_ids: f?.projectIds,
+      filter: f?.filter,
+      broken_api: f?.brokenApi
     )
-    guard let response = try await callList({ try await client.get_cards(query: queryParams) })
-    else {
-      return Page(items: [], offset: offset, limit: limit)
-    }
-    let items: [Components.Schemas.Card] = try decodeResponse(response.toCase()) { try $0.json }
-    return Page(items: items, offset: offset, limit: limit)
   }
 
   /// Fetches a single card by its identifier.
   ///
-  /// - Parameter id: The card identifier.
+  /// - Parameters:
+  ///   - id: The card identifier.
+  ///   - brokenApi: Representation of user-type custom property values: `true` returns user
+  ///     UID strings, `false` (the server default) integer user ids (optional).
   /// - Returns: The full card object with all fields including custom properties.
   /// - Throws:
   ///   - ``KaitenError/notFound(resource:id:)`` if the card does not exist.
@@ -123,8 +239,12 @@ extension KaitenClient {
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
   ///   - ``KaitenError/networkError(underlying:)`` for connectivity failures.
   ///   - ``KaitenError/unexpectedResponse(statusCode:body:)`` for undocumented HTTP status codes.
-  public func getCard(id: Int) async throws(KaitenError) -> Components.Schemas.Card {
-    let response = try await call { try await client.get_card(path: .init(card_id: id)) }
+  public func getCard(
+    id: Int, brokenApi: Bool? = nil
+  ) async throws(KaitenError) -> Components.Schemas.Card {
+    let response = try await call {
+      try await client.get_card(path: .init(card_id: id), query: .init(broken_api: brokenApi))
+    }
     return try decodeResponse(response.toCase(), notFoundResource: ("card", id)) { try $0.json }
   }
 
@@ -157,6 +277,7 @@ extension KaitenClient {
       owner_email: options.ownerEmail,
       position: options.position?.rawValue,
       type_id: options.typeId,
+      service_id: options.serviceId,
       external_id: options.externalId,
       text_format_type_id: options.textFormatTypeId?.rawValue,
       properties: options.properties
@@ -214,6 +335,7 @@ extension KaitenClient {
       //   .some("x")   → .some(.value("x")) (field sent as string, server sets the value)
       planned_start: options.plannedStart.map { $0.map(ExplicitNullString.value) ?? .null },
       planned_end: options.plannedEnd.map { $0.map(ExplicitNullString.value) ?? .null },
+      ignore_planned_dates_recalculation: options.ignorePlannedDatesRecalculation,
       properties: options.properties
     )
     let response = try await call {
@@ -373,6 +495,8 @@ extension KaitenClient {
   ///   - cardId: The card identifier.
   ///   - limit: Maximum number of children to return (1–100). The API returns 100 when omitted.
   ///   - offset: Number of children to skip.
+  ///   - brokenApi: Representation of user-type custom property values: `true` returns user
+  ///     UID strings, `false` integer user ids (optional).
   /// - Returns: An array of card children.
   /// - Throws:
   ///   - ``KaitenError/invalidPaginationRange(offset:limit:)`` if pagination parameters are out of range.
@@ -384,13 +508,15 @@ extension KaitenClient {
   public func listCardChildren(
     cardId: Int,
     limit: Int? = nil,
-    offset: Int? = nil
+    offset: Int? = nil,
+    brokenApi: Bool? = nil
   ) async throws(KaitenError) -> [Components.Schemas.CardChild] {
     try validatePagination(offset: offset ?? 0, limit: limit ?? 100)
     guard
       let response = try await callList({
         try await client.list_card_children(
-          path: .init(card_id: cardId), query: .init(limit: limit, offset: offset))
+          path: .init(card_id: cardId),
+          query: .init(limit: limit, offset: offset, broken_api: brokenApi))
       })
     else {
       return []

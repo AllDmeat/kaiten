@@ -185,6 +185,22 @@ struct JSONOutputTests {
     #expect(JSONOutput.expandableFields(in: page) == ["owner", "tags", "children", "files"])
   }
 
+  @Test("Search responses are trimmed through their result array, not collapsed to ids")
+  func trimsThroughSearchEnvelope() throws {
+    let search: [String: Any] = ["result": [card], "position": "cursor-1"]
+
+    let trimmed = try object(JSONOutput.trim(search, expand: ["owner"]))
+    let rows = try #require(trimmed["result"] as? [Any])
+    let row = try object(#require(rows.first))
+
+    #expect(trimmed["position"] as? String == "cursor-1", "the cursor survives")
+    #expect(row["id"] as? Int == 42, "rows survive rather than collapsing to their ids")
+    #expect(row["owner"] != nil)
+    #expect(row["tags"] as? [Int] == [4], "unexpanded collections stay as ids")
+    #expect(
+      JSONOutput.expandableFields(in: search) == ["owner", "tags", "children", "files"])
+  }
+
   @Test("An entity that merely has items is not mistaken for a page")
   func doesNotMistakeEntityForPage() throws {
     let checklist: [String: Any] = ["id": 3, "items": [["id": 9, "text": "Step"]]]

@@ -24,10 +24,16 @@ struct ListCardChildren: AsyncParsableCommand {
   @Option(name: .long, help: "Number of children to skip")
   var offset: Int?
 
+  @Option(
+    name: .long,
+    help: "User-type custom property values as user UID strings (true) or integer user ids (false)"
+  )
+  var brokenApi: Bool?
+
   func run() async throws {
     let client = try await global.makeClient()
     let children = try await client.listCardChildren(
-      cardId: cardId, limit: limit, offset: offset)
+      cardId: cardId, limit: limit, offset: offset, brokenApi: brokenApi)
     try printJSON(children, expand: global.expandedFields)
   }
 }

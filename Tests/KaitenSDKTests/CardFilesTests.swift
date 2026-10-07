@@ -157,6 +157,23 @@ struct CardFilesTests {
 
   // MARK: - Private files
 
+  @Test("private comment file decodes kind and comment_uid")
+  func privateCommentFileDecodesKind() throws {
+    let json = """
+      {
+        "id": "aaaa1111-bb22-cc33-dd44-eeee5555ffff",
+        "name": "notes.txt",
+        "entity_type": "comment",
+        "kind": "attachment",
+        "comment_uid": "comment-uid-1",
+        "type": 11
+      }
+      """
+    let file = try #require(try Self.decodeEntry(json).value2)
+    #expect(file.kind == "attachment")
+    #expect(file.comment_uid == "comment-uid-1")
+  }
+
   @Test("private file decodes into the PrivateFile branch, not File")
   func privateDecodesAsPrivateFile() throws {
     let entry = try Self.decodeEntry(Self.privateFile)

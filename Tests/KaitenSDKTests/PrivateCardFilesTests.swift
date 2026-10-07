@@ -4,9 +4,8 @@ import Testing
 
 @testable import KaitenSDK
 
-/// The private-card-files endpoints could not be verified live: "Restricted file access"
-/// is not enabled on the verification instance, so the routes answer 404. All fixtures
-/// below are built from the documented response attributes.
+/// Fixtures are built from the documented response attributes. The GET shape was also
+/// confirmed against the live API; attach, update and delete were not called live.
 @Suite("PrivateCardFiles")
 struct PrivateCardFilesTests {
 
@@ -121,34 +120,70 @@ struct PrivateCardFilesTests {
   // MARK: - Get
 
   /// Fixture built from the documented response attributes of
-  /// `GET /cards/{card_uid}/files/{id}` with `response_type=json`.
-  static let urlResponse = """
-    {"url": "https://files.example.com/signed/aaaa1111?token=abc"}
+  /// `GET /cards/{card_uid}/files/{id}`, matching the live shape.
+  static let getResponse = """
+    {
+      "id": "aaaa1111-bb22-cc33-dd44-eeee5555ffff",
+      "name": "photo.png",
+      "size": null,
+      "mime_type": "image/png",
+      "entity_type": "card",
+      "created": "2024-05-20T14:03:35.022Z",
+      "updated": "2024-05-20T14:03:35.022Z",
+      "card_uid": "cccc3333-dd44-ee55-ff66-aaaa7777bbbb",
+      "author_uid": "bbbb2222-cc33-dd44-ee55-ffff6666aaaa",
+      "card_cover": true,
+      "url": "https://files.example.com/signed/aaaa1111?token=abc"
+    }
     """
 
-  @Test("get: 200 returns the signed URL")
+  @Test("get: 200 returns the file metadata with the signed URL")
   func getSuccess() async throws {
-    let transport = MockClientTransport.returning(statusCode: 200, body: Self.urlResponse)
+    let transport = MockClientTransport.returning(statusCode: 200, body: Self.getResponse)
     let client = try makeClient(transport)
 
-    let url = try await client.getPrivateFile(cardUid: Self.cardUid, fileId: Self.fileId)
+    let file = try await client.getPrivateCardFile(cardUid: Self.cardUid, fileId: Self.fileId)
 
-    #expect(url == "https://files.example.com/signed/aaaa1111?token=abc")
+    #expect(file.id == Self.fileId)
+    #expect(file.name == "photo.png")
+    #expect(file.size == nil)
+    #expect(file.mime_type == "image/png")
+    #expect(file.entity_type == "card")
+    #expect(file.card_uid == Self.cardUid)
+    #expect(file.author_uid == "bbbb2222-cc33-dd44-ee55-ffff6666aaaa")
+    #expect(file.card_cover == true)
+    #expect(file.url == "https://files.example.com/signed/aaaa1111?token=abc")
 
     let request = try #require(transport.recordedRequests.first)
     #expect(request.request.method == .get)
-    #expect(request.request.path?.contains("/cards/\(Self.cardUid)/files/\(Self.fileId)") == true)
-    #expect(request.request.path?.contains("response_type=json") == true)
+    let path = try #require(request.request.path)
+    #expect(path.contains("/cards/\(Self.cardUid)/files/\(Self.fileId)"))
+    #expect(!path.contains("response_type"))
+    #expect(!path.contains("download"))
   }
 
-  @Test("get: response type is forwarded as a query parameter")
-  func getResponseTypeForwarded() async throws {
-    let transport = MockClientTransport.returning(statusCode: 200, body: Self.urlResponse)
+  @Test("get: download is forwarded as a query parameter")
+  func getDownloadForwarded() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: Self.getResponse)
     let client = try makeClient(transport)
 
-    _ = try await client.getPrivateFile(
+    _ = try await client.getPrivateCardFile(
+      cardUid: Self.cardUid, fileId: Self.fileId, download: true)
+
+    let request = try #require(transport.recordedRequests.first)
+    #expect(request.request.path?.contains("download=true") == true)
+  }
+
+  @Test("get (deprecated): returns the URL and still sends response_type")
+  @available(*, deprecated)
+  func getDeprecated() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: Self.getResponse)
+    let client = try makeClient(transport)
+
+    let url = try await client.getPrivateFile(
       cardUid: Self.cardUid, fileId: Self.fileId, responseType: .attachment)
 
+    #expect(url == "https://files.example.com/signed/aaaa1111?token=abc")
     let request = try #require(transport.recordedRequests.first)
     #expect(request.request.path?.contains("response_type=attachment") == true)
   }
@@ -159,8 +194,7 @@ struct PrivateCardFilesTests {
     let client = try makeClient(transport)
 
     await expectUnexpectedResponse(statusCode: 302) {
-      _ = try await client.getPrivateFile(
-        cardUid: Self.cardUid, fileId: Self.fileId, responseType: .inline)
+      _ = try await client.getPrivateCardFile(cardUid: Self.cardUid, fileId: Self.fileId)
     }
   }
 
@@ -170,7 +204,7 @@ struct PrivateCardFilesTests {
     let client = try makeClient(transport)
 
     await expectUnexpectedResponse(statusCode: 422) {
-      _ = try await client.getPrivateFile(cardUid: Self.cardUid, fileId: Self.fileId)
+      _ = try await client.getPrivateCardFile(cardUid: Self.cardUid, fileId: Self.fileId)
     }
   }
 
@@ -180,7 +214,7 @@ struct PrivateCardFilesTests {
     let client = try makeClient(transport)
 
     await #expect(throws: KaitenError.self) {
-      _ = try await client.getPrivateFile(cardUid: Self.cardUid, fileId: Self.fileId)
+      _ = try await client.getPrivateCardFile(cardUid: Self.cardUid, fileId: Self.fileId)
     }
   }
 
@@ -190,7 +224,37 @@ struct PrivateCardFilesTests {
     let client = try makeClient(transport)
 
     await expectUnexpectedResponse(statusCode: 404) {
-      _ = try await client.getPrivateFile(cardUid: Self.cardUid, fileId: Self.fileId)
+      _ = try await client.getPrivateCardFile(cardUid: Self.cardUid, fileId: Self.fileId)
+    }
+  }
+
+  // MARK: - Update
+
+  @Test("update: sends PATCH with name and card_cover, returns the file")
+  func updateSuccess() async throws {
+    let transport = MockClientTransport.returning(statusCode: 200, body: Self.attachResponse)
+    let client = try makeClient(transport)
+
+    let file = try await client.updatePrivateFile(
+      cardUid: Self.cardUid, fileId: Self.fileId, name: "renamed.png", cardCover: true)
+
+    #expect(file.id == Self.fileId)
+    #expect(file.company_uid == "dddd4444-ee55-ff66-aa77-bbbb8888cccc")
+
+    let request = try #require(transport.recordedRequests.first)
+    #expect(request.request.method == .patch)
+    #expect(request.request.path?.hasSuffix("/cards/\(Self.cardUid)/files/\(Self.fileId)") == true)
+    let bytes = try await Data(collecting: #require(request.body), upTo: 1024 * 1024)
+    let sent = try #require(try JSONSerialization.jsonObject(with: bytes) as? [String: Any])
+    #expect(sent["name"] as? String == "renamed.png")
+    #expect(sent["card_cover"] as? Bool == true)
+  }
+
+  @Test("update: 400 throws unexpectedResponse")
+  func updateValidationError() async throws {
+    let client = try makeClient(.returning(statusCode: 400))
+    await expectUnexpectedResponse(statusCode: 400) {
+      _ = try await client.updatePrivateFile(cardUid: Self.cardUid, fileId: Self.fileId, name: "")
     }
   }
 

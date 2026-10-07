@@ -286,12 +286,16 @@ CLI: `list-service-desk-services`.
 
 | Method | Description |
 |--------|-------------|
-| `attachFile(cardId:fileData:filename:)` | Attach a file to a card (multipart upload) |
+| `attachFile(cardId:fileData:filename:)` | Deprecated by Kaiten. Attach a file to a card without restricted access (multipart upload) |
 | `updateFile(cardId:fileId:cardCover:)` | Update a file attached to a card |
 | `detachFile(cardId:fileId:)` | Detach a file from a card |
 
 The attach response is one of two shapes — a legacy attachment (integer `id`) or a
 private file (UUID string `id`) — the same pair a card's `files` array carries.
+
+Kaiten deprecated the upload: it is unavailable for companies created on or after
+2026-05-21. Update and detach still work on files uploaded this way, which the restricted
+access routes below answer 404 for.
 
 From the CLI:
 
@@ -306,18 +310,23 @@ kaiten detach-card-file --card-id 123 --file-id 7
 | Method | Description |
 |--------|-------------|
 | `attachPrivateFile(cardUid:fileData:filename:)` | Attach a file to a card addressed by UID (multipart upload) |
-| `getPrivateFile(cardUid:fileId:responseType:)` | Get the signed URL of a private card file |
+| `getPrivateCardFile(cardUid:fileId:download:)` | Get the metadata and signed URL of a private card file |
+| `updatePrivateFile(cardUid:fileId:name:cardCover:)` | Rename a private card file or set it as the card cover |
+| `getPrivateFile(cardUid:fileId:responseType:)` | Deprecated: the API ignores `response_type`. Returns only the signed URL |
 | `deletePrivateFile(cardUid:fileId:)` | Delete a private card file |
 
 These routes address the card by UID and the file by UUID string id, and are live only
 when "Restricted file access" is enabled in company settings. The docs mark the section
-as under active development.
+as under active development. `download: true` makes the signed URL serve the file as an
+attachment. The API's `redirect` parameter is not exposed: the transport follows the 302,
+so the SDK would receive file bytes instead of metadata.
 
 From the CLI:
 
 ```bash
 kaiten attach-private-card-file --card-uid aaaa-11 --file ./diagram.png
-kaiten get-private-card-file --card-uid aaaa-11 --file-id bbbb-22
+kaiten get-private-card-file --card-uid aaaa-11 --file-id bbbb-22 --download
+kaiten update-private-card-file --card-uid aaaa-11 --file-id bbbb-22 --name diagram-v2.png
 kaiten delete-private-card-file --card-uid aaaa-11 --file-id bbbb-22
 ```
 
@@ -326,19 +335,21 @@ kaiten delete-private-card-file --card-uid aaaa-11 --file-id bbbb-22
 | Method | Description |
 |--------|-------------|
 | `attachFileToComment(cardUid:commentUid:fileData:filename:)` | Attach a file to a card comment (multipart upload) |
-| `getCommentFile(cardUid:commentUid:fileId:responseType:)` | Get a signed URL for a comment file |
+| `getCommentFile(cardUid:commentUid:fileId:download:)` | Get the metadata and signed URL of a comment file |
+| `updateCommentFile(cardUid:commentUid:fileId:name:cardCover:)` | Rename a comment file or set it as the card cover |
+| `getCommentFile(cardUid:commentUid:fileId:responseType:)` | Deprecated: the API ignores `response_type` |
 | `deleteCommentFile(cardUid:commentUid:fileId:)` | Delete a comment file |
 
 All three endpoints require "Restricted file access" enabled in company settings and
-address the card, the comment and the file by string UID. `getCommentFile` requests the
-`json` disposition by default; `inline` and `attachment` answer with a redirect to the
-file content instead of a JSON body.
+address the card, the comment and the file by string UID. `commentUid` also accepts
+`new`, for a file uploaded to a comment that has not been created yet.
 
 From the CLI:
 
 ```bash
 kaiten attach-comment-file --card-uid CARD-UID --comment-uid COMMENT-UID --file ./log.txt
 kaiten get-comment-file --card-uid CARD-UID --comment-uid COMMENT-UID --file-id FILE-ID
+kaiten update-comment-file --card-uid CARD-UID --comment-uid COMMENT-UID --file-id FILE-ID --card-cover true
 kaiten delete-comment-file --card-uid CARD-UID --comment-uid COMMENT-UID --file-id FILE-ID
 ```
 
@@ -347,24 +358,21 @@ kaiten delete-comment-file --card-uid CARD-UID --comment-uid COMMENT-UID --file-
 | Method | Description |
 |--------|-------------|
 | `attachFileToCustomProperty(cardUid:propertyUid:fileData:filename:)` | Attach a file to a card custom property (multipart upload) |
-| `getCustomPropertyFileUrl(cardUid:propertyUid:fileId:responseType:)` | Get the signed URL of a custom property file |
+| `getCustomPropertyFile(cardUid:propertyUid:fileId:download:)` | Get the metadata and signed URL of a custom property file |
+| `updateCustomPropertyFile(cardUid:propertyUid:fileId:name:cardCover:)` | Rename a custom property file or set it as the card cover |
+| `getCustomPropertyFileUrl(cardUid:propertyUid:fileId:responseType:)` | Deprecated: the API ignores `response_type`. Returns only the signed URL |
 | `deleteCustomPropertyFile(cardUid:propertyUid:fileId:)` | Delete a custom property file |
 
 These endpoints require the "Restricted file access" company setting and are
 marked by Kaiten as under active development. Resources are addressed by string
 UIDs, so a 404 surfaces as `unexpectedResponse(statusCode: 404)`.
 
-The documented `response_type` query parameter is exposed as the
-`CustomPropertyFileResponseType` enum. With `.json` (the default) the API
-returns the signed URL; with `.inline` or `.attachment` it redirects (302) to
-the file itself, which the SDK's transport follows, so only `.json` produces a
-decodable response.
-
 From the CLI:
 
 ```bash
 kaiten attach-custom-property-file --card-uid c1a2 --property-uid p3b4 --file ./report.pdf
 kaiten get-custom-property-file --card-uid c1a2 --property-uid p3b4 --file-id f5c6
+kaiten update-custom-property-file --card-uid c1a2 --property-uid p3b4 --file-id f5c6 --name report-v2.pdf
 kaiten delete-custom-property-file --card-uid c1a2 --property-uid p3b4 --file-id f5c6
 ```
 

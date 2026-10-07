@@ -7,7 +7,11 @@ import KaitenSDK
 struct AttachCardFile: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "attach-card-file",
-    abstract: "Attach a file to a card"
+    abstract: "Attach a file to a card",
+    discussion: """
+      Kaiten deprecated this upload: the file gets no restricted access, and the endpoint is \
+      unavailable for companies created on or after 2026-05-21.
+      """
   )
 
   @OptionGroup var global: GlobalOptions

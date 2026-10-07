@@ -40,11 +40,10 @@ struct AttachPrivateCardFile: AsyncParsableCommand {
 struct GetPrivateCardFile: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "get-private-card-file",
-    abstract: "Get the signed URL of a private card file",
+    abstract: "Get the metadata and signed URL of a private card file",
     discussion: """
-      Requires "Restricted file access" enabled in company settings. The API returns the \
-      signed URL as JSON; requesting an inline or attachment disposition makes the API \
-      answer with a 302 redirect instead, which this command reports as an error.
+      Requires "Restricted file access" enabled in company settings. The API answers 404 \
+      for a file uploaded without restricted access.
       """
   )
 
@@ -56,15 +55,48 @@ struct GetPrivateCardFile: AsyncParsableCommand {
   @Option(name: .long, help: "File ID")
   var fileId: String
 
-  @Option(name: .long, help: "One of: json, inline, attachment (default: json)")
+  @Flag(name: .long, help: "Make the signed URL serve the file as an attachment")
+  var download = false
+
+  @Option(name: .long, help: "Deprecated: the API ignores it, so it is not sent")
   var responseType: String?
 
   func run() async throws {
     let client = try await global.makeClient()
-    let url = try await client.getPrivateFile(
-      cardUid: cardUid, fileId: fileId,
-      responseType: responseType.map(PrivateCardFileResponseType.init(rawValue:)) ?? .json)
-    try printJSON(["url": url], expand: global.expandedFields)
+    let file = try await client.getPrivateCardFile(
+      cardUid: cardUid, fileId: fileId, download: download ? true : nil)
+    try printJSON(file, expand: global.expandedFields)
+  }
+}
+
+// MARK: - Update Private Card File
+
+struct UpdatePrivateCardFile: AsyncParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "update-private-card-file",
+    abstract: "Update a private card file",
+    discussion: "Requires \"Restricted file access\" enabled in company settings."
+  )
+
+  @OptionGroup var global: GlobalOptions
+
+  @Option(name: .long, help: "Card UID")
+  var cardUid: String
+
+  @Option(name: .long, help: "File ID")
+  var fileId: String
+
+  @Option(name: .long, help: "New file name")
+  var name: String?
+
+  @Option(name: .long, help: "Use the image as the card cover")
+  var cardCover: Bool?
+
+  func run() async throws {
+    let client = try await global.makeClient()
+    let file = try await client.updatePrivateFile(
+      cardUid: cardUid, fileId: fileId, name: name, cardCover: cardCover)
+    try printJSON(file, expand: global.expandedFields)
   }
 }
 

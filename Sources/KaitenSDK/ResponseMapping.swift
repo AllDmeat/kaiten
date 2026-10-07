@@ -1249,6 +1249,19 @@ extension Operations.get_private_card_file.Output {
   }
 }
 
+extension Operations.update_private_card_file.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.update_private_card_file.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 extension Operations.delete_private_card_file.Output {
   func toCase() -> KaitenClient.ResponseCase<Operations.delete_private_card_file.Output.Ok.Body> {
     switch self {
@@ -1285,6 +1298,19 @@ extension Operations.get_comment_file.Output {
     case .forbidden: .forbidden
     case .notFound: .notFound
     case .unprocessableContent: .undocumented(statusCode: 422)
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_comment_file.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.update_comment_file.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
     case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
     }
   }
@@ -2620,6 +2646,21 @@ extension Operations.get_custom_property_file.Output {
   func toCase() -> KaitenClient.ResponseCase<Operations.get_custom_property_file.Output.Ok.Body> {
     switch self {
     case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .unprocessableContent: .undocumented(statusCode: 422)
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.update_custom_property_file.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.update_custom_property_file.Output.Ok.Body>
+  {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .badRequest: .undocumented(statusCode: 400)
     case .unauthorized: .unauthorized
     case .forbidden: .forbidden
     case .notFound: .notFound

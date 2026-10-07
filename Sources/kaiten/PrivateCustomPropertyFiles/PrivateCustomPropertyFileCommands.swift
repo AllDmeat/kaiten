@@ -4,17 +4,6 @@ import KaitenSDK
 
 // MARK: - Private Custom Property Files
 
-func parseCustomPropertyFileResponseType(_ rawValue: String) throws
-  -> CustomPropertyFileResponseType
-{
-  let type = CustomPropertyFileResponseType(rawValue: rawValue)
-  guard CustomPropertyFileResponseType.allCases.contains(type) else {
-    let allowed = CustomPropertyFileResponseType.allCases.map(\.rawValue).joined(separator: ", ")
-    throw ValidationError("Invalid response type: '\(rawValue)'. Allowed values: \(allowed)")
-  }
-  return type
-}
-
 // MARK: - Attach Custom Property File
 
 struct AttachCustomPropertyFile: AsyncParsableCommand {
@@ -57,12 +46,10 @@ struct AttachCustomPropertyFile: AsyncParsableCommand {
 struct GetCustomPropertyFile: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "get-custom-property-file",
-    abstract: "Get the signed URL of a custom property file",
+    abstract: "Get the metadata and signed URL of a custom property file",
     discussion: """
-      Requires the "Restricted file access" company setting to be enabled. With \
-      response type json (the default) the API returns the signed URL. With inline \
-      or attachment the API redirects to the file itself, so the response cannot be \
-      printed as JSON.
+      Requires the "Restricted file access" company setting to be enabled. The API answers \
+      404 for a file uploaded without restricted access.
       """
   )
 
@@ -77,15 +64,56 @@ struct GetCustomPropertyFile: AsyncParsableCommand {
   @Option(name: .long, help: "File ID")
   var fileId: String
 
-  @Option(name: .long, help: "Response type: json, inline, attachment")
-  var responseType: String = "json"
+  @Flag(name: .long, help: "Make the signed URL serve the file as an attachment")
+  var download = false
+
+  @Option(name: .long, help: "Deprecated: the API ignores it, so it is not sent")
+  var responseType: String?
 
   func run() async throws {
-    let type = try parseCustomPropertyFileResponseType(responseType)
     let client = try await global.makeClient()
-    let url = try await client.getCustomPropertyFileUrl(
-      cardUid: cardUid, propertyUid: propertyUid, fileId: fileId, responseType: type)
-    try printJSON(["url": url], expand: global.expandedFields)
+    let file = try await client.getCustomPropertyFile(
+      cardUid: cardUid, propertyUid: propertyUid, fileId: fileId,
+      download: download ? true : nil)
+    try printJSON(file, expand: global.expandedFields)
+  }
+}
+
+// MARK: - Update Custom Property File
+
+struct UpdateCustomPropertyFile: AsyncParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "update-custom-property-file",
+    abstract: "Update a custom property file",
+    discussion: """
+      Requires the "Restricted file access" company setting to be enabled. The API answers \
+      403 for a locked card.
+      """
+  )
+
+  @OptionGroup var global: GlobalOptions
+
+  @Option(name: .long, help: "Card UID")
+  var cardUid: String
+
+  @Option(name: .long, help: "Custom property UID")
+  var propertyUid: String
+
+  @Option(name: .long, help: "File ID")
+  var fileId: String
+
+  @Option(name: .long, help: "New file name")
+  var name: String?
+
+  @Option(name: .long, help: "Use the image as the card cover")
+  var cardCover: Bool?
+
+  func run() async throws {
+    let client = try await global.makeClient()
+    let file = try await client.updateCustomPropertyFile(
+      cardUid: cardUid, propertyUid: propertyUid, fileId: fileId, name: name,
+      cardCover: cardCover)
+    try printJSON(file, expand: global.expandedFields)
   }
 }
 

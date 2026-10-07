@@ -2853,6 +2853,10 @@ paths:
     put:
       summary: Attach file to card
       operationId: attach_file_to_card
+      deprecated: true
+      description: >-
+        Deprecated by Kaiten: the file is uploaded without restricted access. Unavailable for
+        companies created on or after 2026-05-21.
       parameters:
       - name: card_id
         in: path
@@ -3019,16 +3023,28 @@ paths:
         schema:
           type: string
         description: File ID
+      # DOC_MISMATCH: not in docs (replaced by `redirect`/`download`), accepted and ignored by the actual API — https://developers.kaiten.ru/restricted-access-card-files/get-card-file
       - name: response_type
         in: query
+        deprecated: true
         schema:
-          # Documented as an enum (json, inline, attachment); declared as a plain string per
-          # FR-020a, with the typed surface in Enums.swift (PrivateCardFileResponseType).
           type: string
         description: >-
-          One of `json`, `inline`, `attachment`. If set to `json`, returns a signed URL in
-          JSON. If set to `inline` or `attachment`, requests the corresponding content
-          disposition via a 302 redirect.
+          Formerly documented as `json`, `inline` or `attachment`. The API ignores it and
+          always answers with JSON metadata unless `redirect` is true.
+      - name: redirect
+        in: query
+        schema:
+          type: boolean
+        description: >-
+          If true, the server responds with a 302 redirect to the signed file URL instead of
+          the JSON metadata
+      - name: download
+        in: query
+        schema:
+          type: boolean
+        description: >-
+          If true, the signed file URL serves the file with `Content-Disposition: attachment`
       responses:
         '200':
           description: success
@@ -3037,7 +3053,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PrivateCardFileUrlResponse'
         '302':
-          description: Redirect to the signed file URL
+          description: Redirect to the signed file URL, returned when `redirect` is true
         '401':
           description: Invalid token
         '403':
@@ -3046,6 +3062,44 @@ paths:
           description: Not found
         '422':
           description: The file is malicious
+    patch:
+      summary: Update card file
+      operationId: update_private_card_file
+      description: Requires "Restricted file access" enabled in company settings.
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: File ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRestrictedFileRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateCardFile'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
     delete:
       summary: Delete card file
       operationId: delete_private_card_file
@@ -3094,7 +3148,8 @@ paths:
         required: true
         schema:
           type: string
-        description: Comment UID
+        description: >-
+          Comment UID, or `new` for a file uploaded to a comment that has not been created yet
       requestBody:
         required: true
         content:
@@ -3131,9 +3186,8 @@ paths:
       summary: Get comment file
       operationId: get_comment_file
       description: >-
-        Requires "Restricted file access" enabled in company settings. The documentation
-        marks this endpoint as under active development. Without `response_type=json` the
-        endpoint answers with a redirect to the file content instead of a JSON body.
+        Requires "Restricted file access" enabled in company settings. Returns the file
+        metadata with a signed URL, or a redirect to the file when `redirect` is true.
       parameters:
       - name: card_uid
         in: path
@@ -3146,24 +3200,39 @@ paths:
         required: true
         schema:
           type: string
-        description: Comment UID
+        description: >-
+          Comment UID, or `new` for a file uploaded to a comment that has not been created yet
       - name: id
         in: path
         required: true
         schema:
           type: string
         description: File ID
+      # DOC_MISMATCH: not in docs (replaced by `redirect`/`download`), accepted and ignored by the actual API — https://developers.kaiten.ru/restricted-access-comment-files/get-comment-file
       - name: response_type
         in: query
+        deprecated: true
         schema:
           type: string
         description: >-
-          Documented values: json, inline, attachment. If set to json, returns a signed URL
-          in JSON. If set to inline or attachment, requests the corresponding content
-          disposition via a redirect.
+          Formerly documented as `json`, `inline` or `attachment`. The API ignores it and
+          always answers with JSON metadata unless `redirect` is true.
+      - name: redirect
+        in: query
+        schema:
+          type: boolean
+        description: >-
+          If true, the server responds with a 302 redirect to the signed file URL instead of
+          the JSON metadata
+      - name: download
+        in: query
+        schema:
+          type: boolean
+        description: >-
+          If true, the signed file URL serves the file with `Content-Disposition: attachment`
       responses:
         '302':
-          description: Redirect to the file content
+          description: Redirect to the signed file URL, returned when `redirect` is true
         '200':
           description: success
           content:
@@ -3178,6 +3247,53 @@ paths:
           description: Not found
         '422':
           description: The file is malicious
+    patch:
+      summary: Update comment file
+      operationId: update_comment_file
+      description: >-
+        Requires "Restricted file access" enabled in company settings. Setting `card_cover`
+        to true additionally requires card update permission.
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      - name: comment_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: >-
+          Comment UID, or `new` for a file uploaded to a comment that has not been created yet
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: File ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRestrictedFileRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentFile'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
     delete:
       summary: Delete comment file
       operationId: delete_comment_file
@@ -3196,7 +3312,8 @@ paths:
         required: true
         schema:
           type: string
-        description: Comment UID
+        description: >-
+          Comment UID, or `new` for a file uploaded to a comment that has not been created yet
       - name: id
         in: path
         required: true
@@ -3288,21 +3405,86 @@ paths:
         schema:
           type: string
         description: File ID
+      # DOC_MISMATCH: not in docs (replaced by `redirect`/`download`), accepted and ignored by the actual API — https://developers.kaiten.ru/restricted-access-custom-property-files/get-custom-property-file
       - name: response_type
         in: query
+        deprecated: true
         schema:
           type: string
-        description: 'If set to json, returns a signed URL in JSON. If set to inline or attachment, requests the corresponding content disposition. Documented values: json, inline, attachment. Map to the CustomPropertyFileResponseType Swift enum.'
+        description: >-
+          Formerly documented as `json`, `inline` or `attachment`. The API ignores it and
+          always answers with JSON metadata unless `redirect` is true.
+      - name: redirect
+        in: query
+        schema:
+          type: boolean
+        description: >-
+          If true, the server responds with a 302 redirect to the signed file URL instead of
+          the JSON metadata
+      - name: download
+        in: query
+        schema:
+          type: boolean
+        description: >-
+          If true, the signed file URL serves the file with `Content-Disposition: attachment`
       responses:
-        # NOTE: the docs also list a 302 redirect, returned when `response_type` is omitted or
-        # set to inline/attachment. It is deliberately not modelled: the URLSession transport
-        # follows redirects transparently, so the generated client never observes the 302.
+        # NOTE: the docs also list a 302 redirect, returned when `redirect` is true. It is
+        # deliberately not modelled: the URLSession transport follows redirects transparently,
+        # so the generated client never observes the 302.
         '200':
           description: success
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomPropertyFileUrl'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '422':
+          description: The file is malicious
+    patch:
+      summary: Update custom property file
+      operationId: update_custom_property_file
+      description: >-
+        Requires "Restricted file access" enabled in company settings. A locked card yields
+        403.
+      parameters:
+      - name: card_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card UID
+      - name: property_uid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Custom property UID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: File ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRestrictedFileRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPropertyFile'
+        '400':
+          description: Validation error
         '401':
           description: Invalid token
         '403':
@@ -8507,6 +8689,10 @@ components:
         deleted:
           type: boolean
           description: Custom property catalog value delete condition
+    # NOTE: the docs also list a deprecated multipart `files[]` upload on this route and on
+    # comment update. It is deliberately not modelled: it uploads files without restricted
+    # access and answers 403 `public_api_legacy_file_upload_disabled` for companies created on
+    # or after 2026-05-21.
     CreateCommentRequest:
       type: object
       required:
@@ -9751,6 +9937,10 @@ components:
         entity_type:
           type: string
           description: 'What the file hangs off. Observed values: card, comment.'
+        # DOC_MISMATCH: not in docs, present in actual API responses for comment files; observed: "attachment" — https://developers.kaiten.ru/cards/retrieve-card
+        kind:
+          type: string
+          description: File kind
         type:
           type: integer
           description: Always 11 for private files
@@ -9807,7 +9997,9 @@ components:
           type: string
           description: File name
         size:
-          type: string
+          type:
+          - string
+          - 'null'
           description: File size in bytes (bigint serialized as string)
         mime_type:
           type: string
@@ -9835,13 +10027,47 @@ components:
           description: Flag indicating that image is used as card cover
     PrivateCardFileUrlResponse:
       type: object
-      description: Signed URL of a private card file, returned when `response_type` is `json`
+      description: Metadata and signed URL of a restricted access card file
       required:
       - url
       properties:
+        id:
+          type: string
+          description: File id
+        name:
+          type: string
+          description: File name
+        size:
+          type:
+          - string
+          - 'null'
+          description: File size in bytes (bigint serialized as string)
+        mime_type:
+          type: string
+          description: MIME type
+        entity_type:
+          type: string
+          description: File entity type
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        card_uid:
+          type: string
+          description: Card UID
+        author_uid:
+          type: string
+          description: Author UID
+        card_cover:
+          type: boolean
+          description: Flag indicating that image is used as card cover
         url:
           type: string
-          description: Signed file URL
+          description: >-
+            Temporary signed URL to the file content. Images, videos and PDF files are served
+            inline, other types as an attachment; with `download=true` always as an attachment.
     DeletedPrivateCardFileResponse:
       type: object
       description: Response of the private-card-files delete endpoint
@@ -9868,7 +10094,9 @@ components:
           type: string
           description: File name
         size:
-          type: string
+          type:
+          - string
+          - 'null'
           description: File size in bytes (bigint serialized as string)
         mime_type:
           type: string
@@ -9884,6 +10112,9 @@ components:
           - string
           - 'null'
           description: Comment UID
+        company_uid:
+          type: string
+          description: Company UID
         entity_type:
           type: string
           description: File entity type
@@ -9898,13 +10129,56 @@ components:
           description: Flag indicating that image is used as card cover
     CommentFileSignedUrl:
       type: object
-      description: Signed URL of a private comment file, returned when `response_type` is `json`
+      description: Metadata and signed URL of a restricted access comment file
       required:
       - url
       properties:
+        id:
+          type: string
+          description: File id
+        name:
+          type: string
+          description: File name
+        size:
+          type:
+          - string
+          - 'null'
+          description: File size in bytes (bigint serialized as string)
+        mime_type:
+          type: string
+          description: MIME type
+        entity_type:
+          type: string
+          description: File entity type
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        card_uid:
+          type: string
+          description: Card UID
+        comment_uid:
+          type:
+          - string
+          - 'null'
+          description: Comment UID
+        # DOC_MISMATCH: not in docs, present in actual API responses; observed: "attachment" — https://developers.kaiten.ru/restricted-access-comment-files/get-comment-file
+        kind:
+          type: string
+          description: File kind
+        author_uid:
+          type: string
+          description: Author UID
+        card_cover:
+          type: boolean
+          description: Flag indicating that image is used as card cover
         url:
           type: string
-          description: Signed file URL
+          description: >-
+            Temporary signed URL to the file content. Images, videos and PDF files are served
+            inline, other types as an attachment; with `download=true` always as an attachment.
     DeletedCommentFileResponse:
       type: object
       description: Response of the private-comment-files delete endpoint
@@ -9930,7 +10204,9 @@ components:
           type: string
           description: File name
         size:
-          type: string
+          type:
+          - string
+          - 'null'
           description: File size in bytes (bigint serialized as string)
         mime_type:
           type: string
@@ -9944,6 +10220,9 @@ components:
         custom_property_uid:
           type: string
           description: Custom property UID
+        company_uid:
+          type: string
+          description: Company UID
         entity_type:
           type: string
           description: File entity type
@@ -9958,13 +10237,50 @@ components:
           description: Flag indicating that image is used as card cover
     CustomPropertyFileUrl:
       type: object
-      description: Signed URL of a custom property file
+      description: Metadata and signed URL of a restricted access custom property file
       required:
       - url
       properties:
+        id:
+          type: string
+          description: File id
+        name:
+          type: string
+          description: File name
+        size:
+          type:
+          - string
+          - 'null'
+          description: File size in bytes (bigint serialized as string)
+        mime_type:
+          type: string
+          description: MIME type
+        entity_type:
+          type: string
+          description: File entity type
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+        card_uid:
+          type: string
+          description: Card UID
+        custom_property_uid:
+          type: string
+          description: Custom property UID
+        author_uid:
+          type: string
+          description: Author UID
+        card_cover:
+          type: boolean
+          description: Flag indicating that image is used as card cover
         url:
           type: string
-          description: Signed file URL
+          description: >-
+            Temporary signed URL to the file content. Images, videos and PDF files are served
+            inline, other types as an attachment; with `download=true` always as an attachment.
     DeletedCustomPropertyFileResponse:
       type: object
       required:
@@ -10949,6 +11265,16 @@ components:
         card_cover:
           type: boolean
           description: Flag indicating that image used as card cover
+    UpdateRestrictedFileRequest:
+      type: object
+      description: Body of the restricted access card, comment and custom property file updates
+      properties:
+        name:
+          type: string
+          description: File name
+        card_cover:
+          type: boolean
+          description: Flag indicating that image is used as card cover
     DeletedCardFileResponse:
       type: object
       required:

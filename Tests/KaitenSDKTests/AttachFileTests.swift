@@ -30,6 +30,7 @@ struct AttachFileTests {
     """
 
   @Test("200 returns the attached file entry")
+  @available(*, deprecated)
   func success() async throws {
     let transport = MockClientTransport.returning(statusCode: 200, body: Self.legacyResponse)
     let client = try KaitenClient(
@@ -54,6 +55,7 @@ struct AttachFileTests {
   }
 
   @Test("request is sent as multipart/form-data")
+  @available(*, deprecated)
   func multipartRequest() async throws {
     let transport = MockClientTransport.returning(statusCode: 200, body: Self.legacyResponse)
     let client = try KaitenClient(
@@ -71,6 +73,7 @@ struct AttachFileTests {
   /// string `id` — the same second shape a card's `files` array holds. A private-file
   /// response must decode into the PrivateFile branch instead of failing.
   @Test("private-file shaped response decodes into the PrivateFile branch")
+  @available(*, deprecated)
   func privateFileResponse() async throws {
     let json = """
       {
@@ -104,6 +107,7 @@ struct AttachFileTests {
   }
 
   @Test("404 throws notFound")
+  @available(*, deprecated)
   func notFound() async throws {
     let transport = MockClientTransport.returning(statusCode: 404)
     let client = try KaitenClient(
@@ -116,6 +120,7 @@ struct AttachFileTests {
   }
 
   @Test("401 throws unauthorized")
+  @available(*, deprecated)
   func unauthorized() async throws {
     let transport = MockClientTransport.returning(statusCode: 401)
     let client = try KaitenClient(

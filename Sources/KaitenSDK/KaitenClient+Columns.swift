@@ -102,7 +102,8 @@ extension KaitenClient {
   ///   - title: The updated title.
   ///   - sortOrder: The updated sort order.
   ///   - type: The updated column type.
-  ///   - wipLimit: The updated WIP limit.
+  ///   - wipLimit: The updated WIP limit. `nil` leaves it unchanged.
+  ///   - clearWipLimit: Pass `true` to remove the WIP limit (sends `"wip_limit": null`).
   ///   - wipLimitType: The updated WIP limit type.
   ///   - colCount: The updated column count.
   ///   - lastMovedWarningAfterDays: Days without movement after which a card is marked stale.
@@ -124,6 +125,7 @@ extension KaitenClient {
   ///   - pauseSla: Whether the SLA timer is paused in this column.
   /// - Returns: The updated column.
   /// - Throws:
+  ///   - ``KaitenError/conflictingArguments(_:_:)`` if both `wipLimit` and `clearWipLimit` are given.
   ///   - ``KaitenError/notFound(resource:id:)`` if the column does not exist.
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
@@ -136,6 +138,7 @@ extension KaitenClient {
     sortOrder: Double? = nil,
     type: ColumnType? = nil,
     wipLimit: Int? = nil,
+    clearWipLimit: Bool = false,
     wipLimitType: WipLimitType? = nil,
     colCount: Int? = nil,
     lastMovedWarningAfterDays: Int? = nil,
@@ -149,28 +152,35 @@ extension KaitenClient {
     nextColumnId: Int?? = nil,
     pauseSla: Bool? = nil
   ) async throws(KaitenError) -> Components.Schemas.Column {
+    if clearWipLimit, wipLimit != nil {
+      throw .conflictingArguments("wipLimit", "clearWipLimit")
+    }
     let response = try await call {
-      try await client.update_column(
-        path: .init(board_id: boardId, id: id),
-        body: .json(
-          .init(
-            title: title,
-            sort_order: sortOrder,
-            _type: type?.rawValue,
-            wip_limit: wipLimit,
-            wip_limit_type: wipLimitType?.rawValue,
-            col_count: colCount,
-            last_moved_warning_after_days: lastMovedWarningAfterDays,
-            last_moved_warning_after_hours: lastMovedWarningAfterHours,
-            last_moved_warning_after_minutes: lastMovedWarningAfterMinutes,
-            archive_after_days: archiveAfterDays,
-            card_hide_after_days: .from(cardHideAfterDays),
-            rules: rules,
-            external_id: externalId,
-            prev_column_id: .from(prevColumnId),
-            next_column_id: .from(nextColumnId),
-            pause_sla: pauseSla
-          )))
+      try await ExplicitNullFieldsMiddleware.$fields.withValue(
+        clearWipLimit ? ["wip_limit"] : []
+      ) {
+        try await client.update_column(
+          path: .init(board_id: boardId, id: id),
+          body: .json(
+            .init(
+              title: title,
+              sort_order: sortOrder,
+              _type: type?.rawValue,
+              wip_limit: wipLimit,
+              wip_limit_type: wipLimitType?.rawValue,
+              col_count: colCount,
+              last_moved_warning_after_days: lastMovedWarningAfterDays,
+              last_moved_warning_after_hours: lastMovedWarningAfterHours,
+              last_moved_warning_after_minutes: lastMovedWarningAfterMinutes,
+              archive_after_days: archiveAfterDays,
+              card_hide_after_days: .from(cardHideAfterDays),
+              rules: rules,
+              external_id: externalId,
+              prev_column_id: .from(prevColumnId),
+              next_column_id: .from(nextColumnId),
+              pause_sla: pauseSla
+            )))
+      }
     }
     return try decodeResponse(
       response.toCase(), notFoundResource: ("column", id)

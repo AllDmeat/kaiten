@@ -410,7 +410,7 @@ CLI: `get-space-board --space-id <id> --id <id>`,
 |--------|-------------|
 | `getBoardColumns(boardId:)` | Get columns for a board |
 | `createColumn(...)` | Create a column |
-| `updateColumn(...)` | Update a column |
+| `updateColumn(...)` | Update a column; `clearWipLimit: true` removes the WIP limit |
 | `deleteColumn(...)` | Delete a column |
 | `listSubcolumns(...)` | List subcolumns |
 | `createSubcolumn(...)` | Create a subcolumn |
@@ -423,7 +423,7 @@ CLI: `get-space-board --space-id <id> --id <id>`,
 |--------|-------------|
 | `getBoardLanes(boardId:)` | Get lanes for a board |
 | `createLane(...)` | Create a lane |
-| `updateLane(...)` | Update a lane |
+| `updateLane(...)` | Update a lane; `clearWipLimit: true` removes the WIP limit |
 
 ### Custom Properties
 
@@ -1359,6 +1359,18 @@ selects what it counts — `1` for card count, `2` for card size:
 kaiten update-column --board-id 42 --id 7 --wip-limit 5 --wip-limit-type 1
 ```
 
+On `update-column` and `update-lane`, `--wip-limit ""` removes the limit. In the SDK, `wipLimit: nil`
+leaves it unchanged and `clearWipLimit: true` removes it; passing both throws
+`KaitenError.conflictingArguments` before any request:
+
+```bash
+kaiten update-lane --board-id 42 --id 3 --wip-limit ""
+```
+
+```swift
+try await client.updateLane(boardId: 42, id: 3, clearWipLimit: true)
+```
+
 #### Column and lane settings
 
 Columns, subcolumns and lanes take `--last-moved-warning-after-days`, `--last-moved-warning-after-hours`
@@ -1413,6 +1425,8 @@ do {
         print("Server error \(statusCode): \(body ?? "")")
     case .networkError(let underlying):
         print("Network: \(underlying)")
+    case .conflictingArguments(let first, let second):
+        print("\(first) and \(second) cannot be combined")
     case .unexpectedResponse(let statusCode):
         print("Unexpected HTTP \(statusCode)")
     }

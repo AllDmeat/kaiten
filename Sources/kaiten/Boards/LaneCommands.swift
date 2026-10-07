@@ -83,8 +83,9 @@ struct UpdateLane: AsyncParsableCommand {
   @Option(name: .long, help: "Sort order")
   var sortOrder: Double?
 
-  @Option(name: .long, help: "WIP limit value")
-  var wipLimit: Int?
+  @Option(
+    name: .long, help: "WIP limit value. Pass empty string \"\" to remove the WIP limit.")
+  var wipLimit: String?
 
   @Option(name: .long, help: "WIP limit type: 1=card count, 2=card size")
   var wipLimitType: Int?
@@ -105,13 +106,15 @@ struct UpdateLane: AsyncParsableCommand {
   var condition: Int?
 
   func run() async throws {
+    let wipLimit = try parseNullableInt(wipLimit, option: "--wip-limit")
     let client = try await global.makeClient()
     let lane = try await client.updateLane(
       boardId: boardId,
       id: id,
       title: title,
       sortOrder: sortOrder,
-      wipLimit: wipLimit,
+      wipLimit: wipLimit ?? nil,
+      clearWipLimit: wipLimit == .some(nil),
       wipLimitType: try parseWipLimitType(wipLimitType),
       rowCount: rowCount,
       condition: try parseLaneCondition(condition),

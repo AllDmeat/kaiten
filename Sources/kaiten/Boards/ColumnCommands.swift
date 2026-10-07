@@ -162,8 +162,9 @@ struct UpdateColumn: AsyncParsableCommand {
   @Option(name: .long, help: "Column type: 1=queue, 2=in progress, 3=done")
   var columnType: Int?
 
-  @Option(name: .long, help: "WIP limit value")
-  var wipLimit: Int?
+  @Option(
+    name: .long, help: "WIP limit value. Pass empty string \"\" to remove the WIP limit.")
+  var wipLimit: String?
 
   @Option(name: .long, help: "WIP limit type: 1=card count, 2=card size")
   var wipLimitType: Int?
@@ -176,6 +177,7 @@ struct UpdateColumn: AsyncParsableCommand {
   @OptionGroup var update: ColumnUpdateOptions
 
   func run() async throws {
+    let wipLimit = try parseNullableInt(wipLimit, option: "--wip-limit")
     let client = try await global.makeClient()
     let column = try await client.updateColumn(
       boardId: boardId,
@@ -183,7 +185,8 @@ struct UpdateColumn: AsyncParsableCommand {
       title: title,
       sortOrder: sortOrder,
       type: try parseColumnType(columnType),
-      wipLimit: wipLimit,
+      wipLimit: wipLimit ?? nil,
+      clearWipLimit: wipLimit == .some(nil),
       wipLimitType: try parseWipLimitType(wipLimitType),
       colCount: colCount,
       lastMovedWarningAfterDays: settings.lastMovedWarningAfterDays,

@@ -89,7 +89,8 @@ extension KaitenClient {
   ///   - id: The lane identifier.
   ///   - title: The updated title.
   ///   - sortOrder: The updated sort order.
-  ///   - wipLimit: The updated WIP limit.
+  ///   - wipLimit: The updated WIP limit. `nil` leaves it unchanged.
+  ///   - clearWipLimit: Pass `true` to remove the WIP limit (sends `"wip_limit": null`).
   ///   - wipLimitType: The updated WIP limit type.
   ///   - rowCount: The updated row count.
   ///   - condition: The updated lane condition.
@@ -98,6 +99,7 @@ extension KaitenClient {
   ///   - lastMovedWarningAfterMinutes: Minutes without movement after which a card is marked stale.
   /// - Returns: The updated lane.
   /// - Throws:
+  ///   - ``KaitenError/conflictingArguments(_:_:)`` if both `wipLimit` and `clearWipLimit` are given.
   ///   - ``KaitenError/notFound(resource:id:)`` if the lane does not exist.
   ///   - ``KaitenError/unauthorized`` if the API token is invalid or lacks permissions.
   ///   - ``KaitenError/decodingError(underlying:)`` if the response body cannot be decoded.
@@ -109,6 +111,7 @@ extension KaitenClient {
     title: String? = nil,
     sortOrder: Double? = nil,
     wipLimit: Int? = nil,
+    clearWipLimit: Bool = false,
     wipLimitType: WipLimitType? = nil,
     rowCount: Int? = nil,
     condition: LaneCondition? = nil,
@@ -116,21 +119,28 @@ extension KaitenClient {
     lastMovedWarningAfterHours: Int? = nil,
     lastMovedWarningAfterMinutes: Int? = nil
   ) async throws(KaitenError) -> Components.Schemas.Lane {
+    if clearWipLimit, wipLimit != nil {
+      throw .conflictingArguments("wipLimit", "clearWipLimit")
+    }
     let response = try await call {
-      try await client.update_lane(
-        path: .init(board_id: boardId, id: id),
-        body: .json(
-          .init(
-            title: title,
-            sort_order: sortOrder,
-            wip_limit: wipLimit,
-            wip_limit_type: wipLimitType?.rawValue,
-            row_count: rowCount,
-            last_moved_warning_after_days: lastMovedWarningAfterDays,
-            last_moved_warning_after_hours: lastMovedWarningAfterHours,
-            last_moved_warning_after_minutes: lastMovedWarningAfterMinutes,
-            condition: condition?.rawValue
-          )))
+      try await ExplicitNullFieldsMiddleware.$fields.withValue(
+        clearWipLimit ? ["wip_limit"] : []
+      ) {
+        try await client.update_lane(
+          path: .init(board_id: boardId, id: id),
+          body: .json(
+            .init(
+              title: title,
+              sort_order: sortOrder,
+              wip_limit: wipLimit,
+              wip_limit_type: wipLimitType?.rawValue,
+              row_count: rowCount,
+              last_moved_warning_after_days: lastMovedWarningAfterDays,
+              last_moved_warning_after_hours: lastMovedWarningAfterHours,
+              last_moved_warning_after_minutes: lastMovedWarningAfterMinutes,
+              condition: condition?.rawValue
+            )))
+      }
     }
     return try decodeResponse(
       response.toCase(), notFoundResource: ("lane", id)

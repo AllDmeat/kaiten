@@ -36,6 +36,7 @@ public struct KaitenClient: Sendable {
       serverURL: url,
       transport: transport,
       middlewares: [
+        ExplicitNullFieldsMiddleware(),
         AuthenticationMiddleware(token: token),
         RetryMiddleware(gate: gate),
       ]

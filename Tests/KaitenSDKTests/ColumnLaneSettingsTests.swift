@@ -126,6 +126,32 @@ struct ColumnLaneSettingsTests {
     #expect(columns[1].archive_after_days == 30)
   }
 
+  @Test("Column.months_to_hide_cards is marked deprecated in the spec")
+  func monthsToHideCardsDeprecated() throws {
+    let spec = try String(
+      contentsOf: URL(fileURLWithPath: #filePath)
+        .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        .appendingPathComponent("openapi/kaiten.yaml"),
+      encoding: .utf8)
+    let column = try #require(spec.range(of: "\n    Column:\n"))
+    let field = try #require(
+      spec.range(of: "months_to_hide_cards:", range: column.upperBound..<spec.endIndex))
+    let next = try #require(
+      spec.range(of: "card_hide_after_days:", range: field.upperBound..<spec.endIndex))
+    #expect(spec[field.upperBound..<next.lowerBound].contains("deprecated: true"))
+  }
+
+  @Test("CLI collapses nested subcolumns to ids unless expanded")
+  func subcolumnsOutput() throws {
+    let column = try JSONDecoder().decode(
+      Components.Schemas.Column.self,
+      from: Data(#"{"id": 100, "subcolumns": [{"id": 101}, {"id": 102}]}"#.utf8))
+    #expect(try renderJSON(column) == #"{"id":100,"subcolumns":[101,102]}"#)
+    #expect(
+      try renderJSON(column, expand: ["subcolumns"])
+        == #"{"id":100,"subcolumns":[{"id":101},{"id":102}]}"#)
+  }
+
   @Test("update-column parses settings and reordering options")
   func updateColumnCLIOptions() throws {
     let command = try UpdateColumn.parse([

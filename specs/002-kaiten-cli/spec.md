@@ -342,6 +342,13 @@ stdout confirms it works.
   does not start failing with an unknown-field error. An expanded
   value MUST be stripped by the same rule. Collections are unaffected and
   keep FR-021.
+- **FR-037**: The root command MUST accept `-v` and `--version`, which print
+  the CLI version to stdout and exit with status 0. The version MUST NOT be
+  hardcoded in the Swift source: the source holds the fallback
+  `development`, which every local or non-release build prints, and the
+  release workflow replaces it with the release tag before building, so a
+  binary built from the `2.3.0` tag prints `2.3.0`. The release workflow
+  MUST fail if the built binary reports anything other than its tag.
 
 ### Non-Functional Requirements
 

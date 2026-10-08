@@ -83,6 +83,11 @@ jobs:
           path: .build/checkouts
           key: ${{ steps.cache-spm.outputs.cache-primary-key }}
 
+      - name: Inject release version
+        # Sources/kaiten/Version.swift holds the "development" fallback; the release
+        # binary reports the tag instead. The edit stays in this runner's checkout.
+        run: printf 'let kaitenVersion = "%s"\n' "$GITHUB_REF_NAME" > Sources/kaiten/Version.swift
+
       - name: Build release binary
         id: build
         run: |
@@ -94,6 +99,11 @@ jobs:
           # to avoid invoking swift build twice.
           BIN_PATH="$(swift build -c release --product "$PRODUCT_NAME" $STATIC_FLAG --show-bin-path)"
           swift build -c release --product "$PRODUCT_NAME" $STATIC_FLAG
+          VERSION="$("$BIN_PATH/$PRODUCT_NAME" --version)"
+          if [ "$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Built binary reports version '$VERSION', expected '$GITHUB_REF_NAME'"
+            exit 1
+          fi
           echo "bin-path=$BIN_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Package binary

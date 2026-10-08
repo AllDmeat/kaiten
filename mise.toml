@@ -5,12 +5,8 @@ lockfile = true
 [tools]
 node = "latest"
 "npm:playwright" = "latest"
-# Swift is intentionally NOT managed by mise. Its core:swift backend does not
-# persist per-platform download URLs in mise.lock, so `mise install` hard-fails
-# under locked enforcement (lockfile = true) on a cache miss on Linux.
-# See https://github.com/jdx/mise/discussions/10572
-# Swift is installed in CI via SwiftyLab/setup-swift (Linux); macOS uses the
-# Xcode toolchain.
+# Pinned so local development and CI use the same Swift toolchain.
+swift = "6.4.0"
 
 [tasks.kaiten-docs-install-browsers]
 description = "Install Playwright Chromium browser binaries"

@@ -27,7 +27,11 @@ struct ListExternalLinks: AsyncParsableCommand {
 struct CreateExternalLink: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "create-external-link",
-    abstract: "Add an external link to a card"
+    abstract: "Add an external link to a card",
+    discussion: """
+      When the URL points to another card in the same Kaiten company, Kaiten also adds a \
+      link back to this card on that card, so linking two cards needs one call, not two.
+      """
   )
 
   @OptionGroup var global: GlobalOptions

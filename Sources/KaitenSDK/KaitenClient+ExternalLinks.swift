@@ -29,6 +29,9 @@ extension KaitenClient {
 
   /// Creates an external link on a card.
   ///
+  /// When `url` points to another card in the same Kaiten company, Kaiten also adds a link
+  /// back to this card on that card, so linking two cards needs one call, not two.
+  ///
   /// - Parameters:
   ///   - cardId: The card identifier.
   ///   - url: The external link URL.

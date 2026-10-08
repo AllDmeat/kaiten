@@ -15,7 +15,7 @@ struct ListBlockerCategories: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let categories = try await client.listBlockerCategories()
-    try printJSON(categories)
+    try printJSON(categories, expand: global.expandedFields)
   }
 }
 
@@ -38,7 +38,7 @@ struct AddBlockerCategory: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let category = try await client.addBlockerCategory(blockerId: blockerId, name: name)
-    try printJSON(category)
+    try printJSON(category, expand: global.expandedFields)
   }
 }
 
@@ -62,6 +62,6 @@ struct RemoveBlockerCategory: AsyncParsableCommand {
     let client = try await global.makeClient()
     let removed = try await client.removeBlockerCategory(
       blockerId: blockerId, categoryUid: categoryUid)
-    try printJSON(removed)
+    try printJSON(removed, expand: global.expandedFields)
   }
 }

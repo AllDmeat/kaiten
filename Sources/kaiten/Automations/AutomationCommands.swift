@@ -47,7 +47,7 @@ struct ListAutomations: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let automations = try await client.listAutomations(spaceId: spaceId)
-    try printJSON(automations)
+    try printJSON(automations, expand: global.expandedFields)
   }
 }
 
@@ -101,7 +101,7 @@ struct CreateAutomation: AsyncParsableCommand {
       trigger: parsedTrigger,
       conditions: parsedConditions
     )
-    try printJSON(automation)
+    try printJSON(automation, expand: global.expandedFields)
   }
 }
 
@@ -150,7 +150,7 @@ struct UpdateAutomation: AsyncParsableCommand {
       conditions: parsedConditions,
       actions: parsedActions
     )
-    try printJSON(automation)
+    try printJSON(automation, expand: global.expandedFields)
   }
 }
 

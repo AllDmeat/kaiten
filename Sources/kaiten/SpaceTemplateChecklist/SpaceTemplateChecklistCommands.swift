@@ -18,7 +18,7 @@ struct ListSpaceTemplateChecklists: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let checklists = try await client.listSpaceTemplateChecklists(spaceUid: spaceUid)
-    try printJSON(checklists)
+    try printJSON(checklists, expand: global.expandedFields)
   }
 }
 
@@ -48,7 +48,7 @@ struct CreateSpaceTemplateChecklist: AsyncParsableCommand {
       name: name,
       sortOrder: sortOrder
     )
-    try printJSON(checklist)
+    try printJSON(checklist, expand: global.expandedFields)
   }
 }
 
@@ -88,7 +88,7 @@ struct UpdateSpaceTemplateChecklist: AsyncParsableCommand {
       sortOrder: sortOrder,
       newSpaceUid: newSpaceUid
     )
-    try printJSON(checklist)
+    try printJSON(checklist, expand: global.expandedFields)
   }
 }
 
@@ -114,6 +114,6 @@ struct RemoveSpaceTemplateChecklist: AsyncParsableCommand {
       spaceUid: spaceUid,
       templateChecklistUid: templateChecklistUid
     )
-    try printJSON(response)
+    try printJSON(response, expand: global.expandedFields)
   }
 }

@@ -6,8 +6,7 @@ import SystemPackage
 
 @main
 struct Kaiten: AsyncParsableCommand {
-  // Not `CommandConfiguration(version:)`: the built-in flag has no `-v` and claims
-  // `--version` in every subcommand.
+  // Not `CommandConfiguration(version:)`: the built-in flag has no `-v`.
   @Flag(name: [.customShort("v"), .long], help: "Show the version.")
   var version = false
 

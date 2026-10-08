@@ -129,7 +129,11 @@ struct SpaceTemplateChecklistsTests {
       "items": [{"id": 201, "uid": "item-uid-1", "text": "Hold the daily meeting", "sort_order": 1}]}]
     """
 
-  /// Renders the list as `list-space-template-checklists` does, with the `--expand` it was given.
+  /// Renders the list with the `--expand` set parsed by `list-space-template-checklists`.
+  ///
+  /// This exercises option parsing and the renderer, not `run()`: there is no transport hook to
+  /// run the command against a mock. What guards `run()` is that `printJSON` has no default for
+  /// `expand`, so a command that forgets to pass the set does not compile.
   private func renderList(expand: String) async throws -> String {
     let command = try ListSpaceTemplateChecklists.parse([
       "--space-uid", "space-uid-1", "--expand", expand,

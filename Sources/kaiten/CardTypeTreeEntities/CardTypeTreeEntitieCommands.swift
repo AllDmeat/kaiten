@@ -17,7 +17,7 @@ struct ListCardTypeTreeEntities: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let entities = try await client.listCardTypeTreeEntities(typeId: typeId)
-    try printJSON(entities)
+    try printJSON(entities, expand: global.expandedFields)
   }
 }
 
@@ -41,7 +41,7 @@ struct AddCardTypeTreeEntity: AsyncParsableCommand {
     let client = try await global.makeClient()
     let result = try await client.addCardTypeTreeEntity(
       typeId: typeId, treeEntityUid: treeEntityUid)
-    try printJSON(result)
+    try printJSON(result, expand: global.expandedFields)
   }
 }
 
@@ -64,6 +64,6 @@ struct DeleteCardTypeTreeEntity: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let result = try await client.deleteCardTypeTreeEntity(typeId: typeId, uid: uid)
-    try printJSON(result)
+    try printJSON(result, expand: global.expandedFields)
   }
 }

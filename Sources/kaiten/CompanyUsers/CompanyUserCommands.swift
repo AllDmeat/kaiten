@@ -169,6 +169,6 @@ struct RemoveVirtualUser: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let deletedId = try await client.removeVirtualUser(id: id)
-    try printJSON(["id": deletedId])
+    try printJSON(["id": deletedId], expand: global.expandedFields)
   }
 }

@@ -219,6 +219,6 @@ func renderJSON(_ value: some Encodable, expand: Set<String> = []) throws -> Str
 }
 
 /// Writes `value` to stdout as JSON, keeping only the nested fields named in `expand`.
-func printJSON(_ value: some Encodable, expand: Set<String> = []) throws {
+func printJSON(_ value: some Encodable, expand: Set<String>) throws {
   print(try renderJSON(value, expand: expand))
 }

@@ -1,8 +1,10 @@
+import ArgumentParser
 import Foundation
 import HTTPTypes
 import Testing
 
 @testable import KaitenSDK
+@testable import kaiten
 
 @Suite("Space Template Checklists")
 struct SpaceTemplateChecklistsTests {
@@ -117,6 +119,38 @@ struct SpaceTemplateChecklistsTests {
     let client = try makeClient(.returning(statusCode: 404))
     await expectUnexpectedResponse(statusCode: 404) {
       _ = try await client.listSpaceTemplateChecklists(spaceUid: "missing-uid")
+    }
+  }
+
+  // MARK: - CLI output
+
+  private let checklistWithItems = """
+    [{"id": 101, "uid": "checklist-uid-1", "name": "Planning process",
+      "items": [{"id": 201, "uid": "item-uid-1", "text": "Hold the daily meeting", "sort_order": 1}]}]
+    """
+
+  /// Renders the list as `list-space-template-checklists` does, with the `--expand` it was given.
+  private func renderList(expand: String) async throws -> String {
+    let command = try ListSpaceTemplateChecklists.parse([
+      "--space-uid", "space-uid-1", "--expand", expand,
+    ])
+    let checklists = try await makeClient(
+      .returning(statusCode: 200, body: checklistWithItems)
+    ).listSpaceTemplateChecklists(spaceUid: command.spaceUid)
+    return try renderJSON(checklists, expand: command.global.expandedFields)
+  }
+
+  @Test("CLI --expand items keeps the item objects and their text")
+  func listExpandItems() async throws {
+    let output = try await renderList(expand: "items")
+    #expect(output.contains(#""text":"Hold the daily meeting""#))
+    #expect(output.contains(#""uid":"item-uid-1""#))
+  }
+
+  @Test("CLI rejects an unknown --expand field")
+  func listExpandUnknownField() async throws {
+    await #expect(throws: ValidationError.self) {
+      _ = try await self.renderList(expand: "itemz")
     }
   }
 

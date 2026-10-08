@@ -17,7 +17,7 @@ struct ListCustomPropertyTreeEntities: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let entities = try await client.listCustomPropertyTreeEntities(propertyId: propertyId)
-    try printJSON(entities)
+    try printJSON(entities, expand: global.expandedFields)
   }
 }
 
@@ -41,7 +41,7 @@ struct AddCustomPropertyTreeEntity: AsyncParsableCommand {
     let client = try await global.makeClient()
     let result = try await client.addCustomPropertyTreeEntity(
       propertyId: propertyId, treeEntityUid: treeEntityUid)
-    try printJSON(result)
+    try printJSON(result, expand: global.expandedFields)
   }
 }
 
@@ -64,6 +64,6 @@ struct DeleteCustomPropertyTreeEntity: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let result = try await client.deleteCustomPropertyTreeEntity(propertyId: propertyId, uid: uid)
-    try printJSON(result)
+    try printJSON(result, expand: global.expandedFields)
   }
 }

@@ -17,7 +17,7 @@ struct ListGroupEntities: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let entities = try await client.listGroupEntities(groupUid: groupUid)
-    try printJSON(entities)
+    try printJSON(entities, expand: global.expandedFields)
   }
 }
 
@@ -47,7 +47,7 @@ struct AddGroupEntity: AsyncParsableCommand {
     let client = try await global.makeClient()
     let entity = try await client.addGroupEntity(
       groupUid: groupUid, entityUid: entityUid, roleIds: parsedRoleIds)
-    try printJSON(entity)
+    try printJSON(entity, expand: global.expandedFields)
   }
 }
 
@@ -75,7 +75,7 @@ struct UpdateGroupEntity: AsyncParsableCommand {
     let client = try await global.makeClient()
     let entity = try await client.updateGroupEntity(
       groupUid: groupUid, uid: uid, roleIds: parsedRoleIds)
-    try printJSON(entity)
+    try printJSON(entity, expand: global.expandedFields)
   }
 }
 
@@ -98,6 +98,6 @@ struct RemoveGroupEntity: AsyncParsableCommand {
   func run() async throws {
     let client = try await global.makeClient()
     let entity = try await client.removeGroupEntity(groupUid: groupUid, uid: uid)
-    try printJSON(entity)
+    try printJSON(entity, expand: global.expandedFields)
   }
 }

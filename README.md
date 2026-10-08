@@ -73,6 +73,7 @@ propose additions — but only write to it with your approval.
 
 ```sh
 kaiten --help
+kaiten --version   # or -v; release binaries print their tag, local builds print "development"
 kaiten list-spaces
 kaiten list-boards --space-id 42
 kaiten list-cards --board-id 84 | jq '.[].title'

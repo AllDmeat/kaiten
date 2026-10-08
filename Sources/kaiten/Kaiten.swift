@@ -6,6 +6,14 @@ import SystemPackage
 
 @main
 struct Kaiten: AsyncParsableCommand {
+  // Not `CommandConfiguration(version:)`: the built-in flag has no `-v`.
+  @Flag(name: [.customShort("v"), .long], help: "Show the version.")
+  var version = false
+
+  func validate() throws {
+    if version { throw CleanExit.message(kaitenVersion) }
+  }
+
   static let configuration = CommandConfiguration(
     commandName: "kaiten",
     abstract: "CLI for Kaiten API",

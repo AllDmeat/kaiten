@@ -35,3 +35,16 @@ url = "https://nodejs.org/dist/v25.6.1/node-v25.6.1-win-x64.zip"
 [[tools."npm:playwright"]]
 version = "1.58.2"
 backend = "npm:playwright"
+
+[[tools.swift]]
+version = "6.4.0"
+backend = "core:swift"
+
+[tools.swift."platforms.macos-arm64"]
+url = "https://download.swift.org/swift-6.4.0-release/xcode/swift-6.4.0-RELEASE/swift-6.4.0-RELEASE-osx.pkg"
+
+[tools.swift."platforms.macos-x64"]
+url = "https://download.swift.org/swift-6.4.0-release/xcode/swift-6.4.0-RELEASE/swift-6.4.0-RELEASE-osx.pkg"
+
+[tools.swift."platforms.windows-x64"]
+url = "https://download.swift.org/swift-6.4.0-release/windows10/swift-6.4.0-RELEASE/swift-6.4.0-RELEASE-windows10.exe"

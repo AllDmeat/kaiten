@@ -6,11 +6,6 @@ on:
 
 env:
   PRODUCT_NAME: kaiten
-  # Swift toolchain version. Swift is installed outside of mise because mise's
-  # core:swift backend does not persist per-platform download URLs in mise.lock,
-  # so `mise install` hard-fails under locked enforcement on a Linux cache miss.
-  # See https://github.com/jdx/mise/discussions/10572
-  SWIFT_VERSION: 6.2.3
 
 jobs:
   build:
@@ -41,22 +36,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install Swift (Linux)
-        if: runner.os == 'Linux'
-        # Swift is installed outside of mise: mise's core:swift backend does not
-        # persist per-platform download URLs in mise.lock, so `mise install`
-        # hard-fails under locked enforcement on a Linux cache miss.
-        # See https://github.com/jdx/mise/discussions/10572
-        # SwiftyLab/setup-swift supports Linux x86_64 and ARM64.
-        uses: SwiftyLab/setup-swift@v1
-        with:
-          swift-version: ${{ env.SWIFT_VERSION }}
-
       - name: Install mise
         uses: jdx/mise-action@v5
-        # mise manages node + playwright (used by the kaiten-docs task), not Swift.
-        # Swift is installed outside of mise — see the steps above and
-        # https://github.com/jdx/mise/discussions/10572 for why.
+        # Installs Swift (pinned in mise.toml) along with node + playwright.
 
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
@@ -93,7 +75,10 @@ jobs:
         run: |
           STATIC_FLAG=""
           if [ "${{ matrix.static-swift-stdlib }}" = "true" ]; then
-            STATIC_FLAG="--static-swift-stdlib"
+            # --build-system native works around swift-build in Swift 6.4.0 failing to link
+            # Foundation statically on Linux (swiftlang/swift-build#1764, fixed in 6.4.x by
+            # swift-build#1770). Drop it once the pinned Swift includes that fix.
+            STATIC_FLAG="--static-swift-stdlib --build-system native"
           fi
           # --show-bin-path is called first (no compilation, just prints the path)
           # to avoid invoking swift build twice.

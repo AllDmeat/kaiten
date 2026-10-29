@@ -117,6 +117,7 @@ stdout confirms it works.
   errors to stderr.
 - **FR-005**: The CLI MUST exit with code 0 on success and
   non-zero on error.
+- **FR-005a**: `create-document` and `update-document` MUST print the returned document, including its `uid`, and exit with code 0 when a successful response contains either a string or integer `schema_version` (SDK FR-030a).
 - **FR-006**: Configuration is stored in two files in a shared
   directory `~/.config/kaiten/` (all platforms):
   - **`config.json`** — connection settings (url, token):

@@ -3,6 +3,7 @@ import HTTPTypes
 import Testing
 
 @testable import KaitenSDK
+@testable import kaiten
 
 @Suite("Documents")
 struct DocumentsTests {
@@ -295,8 +296,10 @@ struct DocumentsTests {
 
   /// Fixture from the create-new-document docs example: there `id` is an integer and
   /// `data` is an object, so both anyOf branches must decode.
-  @Test("create sends the body and parses the docs-shaped response")
-  func createSendsBody() async throws {
+  @Test(
+    "create returns printable document JSON with either schema version type",
+    arguments: ["3", "\"3\""])
+  func createSendsBody(schemaVersion: String) async throws {
     let json = """
       {
         "uid": "doc-uid-4",
@@ -325,7 +328,7 @@ struct DocumentsTests {
         "icon_value": null,
         "icon_color": null,
         "path": "1",
-        "schema_version": 3,
+        "schema_version": \(schemaVersion),
         "notification_period_start": null,
         "notification_period_end": null,
         "group_id": null,
@@ -343,6 +346,9 @@ struct DocumentsTests {
     #expect(document.data?.value2 != nil)
     #expect(document.version == 1)
     #expect(document.access_record?.role == 3)
+    let output = try renderJSON(document)
+    #expect(output.contains("\"uid\":\"doc-uid-4\""))
+    #expect(output.contains("\"schema_version\":\(schemaVersion)"))
 
     let recorded = try #require(transport.recordedRequests.first)
     #expect(recorded.request.method == .post)
@@ -368,10 +374,12 @@ struct DocumentsTests {
 
   // MARK: - Update
 
-  @Test("update targets the document UID and sends the fields")
-  func updateSuccess() async throws {
+  @Test(
+    "update accepts either schema version type and sends the fields", arguments: ["3", "\"3\""])
+  func updateSuccess(schemaVersion: String) async throws {
     let json = """
-      {"uid": "doc-uid-5", "id": 1, "title": "Renamed", "access": "for_everyone", "sort_order": 2}
+      {"uid": "doc-uid-5", "id": 1, "title": "Renamed", "access": "for_everyone", "sort_order": 2,
+       "schema_version": \(schemaVersion)}
       """
     let transport = MockClientTransport.returning(statusCode: 200, body: json)
     let client = try makeClient(transport)
@@ -388,6 +396,9 @@ struct DocumentsTests {
 
     #expect(document.title == "Renamed")
     #expect(document.documentAccess == .forEveryone)
+    let output = try renderJSON(document)
+    #expect(output.contains("\"uid\":\"doc-uid-5\""))
+    #expect(output.contains("\"schema_version\":\(schemaVersion)"))
 
     let recorded = try #require(transport.recordedRequests.first)
     #expect(recorded.request.method == .patch)
@@ -411,6 +422,29 @@ struct DocumentsTests {
     let client = try makeClient(.returning(statusCode: 404))
     await expectUnexpectedResponse(statusCode: 404) {
       _ = try await client.updateDocument(uid: "missing", title: "New title")
+    }
+  }
+
+  // MARK: - Schema Version
+
+  @Test("get, list and search accept either schema version type", arguments: ["3", "\"3\""])
+  func readSchemaVersion(schemaVersion: String) async throws {
+    let json = """
+      {"uid": "doc-uid-7", "schema_version": \(schemaVersion)}
+      """
+    let getClient = try makeClient(.returning(statusCode: 200, body: json))
+    let document = try await getClient.getDocument(uid: "doc-uid-7")
+    let listClient = try makeClient(.returning(statusCode: 200, body: "[\(json)]"))
+    let page = try await listClient.listDocuments()
+    let item = try #require(page.items.first)
+    let searchClient = try makeClient(
+      .returning(statusCode: 200, body: "{\"result\":[\(json)]}"))
+    let response = try await searchClient.searchDocuments()
+    let result = try #require(response.result?.first)
+
+    for output in [try renderJSON(document), try renderJSON(item), try renderJSON(result)] {
+      #expect(output.contains("\"uid\":\"doc-uid-7\""))
+      #expect(output.contains("\"schema_version\":\(schemaVersion)"))
     }
   }
 

@@ -1115,7 +1115,7 @@ CLI: `list-document-groups`, `search-document-groups`, `get-document-group`,
 | `listDocuments(query:offset:limit:)` | List documents (version=1 response) |
 | `searchDocuments(query:condition:fields:startPosition:includeSearchPreview:offset:limit:)` | Search documents via OpenSearch (version=2 response) |
 | `getDocument(uid:)` | Get a document, including its content |
-| `createDocument(sortOrder:title:parentEntityUid:forEveryoneAccessRoleId:cloneUid:cloneVersion:key:)` | Create a document |
+| `createDocument(sortOrder:title:parentEntityUid:forEveryoneAccessRoleId:cloneUid:cloneVersion:key:)` | Create a document and return it, including its `uid` |
 | `updateDocument(uid:title:sortOrder:publishDate:data:access:parentEntityUid:forEveryoneAccessRoleId:isPublic:redirectUrl:hiddenOnPublicSite:settings:backupVersion:publishedVersion:key:iconType:iconValue:iconColor:notificationPeriodStart:notificationPeriodEnd:slug:)` | Update a document |
 | `deleteDocument(uid:)` | Remove a document |
 
@@ -1130,7 +1130,9 @@ Access and icon type discriminators are exposed as Swift enums
 that preserves values the documentation does not list. A document's `data`
 holds the ProseMirror content: live responses return it as a JSON-encoded
 string even though the documentation declares an object, so the SDK accepts
-both shapes.
+both shapes. Document, list and search response models also accept `schema_version`
+as either an integer or a string, preserving its JSON type. The generated
+property uses `value1` for the integer and `value2` for the string.
 
 ```swift
 let page = try await client.listDocuments(query: "handbook")
@@ -1156,6 +1158,9 @@ CLI: `kaiten list-documents` with `--query`, `--offset`, `--limit`;
 `--published-version`, `--key`, `--icon-type`, `--icon-value`, `--icon-color`,
 `--notification-period-start`, `--notification-period-end`, `--slug`;
 `kaiten delete-document --document-uid <uid>`.
+
+`create-document` and `update-document` print the returned document, including
+its `uid`, whether `schema_version` is an integer or a string.
 
 ### Groups
 

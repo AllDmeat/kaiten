@@ -16728,9 +16728,13 @@ components:
           type: string
           description: Inner path to entity in tree
         # DOC_MISMATCH: docs=`integer`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-document
+        # DOC_MISMATCH: docs=`integer`, actual=`string` in create responses — https://developers.kaiten.ru/documents/create-new-document
+        # DOC_MISMATCH: docs=`integer`, actual=`string` in update responses — https://developers.kaiten.ru/documents/update-document
         schema_version:
-          type: integer
-          description: ProseMirror schema version
+          anyOf:
+          - type: integer
+          - type: string
+          description: ProseMirror schema version, as an integer or a string
         notification_period_start:
           type:
           - string
@@ -16885,8 +16889,10 @@ components:
           description: Inner path to entity in tree
         # DOC_MISMATCH: docs=`integer`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
         schema_version:
-          type: integer
-          description: ProseMirror schema version
+          anyOf:
+          - type: integer
+          - type: string
+          description: ProseMirror schema version, as an integer or a string
         # DOC_MISMATCH: docs=`null | string`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
         notification_period_start:
           type:
@@ -17037,8 +17043,10 @@ components:
           description: Inner path to entity in tree
         # DOC_MISMATCH: docs=`integer`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
         schema_version:
-          type: integer
-          description: ProseMirror schema version
+          anyOf:
+          - type: integer
+          - type: string
+          description: ProseMirror schema version, as an integer or a string
         # DOC_MISMATCH: docs=`null | string`, absent from actual API responses — https://developers.kaiten.ru/documents/retrieve-list-of-documents
         notification_period_start:
           type:

@@ -15,7 +15,7 @@ mise use github:AllDmeat/kaiten
 kaiten --help
 ```
 
-This installs the latest release binary for your platform. Add `-g` for a global install or append a release tag to pin a version.
+This installs the latest release binaries for your platform: the `kaiten` CLI and the [`kaiten-mcp`](docs/mcp.md) server. Add `-g` for a global install or append a release tag to pin a version.
 
 ### Release binary
 
@@ -1492,6 +1492,10 @@ do {
     }
 }
 ```
+
+## MCP server
+
+`kaiten-mcp` exposes the SDK to AI agents over the [Model Context Protocol](https://modelcontextprotocol.io). It is installed together with the CLI and reads the same `~/.config/kaiten/config.json`. Setup, the tool list and per-client instructions are in [docs/mcp.md](docs/mcp.md) and [docs/mcp-integration-guide.md](docs/mcp-integration-guide.md).
 
 ## Agent skill
 

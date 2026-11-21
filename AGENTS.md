@@ -30,6 +30,8 @@ is being built and how.
   typed errors, convenience wrappers
 - `specs/002-kaiten-cli/spec.md` — CLI: thin wrapper over SDK,
   config file, subcommands
+- `specs/003-kaiten-mcp/spec.md` — MCP server: one tool per SDK
+  method, shipped in the CLI release archive
 
 ### Constitution
 
@@ -48,6 +50,8 @@ over all other project practices.
   modifies public API surface must include corresponding README
   updates. Specifically: the "API Reference" tables and "CLI Commands"
   section in README.md. No exceptions.
+- Whenever an MCP tool is added, removed, or renamed, update the
+  tool tables in `docs/mcp.md` in the same PR.
 
 ## Agent Plugin Releases
 

@@ -6,6 +6,8 @@ on:
 
 env:
   PRODUCT_NAME: kaiten
+  # The MCP server ships in the same archive, so `mise use github:AllDmeat/kaiten` installs both.
+  MCP_PRODUCT_NAME: kaiten-mcp
 
 jobs:
   build:
@@ -68,7 +70,9 @@ jobs:
       - name: Inject release version
         # Sources/kaiten/Version.swift holds the "development" fallback; the release
         # binary reports the tag instead. The edit stays in this runner's checkout.
-        run: printf 'let kaitenVersion = "%s"\n' "$GITHUB_REF_NAME" > Sources/kaiten/Version.swift
+        run: |
+          printf 'let kaitenVersion = "%s"\n' "$GITHUB_REF_NAME" > Sources/kaiten/Version.swift
+          printf 'let kaitenMCPVersion = "%s"\n' "$GITHUB_REF_NAME" > Sources/kaiten-mcp/Version.swift
 
       - name: Build release binary
         id: build
@@ -84,6 +88,7 @@ jobs:
           # to avoid invoking swift build twice.
           BIN_PATH="$(swift build -c release --product "$PRODUCT_NAME" $STATIC_FLAG --show-bin-path)"
           swift build -c release --product "$PRODUCT_NAME" $STATIC_FLAG
+          swift build -c release --product "$MCP_PRODUCT_NAME" $STATIC_FLAG
           VERSION="$("$BIN_PATH/$PRODUCT_NAME" --version)"
           if [ "$VERSION" != "$GITHUB_REF_NAME" ]; then
             echo "::error::Built binary reports version '$VERSION', expected '$GITHUB_REF_NAME'"
@@ -96,7 +101,7 @@ jobs:
         run: |
           ARCHIVE_NAME="${PRODUCT_NAME}_${GITHUB_REF_NAME}_${{ matrix.archive-suffix }}.tar.gz"
           BIN_PATH="${{ steps.build.outputs.bin-path }}"
-          tar -czf "${ARCHIVE_NAME}" -C "${BIN_PATH}" "${{ matrix.bin-name }}"
+          tar -czf "${ARCHIVE_NAME}" -C "${BIN_PATH}" "${{ matrix.bin-name }}" "$MCP_PRODUCT_NAME"
           echo "archive-name=${ARCHIVE_NAME}" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifact

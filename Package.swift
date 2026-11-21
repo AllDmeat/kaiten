@@ -43,6 +43,10 @@ let package = Package(
             url: "https://github.com/apple/swift-system",
             from: "1.4.0"
         ),
+        .package(
+            url: "https://github.com/modelcontextprotocol/swift-sdk.git",
+            from: "0.12.1"
+        ),
     ],
     targets: [
         .target(
@@ -92,6 +96,23 @@ let package = Package(
                     package: "swift-system"
                 ),
             ],
+            swiftSettings: [
+                .swiftLanguageMode(.v6),
+            ]
+        ),
+        .executableTarget(
+            name: "kaiten-mcp",
+            dependencies: [
+                "KaitenSDK",
+                .product(name: "MCP", package: "swift-sdk"),
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v6),
+            ]
+        ),
+        .testTarget(
+            name: "kaiten-mcpTests",
+            dependencies: ["kaiten-mcp"],
             swiftSettings: [
                 .swiftLanguageMode(.v6),
             ]
